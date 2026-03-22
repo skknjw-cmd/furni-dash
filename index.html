@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소파·가구 시장 인텔리전스</title>
-<!-- build: 20260322_112928 -->
+<!-- build: 20260322_113940 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Design tokens (Linear / GitHub Dark) ── */
@@ -767,16 +767,19 @@ const TOOLTIP={
    → 일별: "03/22"  / 월별: "24.01"
 ──────────────────────────────────────────────────────── */
 function fmtDateLabel(val) {
-  // 숫자만 추출
-  const digits = String(val).replace(/[^0-9]/g, '');
-  if (digits.length >= 8) {
-    // YYYYMMDD → MM/DD
-    return digits.slice(4,6) + '/' + digits.slice(6,8);
-  } else if (digits.length >= 6) {
-    // YYYYMM → YY.MM
-    return digits.slice(2,4) + '.' + digits.slice(4,6);
+  if (!val) return '';
+  const s = String(val);
+  // YYYY-MM-DD 또는 YYYY.MM.DD 형식
+  if (s.includes('-') || (s.includes('.') && s.length > 6)) {
+    const parts = s.split(/[-./]/);
+    if (parts.length >= 3) return parts[1] + '/' + parts[2]; // MM/DD
+    if (parts.length === 2) return parts[0].slice(2) + '.' + parts[1]; // YY.MM
   }
-  return String(val);
+  // 숫자만 추출 (YYYYMMDD or YYYYMM)
+  const digits = s.replace(/[^0-9]/g, '');
+  if (digits.length >= 8) return digits.slice(4,6) + '/' + digits.slice(6,8);
+  if (digits.length >= 6) return digits.slice(2,4) + '.' + digits.slice(4,6);
+  return s;
 }
 
 function buildChart(canvasId,emptyId,datasets,yFmt,ref,setter){
@@ -808,7 +811,7 @@ function buildChart(canvasId,emptyId,datasets,yFmt,ref,setter){
         tooltip:{...TOOLTIP}
       },
       scales:{
-        x:{type:'category',grid:{color:'rgba(48,54,61,.6)',drawBorder:false},ticks:{color:'#484F58',font:{size:10},maxTicksLimit:9}},
+        x:{type:'category',grid:{color:'rgba(48,54,61,.6)',drawBorder:false},ticks:{color:'#484F58',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
         y:{grid:{color:'rgba(48,54,61,.6)',drawBorder:false},ticks:{color:'#8B949E',font:{size:10},callback:yFmt}}
       }
     }
@@ -993,7 +996,7 @@ function buildFreightChart(canvasId, emptyId, series, ref, setter){
         tooltip:{...FREIGHT_TOOLTIP}
       },
       scales:{
-        x:{type:'category',grid:{color:'rgba(48,54,61,.6)'},ticks:{color:'#484F58',font:{size:10},maxTicksLimit:12}},
+        x:{type:'category',grid:{color:'rgba(48,54,61,.6)'},ticks:{color:'#484F58',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
         y:{grid:{color:'rgba(48,54,61,.6)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v!=null?v.toLocaleString():''}}
       }
     }
@@ -1113,7 +1116,7 @@ function renderTradeSection(){
           callbacks:{label:ctx=>`${ctx.parsed.y.toLocaleString('ko-KR')}건`}}
       },
       scales:{
-        x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:10}}},
+        x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
         y:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v.toLocaleString('ko-KR')}}
       }
     }
@@ -1214,7 +1217,7 @@ function renderSupplySection(){
           callbacks:{label:ctx=>ctx.parsed.y!=null?`${ctx.parsed.y.toLocaleString('ko-KR')}가구`:'-'}}
       },
       scales:{
-        x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:10}}},
+        x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
         y:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v.toLocaleString('ko-KR')}}
       }
     }
@@ -1308,7 +1311,7 @@ function renderNaverSection(){
           callbacks:{label:ctx=>`트렌드: ${ctx.parsed.y}`}}
       },
       scales:{
-        x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxTicksLimit:12}},
+        x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
         y:{min:0,max:100,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10}}}
       }
     }
@@ -1494,7 +1497,7 @@ function renderChemSection(){
             callbacks:{label:ctx=>`${ctx.parsed.y.toFixed(2)} $/kg`}}
         },
         scales:{
-          x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxTicksLimit:8}},
+          x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
           y:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v.toFixed(2)}}
         }
       }
