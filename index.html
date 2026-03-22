@@ -789,7 +789,7 @@ function buildChart(canvasId,emptyId,datasets,yFmt,ref,setter){
         tooltip:{...TOOLTIP}
       },
       scales:{
-        x:{grid:{color:'rgba(48,54,61,.6)',drawBorder:false},ticks:{color:'#484F58',font:{size:10},maxTicksLimit:9}},
+        x:{type:'category',grid:{color:'rgba(48,54,61,.6)',drawBorder:false},ticks:{color:'#484F58',font:{size:10},maxTicksLimit:9}},
         y:{grid:{color:'rgba(48,54,61,.6)',drawBorder:false},ticks:{color:'#8B949E',font:{size:10},callback:yFmt}}
       }
     }
@@ -974,7 +974,7 @@ function buildFreightChart(canvasId, emptyId, series, ref, setter){
         tooltip:{...FREIGHT_TOOLTIP}
       },
       scales:{
-        x:{grid:{color:'rgba(48,54,61,.6)'},ticks:{color:'#484F58',font:{size:10},maxTicksLimit:12}},
+        x:{type:'category',grid:{color:'rgba(48,54,61,.6)'},ticks:{color:'#484F58',font:{size:10},maxTicksLimit:12}},
         y:{grid:{color:'rgba(48,54,61,.6)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v!=null?v.toLocaleString():''}}
       }
     }
@@ -1094,7 +1094,7 @@ function renderTradeSection(){
           callbacks:{label:ctx=>`${ctx.parsed.y.toLocaleString('ko-KR')}건`}}
       },
       scales:{
-        x:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:10}}},
+        x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:10}}},
         y:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v.toLocaleString('ko-KR')}}
       }
     }
@@ -1195,7 +1195,7 @@ function renderSupplySection(){
           callbacks:{label:ctx=>ctx.parsed.y!=null?`${ctx.parsed.y.toLocaleString('ko-KR')}가구`:'-'}}
       },
       scales:{
-        x:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:10}}},
+        x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:10}}},
         y:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v.toLocaleString('ko-KR')}}
       }
     }
@@ -1289,7 +1289,7 @@ function renderNaverSection(){
           callbacks:{label:ctx=>`트렌드: ${ctx.parsed.y}`}}
       },
       scales:{
-        x:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxTicksLimit:12}},
+        x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxTicksLimit:12}},
         y:{min:0,max:100,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10}}}
       }
     }
@@ -1475,7 +1475,7 @@ function renderChemSection(){
             callbacks:{label:ctx=>`${ctx.parsed.y.toFixed(2)} $/kg`}}
         },
         scales:{
-          x:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxTicksLimit:8}},
+          x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxTicksLimit:8}},
           y:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v.toFixed(2)}}
         }
       }
