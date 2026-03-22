@@ -839,6 +839,28 @@ async function loadAll(){
     ['usdChartEmpty','eurChartEmpty','cnyChartEmpty'].forEach(id=>{document.getElementById(id).textContent='로드 실패';});
   }
 
+  // Google Sheets 연동된 경우 수동 데이터도 Sheets에서 로드
+  const gasUrl = localStorage.getItem('gas_url');
+  if(gasUrl){
+    try{
+      const r = await fetch(`${gasUrl}?action=getAll`);
+      const json = await r.json();
+      if(json.ok && json.data){
+        const d = json.data;
+        if(d.freight_cn)       localStorage.setItem('freight_cn', JSON.stringify(d.freight_cn));
+        if(d.naver_sofa_trend) localStorage.setItem('naver_sofa_trend', JSON.stringify(d.naver_sofa_trend));
+        if(d.apt_trade_data)   localStorage.setItem('apt_trade_data', JSON.stringify(d.apt_trade_data));
+        if(d.apt_supply_data)  localStorage.setItem('apt_supply_data', JSON.stringify(d.apt_supply_data));
+        if(d.chem_price_data)  localStorage.setItem('chem_price_data', JSON.stringify(d.chem_price_data));
+      }
+    } catch(e){ console.warn('Sheets 로드 실패 (로컬 데이터 사용):', e.message); }
+  }
+
+  // 수동 입력 섹션 렌더 (Sheets 또는 로컬 데이터)
+  renderTradeSection(); renderSupplySection();
+  renderNaverSection(); renderChemSection();
+  ['cn'].forEach(renderFreightSection);
+
   document.getElementById('ts').textContent=new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
   btn.disabled=false; btn.textContent='↻ 새로고침';
 }
@@ -1490,16 +1512,9 @@ document.getElementById('chemModal').addEventListener('click',function(e){if(e.t
 })();
 /* ── 페이지 로드 시 자동 실행 (Chart.js 로드 완료 후) ── */
 window.addEventListener('load', function(){
-  // 수동 입력 섹션 초기 렌더 (Chart 필요)
-  renderTradeSection();
-  renderSupplySection();
-  renderNaverSection();
-  renderChemSection();
-  // 자동 수집 (유가·환율)
-  loadAll();
+  loadAll(); // loadAll 내부에서 render + Sheets 로드 모두 처리
 });
 </script>
 </body>
 </html>
-
 
