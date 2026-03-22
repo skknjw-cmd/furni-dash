@@ -315,116 +315,19 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
     <div class="fcrd-note">SCFI(스팟) + CCFI(장기계약 혼합) 병행 입력 권장. 매주 금요일 KMI 보고서 참조.</div>
   </div>
 
-  <!-- 이탈리아 → 인천 -->
-  <div class="fcrd">
-    <div class="fcrd-head">
-      <div class="fcrd-route">
-        <span class="fcrd-flag">🇮🇹</span>
-        <div>
-          <div class="fcrd-title">이탈리아 → 인천</div>
-          <div class="fcrd-src">FBX13 지중해 지수 또는 포워더 견적가 | 출처: <a href="https://www.freightos.com/freight-resources/freightos-baltic-exchange-fbx/" target="_blank">freightos.com</a></div>
-        </div>
-      </div>
-      <button class="btn" onclick="openFreightModal('it')">✎ 입력</button>
-    </div>
-    <div class="fcrd-kpis">
-      <div class="fkpi">
-        <div class="fkpi-lbl">FBX13 (지중해)</div>
-        <div class="fkpi-val" id="it-fbx-val">—</div>
-        <div class="fkpi-chg" id="it-fbx-chg">—</div>
-      </div>
-      <div class="fkpi">
-        <div class="fkpi-lbl">실제 견적가 ($/CBM)</div>
-        <div class="fkpi-val" id="it-rate-val">—</div>
-        <div class="fkpi-chg" id="it-rate-chg">—</div>
-      </div>
-      <div class="fkpi">
-        <div class="fkpi-lbl">기준일</div>
-        <div class="fkpi-date" id="it-date">—</div>
-      </div>
-    </div>
-    <div class="cwrap" style="height:150px;margin-top:14px;">
-      <div class="cempty" id="itChartEmpty">데이터 없음 — ✎ 입력 버튼으로 추가하세요</div>
-      <canvas id="itChart" style="display:none"></canvas>
-    </div>
-    <div class="fcrd-note">전용 지수 없음. FBX13(지중해 발 아시아 방향 지수)으로 방향성 파악 + 포워더(판토스·글로비스) 실견적 병행 입력 권장.</div>
-  </div>
-
-  <!-- 베트남 → 인천 -->
-  <div class="fcrd" style="grid-column:1/-1;">
-    <div class="fcrd-head">
-      <div class="fcrd-route">
-        <span class="fcrd-flag">🇻🇳</span>
-        <div>
-          <div class="fcrd-title">베트남 → 인천</div>
-          <div class="fcrd-src">포워더 실제 견적가 (근해 노선, 공개 지수 없음)</div>
-        </div>
-      </div>
-      <button class="btn" onclick="openFreightModal('vn')">✎ 입력</button>
-    </div>
-    <div class="fcrd-kpis" style="grid-template-columns:repeat(4,1fr);">
-      <div class="fkpi">
-        <div class="fkpi-lbl">호치민 → 인천 ($/CBM)</div>
-        <div class="fkpi-val" id="vn-hcm-val">—</div>
-        <div class="fkpi-chg" id="vn-hcm-chg">—</div>
-      </div>
-      <div class="fkpi">
-        <div class="fkpi-lbl">하이퐁 → 인천 ($/CBM)</div>
-        <div class="fkpi-val" id="vn-hp-val">—</div>
-        <div class="fkpi-chg" id="vn-hp-chg">—</div>
-      </div>
-      <div class="fkpi">
-        <div class="fkpi-lbl">리드타임 (일)</div>
-        <div class="fkpi-val" id="vn-lt-val">—</div>
-        <div class="fkpi-chg" id="vn-lt-chg">—</div>
-      </div>
-      <div class="fkpi">
-        <div class="fkpi-lbl">기준일</div>
-        <div class="fkpi-date" id="vn-date">—</div>
-      </div>
-    </div>
-    <div class="cwrap" style="height:150px;margin-top:14px;">
-      <div class="cempty" id="vnChartEmpty">데이터 없음 — ✎ 입력 버튼으로 추가하세요</div>
-      <canvas id="vnChart" style="display:none"></canvas>
-    </div>
-    <div class="fcrd-note">근해(intra-Asia) 노선으로 대형 운임 지수에 미포함. 월 1회 포워더 견적 수집 권장. 호치민(VVHCM)·하이퐁(VNHPH) 기준.</div>
-  </div>
-
 </div>
 
 <!-- ── 아파트 거래량 · 신규 입주물량 ── -->
 <div class="sec-hdr">
   <span class="sec-title">🏠 아파트 거래량 · 신규 입주물량</span>
-  <span class="sec-src">거래량: 국토부 실거래가 API · 입주물량: 국토부 주택건설실적 API · 모두 공공데이터포털 키 사용</span>
-</div>
-
-<!-- API 키 설정 패널 -->
-<div id="aptApiPanel" style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-    <div>
-      <div style="font-size:12px;font-weight:600;color:var(--t2);">공공데이터포털 API 키 (거래량 + 입주물량 동시 사용)</div>
-      <div style="font-size:10px;color:var(--t3);margin-top:2px;">
-        <a href="https://www.data.go.kr/data/15126469/openapi.do" target="_blank">아파트매매 실거래 상세 자료</a> +
-        <a href="https://www.data.go.kr/data/15045033/openapi.do" target="_blank">주택건설실적 조회</a> — 동일 키로 두 API 모두 사용 (각각 활용신청 필요)
-      </div>
-    </div>
-    <span id="aptApiStatus" style="font-size:10px;color:var(--t3);">미설정</span>
-  </div>
-  <div style="display:flex;gap:8px;align-items:flex-end;">
-    <input type="password" id="aptApiKey" placeholder="공공데이터포털 Decoding 키 붙여넣기"
-      style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--b1);border-radius:6px;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:11px;transition:border .12s;"
-      onfocus="this.style.borderColor='var(--amber)'" onblur="this.style.borderColor='var(--b1)'">
-    <button class="btn-solid" onclick="saveAptKey()" style="height:34px;padding:0 18px;font-size:12px;white-space:nowrap;">저장 후 불러오기</button>
-    <button class="btn" onclick="diagApt()" style="height:34px;padding:0 12px;font-size:11px;white-space:nowrap;" title="API 연결 테스트">🔍 진단</button>
-  </div>
-  <div id="aptApiMsg" style="font-size:11px;margin-top:8px;"></div>
+  <span class="sec-src">수동 입력 · 월 1회 · <a href="https://rt.molit.go.kr" target="_blank" style="color:var(--t3);">국토부 실거래가 시스템</a> 및 <a href="https://stat.molit.go.kr" target="_blank" style="color:var(--t3);">통계누리</a> 참조</span>
 </div>
 
 <!-- KPI 카드 -->
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:16px;">
   <div class="kpi" style="--kpi-color:#58A6FF;">
     <div class="kpi-label">서울 아파트 거래량 (건)</div>
-    <div id="apt-trade-val"><div class="kpi-loading"><div class="spin">⟳</div>API 키 필요</div></div>
+    <div id="apt-trade-val"><div class="kpi-empty" style="font-size:11px;color:var(--t3);">데이터 없음</div></div>
   </div>
   <div class="kpi" style="--kpi-color:#3FB950;">
     <div class="kpi-label">전월 대비</div>
@@ -432,7 +335,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
   </div>
   <div class="kpi" style="--kpi-color:#F0883E;">
     <div class="kpi-label">신규 입주물량 (가구)</div>
-    <div id="apt-supply-val"><div class="kpi-loading"><div class="spin">⟳</div>API 키 필요</div></div>
+    <div id="apt-supply-val"><div class="kpi-empty" style="font-size:11px;color:var(--t3);">데이터 없음</div></div>
   </div>
   <div class="kpi" style="--kpi-color:#D2A8FF;">
     <div class="kpi-label">전월 대비</div>
@@ -445,22 +348,29 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
   <div class="ccrd">
     <div class="ccrd-head">
       <span class="ccrd-title" style="color:#58A6FF;">서울 아파트 매매 거래량</span>
-      <span class="ccrd-range">12개월</span>
+      <span class="ccrd-range">월별 · 수동입력</span>
     </div>
-    <div class="ccrd-sub">국토부 실거래가 기준 · 서울시 전체 월별 합계</div>
+    <div class="ccrd-sub">
+      <a href="https://rt.molit.go.kr" target="_blank" style="color:var(--t3);">국토부 실거래가 시스템</a> 참조 후 월 1회 입력
+      <button class="btn" onclick="document.getElementById('tradeModal').classList.add('show')"
+        style="margin-left:8px;padding:3px 10px;font-size:10px;">✎ 입력</button>
+    </div>
     <div class="cwrap" style="height:180px;">
-      <div class="cempty" id="tradeChartEmpty">API 키 설정 후 자동 수집</div>
+      <div class="cempty" id="tradeChartEmpty">✎ 입력 버튼으로 월별 데이터를 추가하세요</div>
       <canvas id="tradeChart" style="display:none"></canvas>
     </div>
   </div>
   <div class="ccrd">
     <div class="ccrd-head">
       <span class="ccrd-title" style="color:#F0883E;">신규 아파트 입주물량</span>
-      <span class="ccrd-range">12개월</span>
+      <span class="ccrd-range">월별 · 수동입력</span>
     </div>
-    <div class="ccrd-sub">전국 아파트 준공 기준 · 국토부 주택건설 실적</div>
+    <div class="ccrd-sub">전국 준공 기준 — <a href="https://stat.molit.go.kr" target="_blank" style="color:var(--t3);">국토부 통계누리</a> 참조 후 월 1회 입력
+      <button class="btn" onclick="document.getElementById('supplyModal').classList.add('show')"
+        style="margin-left:8px;padding:3px 10px;font-size:10px;">✎ 입력</button>
+    </div>
     <div class="cwrap" style="height:180px;">
-      <div class="cempty" id="supplyChartEmpty">API 키 설정 후 자동 수집</div>
+      <div class="cempty" id="supplyChartEmpty">✎ 입력 버튼으로 월별 데이터를 추가하세요</div>
       <canvas id="supplyChart" style="display:none"></canvas>
     </div>
   </div>
@@ -469,35 +379,241 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
 <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:14px 18px;margin-bottom:28px;font-size:11px;color:var(--t3);line-height:1.8;">
   <strong style="color:var(--t2);">소파 수요 선행 지표로 활용하는 법 —</strong>
   입주물량 증가 후 <strong style="color:var(--t1);">3~6개월 시차</strong>로 소파 수요 피크가 옵니다.
-  거래량 증가 → 이사 수요 → 새 가구 구매 사이클.
-  거래량은 서울 기준이지만 전국 트렌드와 방향성이 일치합니다.
+  거래량 증가 → 이사 수요 → 새 가구 구매 사이클. · 거래량은 서울 기준, 전국 트렌드와 방향 일치.
+  &nbsp;|&nbsp; <strong style="color:var(--t2);">입주물량 데이터 출처:</strong>
+  <a href="https://stat.molit.go.kr/portal/cate/statFileDownLoad.do?hRsId=15&hFormId=1110&hSelectId=1110&sStyleNum=1&sStart=2020&sEnd=2025&hFileType=EXCEL&hFileName=주택건설실적" target="_blank">국토부 통계누리 → 주택건설실적 → 준공 → 아파트</a>
 </div>
 
-<!-- 주택건설실적 API 신청 안내 (미신청 시 표시) -->
-<div id="supplyApplyNote" style="display:none;background:var(--s1);border:1px solid var(--amber);border-radius:var(--r);padding:14px 18px;margin-bottom:12px;font-size:11px;color:var(--t3);line-height:1.8;">
-  <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:6px;">입주물량 API 활용신청 안내</div>
-  거래량과 동일한 data.go.kr 계정으로 신청합니다. 자동승인 · 무료.<br>
-  <a href="https://www.data.go.kr/data/15045033/openapi.do" target="_blank"
-    style="display:inline-block;margin-top:6px;padding:5px 14px;background:var(--amber);color:#000;border-radius:5px;font-weight:600;font-size:11px;text-decoration:none;">
-    → data.go.kr 주택건설실적 조회 서비스 활용신청
-  </a>
-  <span style="margin-left:10px;font-size:10px;color:var(--t3);">신청 후 키 저장을 다시 누르면 자동 수집됩니다.</span>
+<!-- ── 네이버 소파 검색 트렌드 ── -->
+<div class="sec-hdr">
+  <span class="sec-title">🔍 네이버 소파 검색 트렌드</span>
+  <span class="sec-src">네이버 데이터랩 · 상대값(0~100) · 주간 수동 입력</span>
 </div>
 
-<!-- ── PHASE 2 (남은 항목) ── -->
+<div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:12px 18px;margin-bottom:14px;font-size:11px;color:var(--t3);line-height:1.8;">
+  <strong style="color:var(--t2);">📌 입력 방법:</strong>
+  <a href="https://datalab.naver.com/keyword/trendResult.naver?hashKey=N_84c3e00e8cdf9ddf13bb4ae3fee3de35" target="_blank" style="color:#58A6FF;">네이버 데이터랩 바로가기</a> →
+  키워드: <code style="background:var(--s2);padding:1px 5px;border-radius:3px;">소파, 소파추천, 가죽소파, 패브릭소파</code> → 월별 수치 확인 → 아래 입력
+  &nbsp;|&nbsp; 값은 0~100 상대값 (기간 내 최고점=100)
+  <button class="btn" onclick="document.getElementById('naverModal').classList.add('show')"
+    style="margin-left:10px;padding:3px 12px;font-size:10px;">✎ 주간 입력</button>
+</div>
+
+<!-- KPI + 차트 -->
+<div style="display:grid;grid-template-columns:180px 1fr;gap:16px;margin-bottom:28px;">
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <div class="kpi" style="--kpi-color:#58A6FF;flex:1;">
+      <div class="kpi-label">최근 주간 트렌드 지수</div>
+      <div id="naver-val"><div class="kpi-empty" style="font-size:11px;color:var(--t3);padding-top:4px;">데이터 없음</div></div>
+    </div>
+    <div class="kpi" style="--kpi-color:#3FB950;flex:1;">
+      <div class="kpi-label">전주 대비</div>
+      <div id="naver-chg" style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:500;color:var(--t2);padding-top:4px;">—</div>
+    </div>
+  </div>
+  <div class="ccrd">
+    <div class="ccrd-head">
+      <span class="ccrd-title" style="color:#58A6FF;">소파 검색 트렌드 (네이버)</span>
+      <span class="ccrd-range">최대 52주</span>
+    </div>
+    <div class="ccrd-sub">검색어: 소파 / 소파추천 / 가죽소파 / 패브릭소파 통합 상대값</div>
+    <div class="cwrap" style="height:160px;">
+      <div class="cempty" id="naverChartEmpty">✎ 주간 입력 버튼으로 데이터를 추가하세요</div>
+      <canvas id="naverChart" style="display:none"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ── 폴리올 / TDI / MDI ── -->
+<div class="sec-hdr">
+  <span class="sec-title">🧪 원자재 수입단가 — 폴리올 · TDI · MDI</span>
+  <span class="sec-src">관세청 수출입 무역통계 API · HS코드 기반 수입단가 자동 계산 (CIF 기준)</span>
+</div>
+
+<!-- API 키 패널 -->
+<div id="chemApiPanel" style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--t2);">관세청 무역통계 API 키 (아파트 키와 동일 · 또는 별도 신청)</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:2px;">
+        <a href="https://www.data.go.kr/data/15100475/openapi.do" target="_blank">품목별 국가별 수출입실적 (data.go.kr/data/15100475)</a> 활용신청 (자동승인, 무료)
+        &nbsp;|&nbsp; HS: 폴리올 <code>3907200000</code> · TDI <code>2929101000</code> · MDI <code>2929102000</code>
+      </div>
+    </div>
+    <span id="chemApiStatus" style="font-size:10px;color:var(--t3);">미설정</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:flex-end;">
+    <input type="password" id="chemApiKey" placeholder="공공데이터포털 Encoding 키 (아파트 API와 동일 키 사용 가능)"
+      style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--b1);border-radius:6px;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:11px;"
+      onfocus="this.style.borderColor='var(--amber)'" onblur="this.style.borderColor='var(--b1)'">
+    <button class="btn-solid" onclick="saveChemKey()" style="height:34px;padding:0 16px;font-size:12px;white-space:nowrap;">저장 후 수집</button>
+    <button class="btn" onclick="document.getElementById('chemModal').classList.add('show')" style="height:34px;padding:0 12px;font-size:11px;white-space:nowrap;">✎ 수동 입력</button>
+  </div>
+  <div id="chemApiMsg" style="font-size:11px;margin-top:8px;"></div>
+</div>
+
+<!-- KPI 카드 3개 -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:16px;">
+  <div class="kpi" style="--kpi-color:#D2A8FF;">
+    <div class="kpi-label">폴리올 수입단가 ($/kg)</div>
+    <div id="chem-poly-val"><div class="kpi-loading" style="font-size:10px;">API 키 입력 후 자동 수집</div></div>
+    <div id="chem-poly-chg" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);">—</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#F0883E;">
+    <div class="kpi-label">TDI 수입단가 ($/kg)</div>
+    <div id="chem-tdi-val"><div class="kpi-loading" style="font-size:10px;">API 키 입력 후 자동 수집</div></div>
+    <div id="chem-tdi-chg" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);">—</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#58A6FF;">
+    <div class="kpi-label">MDI 수입단가 ($/kg)</div>
+    <div id="chem-mdi-val"><div class="kpi-loading" style="font-size:10px;">API 키 입력 후 자동 수집</div></div>
+    <div id="chem-mdi-chg" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);">—</div>
+  </div>
+</div>
+
+<!-- 차트 3개 -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:12px;">
+  <div class="ccrd">
+    <div class="ccrd-head"><span class="ccrd-title" style="color:#D2A8FF;">폴리올</span><span class="ccrd-range">HS 3907200000</span></div>
+    <div class="ccrd-sub">폴리에테르폴리올 전체 수입 · 단가 CIF 기준</div>
+    <div class="cwrap" style="height:160px;">
+      <div class="cempty" id="polyChartEmpty">API 키 설정 후 자동 수집</div>
+      <canvas id="polyChart" style="display:none"></canvas>
+    </div>
+  </div>
+  <div class="ccrd">
+    <div class="ccrd-head"><span class="ccrd-title" style="color:#F0883E;">TDI</span><span class="ccrd-range">HS 2929101000</span></div>
+    <div class="ccrd-sub">톨루엔디이소시아네이트 수입 · 단가 CIF 기준</div>
+    <div class="cwrap" style="height:160px;">
+      <div class="cempty" id="tdiChartEmpty">API 키 설정 후 자동 수집</div>
+      <canvas id="tdiChart" style="display:none"></canvas>
+    </div>
+  </div>
+  <div class="ccrd">
+    <div class="ccrd-head"><span class="ccrd-title" style="color:#58A6FF;">MDI</span><span class="ccrd-range">HS 2929102000</span></div>
+    <div class="ccrd-sub">메틸렌디페닐디이소시아네이트 수입 · 단가 CIF 기준</div>
+    <div class="cwrap" style="height:160px;">
+      <div class="cempty" id="mdiChartEmpty">API 키 설정 후 자동 수집</div>
+      <canvas id="mdiChart" style="display:none"></canvas>
+    </div>
+  </div>
+</div>
+<div style="font-size:10px;color:var(--t3);margin-bottom:28px;line-height:1.6;">
+  ※ 수입단가 = 수입금액(CIF USD) ÷ 수입중량(kg). 월별 집계이며 매월 15일경 전월 데이터 확정.
+  실제 구매 계약단가와 차이 있을 수 있음 (관세청 통관 기준).
+</div>
+
+<!-- Phase 3 나머지 -->
 <div class="p2">
-  <div class="p2-title">Phase 3 — 추가 예정 지표</div>
+  <div class="p2-title">Phase 4 — 추가 예정</div>
   <div class="p2-grid">
-    <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">폴리올 · TDI · MDI</span><span class="p2-tag">수동입력+관세청</span></div>
     <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">가죽 원자재 (IMF PHIDEUSDM)</span><span class="p2-tag">FRED API</span></div>
-    <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">네이버 소파 검색 트렌드</span><span class="p2-tag">데이터랩 API</span></div>
     <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">가구 소매판매지수</span><span class="p2-tag">통계청 KOSIS</span></div>
   </div>
 </div>
 
 </main>
 
-<!-- 중국 입력 모달 -->
+<!-- 네이버 트렌드 수동 입력 모달 -->
+<div class="modal-bg" id="naverModal">
+  <div class="modal" style="width:480px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <span style="font-size:14px;font-weight:600;">🔍 소파 검색 트렌드 입력</span>
+      <button onclick="document.getElementById('naverModal').classList.remove('show')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:14px;padding:10px 14px;background:var(--s2);border-radius:6px;border-left:2px solid #58A6FF;line-height:1.8;">
+      📌 <a href="https://datalab.naver.com/keyword/trendResult.naver?hashKey=N_84c3e00e8cdf9ddf13bb4ae3fee3de35" target="_blank" style="color:#58A6FF;font-weight:600;">네이버 데이터랩 → 검색어 트렌드</a><br>
+      키워드 입력: <code style="background:var(--bg);padding:1px 5px;">소파, 소파추천, 가죽소파, 패브릭소파</code><br>
+      기간: 최근 1년 / 주간 / 전체기기 → 그래프에서 해당 주 수치 확인 후 입력
+    </div>
+    <div class="modal-grid">
+      <div class="field"><label>기준 주 (일요일 기준)</label><input type="date" id="nv-in-date"></div>
+      <div class="field"><label>트렌드 지수 (0~100)</label><input type="number" id="nv-in-val" placeholder="예: 74" min="0" max="100"></div>
+      <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="nv-in-note" placeholder="예: 이사철 시작, 봄 성수기 진입"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-solid" onclick="saveNaverTrend()" style="flex:1;">저장</button>
+      <button class="btn" onclick="if(confirm('트렌드 전체 데이터를 초기화합니까?'))clearNaverTrend()" style="color:var(--red);border-color:var(--red);">초기화</button>
+    </div>
+    <div id="nv-history" style="margin-top:14px;max-height:180px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- 폴리올/TDI/MDI 수동 입력 모달 (API 실패 시 fallback) -->
+<div class="modal-bg" id="chemModal">
+  <div class="modal" style="width:540px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <span style="font-size:14px;font-weight:600;">🧪 원자재 수입단가 수동 입력</span>
+      <button onclick="document.getElementById('chemModal').classList.remove('show')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:14px;padding:10px 14px;background:var(--s2);border-radius:6px;border-left:2px solid var(--amber);line-height:1.8;">
+      📌 <a href="https://tradedata.go.kr/cts/tzds/selectImpExpTrend.do" target="_blank" style="color:#58A6FF;">관세청 무역통계 → 품목별 수출입 현황</a>에서 HS코드 검색 후 입력<br>
+      폴리올: <code>3907200000</code> · TDI: <code>2929101000</code> · MDI: <code>2929102000</code><br>
+      수입금액(CIF, USD) ÷ 수입중량(kg) = 수입단가 직접 계산
+    </div>
+    <div class="modal-grid">
+      <div class="field" style="grid-column:1/-1"><label>기준 연월</label><input type="month" id="ch-in-date"></div>
+      <div class="field"><label>폴리올 수입단가 ($/kg)</label><input type="number" id="ch-in-poly" placeholder="예: 1.85" step="0.01"></div>
+      <div class="field"><label>TDI 수입단가 ($/kg)</label><input type="number" id="ch-in-tdi" placeholder="예: 2.10" step="0.01"></div>
+      <div class="field"><label>MDI 수입단가 ($/kg)</label><input type="number" id="ch-in-mdi" placeholder="예: 1.95" step="0.01"></div>
+      <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="ch-in-note" placeholder="예: 중국 TDI 증설 영향 하락세"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-solid" onclick="saveChemManual()" style="flex:1;">저장</button>
+      <button class="btn" onclick="if(confirm('원자재 전체 데이터를 초기화합니까?'))clearChem()" style="color:var(--red);border-color:var(--red);">초기화</button>
+    </div>
+    <div id="ch-history" style="margin-top:14px;max-height:160px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- 거래량 수동 입력 모달 -->
+<div class="modal-bg" id="tradeModal">
+  <div class="modal" style="width:480px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <span style="font-size:14px;font-weight:600;">🏠 서울 아파트 거래량 입력</span>
+      <button onclick="document.getElementById('tradeModal').classList.remove('show')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:14px;padding:10px 14px;background:var(--s2);border-radius:6px;border-left:2px solid #58A6FF;line-height:1.8;">
+      📌 <a href="https://rt.molit.go.kr" target="_blank" style="color:#58A6FF;font-weight:600;">국토부 실거래가 시스템</a> → 아파트 매매 → 서울 전체 → 월별 건수<br>
+      2개월 신고 지연 반영 필요. 단위: 거래 건수
+    </div>
+    <div class="modal-grid">
+      <div class="field" style="grid-column:1/-1"><label>기준 연월</label><input type="month" id="trade-in-date"></div>
+      <div class="field"><label>서울 전체 거래량 (건)</label><input type="number" id="trade-in-total" placeholder="예: 3450"></div>
+      <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="trade-in-note" placeholder="예: 강남 3구 집중, 금리 인하 기대감"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-solid" onclick="saveTrade()" style="flex:1;">저장</button>
+      <button class="btn" onclick="if(confirm('거래량 전체 데이터를 초기화합니까?'))clearTrade()" style="color:var(--red);border-color:var(--red);">초기화</button>
+    </div>
+    <div id="trade-history" style="margin-top:14px;max-height:180px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- 입주물량 수동 입력 모달 -->
+<div class="modal-bg" id="supplyModal">
+  <div class="modal" style="width:520px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <span style="font-size:14px;font-weight:600;">🏗 신규 입주물량 입력</span>
+      <button onclick="document.getElementById('supplyModal').classList.remove('show')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:14px;padding:10px 14px;background:var(--s2);border-radius:6px;border-left:2px solid var(--amber);line-height:1.7;">
+      📌 <strong style="color:var(--t2);">데이터 출처:</strong> <a href="https://stat.molit.go.kr" target="_blank">stat.molit.go.kr</a> → 주택 → 주택건설실적 → 준공 → 아파트 (전국)<br>
+      매월 익월 말 발표. 단위: 가구수
+    </div>
+    <div class="modal-grid">
+      <div class="field" style="grid-column:1/-1"><label>기준 연월</label><input type="month" id="sup-in-date"></div>
+      <div class="field"><label>전국 아파트 준공 (가구)</label><input type="number" id="sup-in-total" placeholder="예: 28500"></div>
+      <div class="field"><label>수도권 (가구, 선택)</label><input type="number" id="sup-in-metro" placeholder="예: 14200"></div>
+      <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="sup-in-note" placeholder="예: 서울 강남권 대단지 입주 집중"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-solid" onclick="saveSupply()" style="flex:1;">저장</button>
+      <button class="btn" onclick="if(confirm('입주물량 전체 데이터를 초기화합니까?'))clearSupply()" style="color:var(--red);border-color:var(--red);">초기화</button>
+    </div>
+    <div id="sup-history" style="margin-top:14px;max-height:180px;overflow-y:auto;"></div>
+  </div>
+</div>
 <div class="modal-bg" id="modal-cn">
   <div class="modal" style="width:520px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
@@ -519,52 +635,12 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
 </div>
 
 <!-- 이탈리아 입력 모달 -->
-<div class="modal-bg" id="modal-it">
-  <div class="modal" style="width:520px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-      <span style="font-size:14px;font-weight:600;">🇮🇹 이탈리아→인천 운임 입력</span>
-      <button onclick="closeModal('it')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
-    </div>
-    <div class="modal-grid">
-      <div class="field" style="grid-column:1/-1"><label>기준일</label><input type="date" id="it-in-date"></div>
-      <div class="field"><label>FBX13 지중해 지수</label><input type="number" id="it-in-fbx" placeholder="예: 2800"></div>
-      <div class="field"><label>실제 견적가 ($/CBM)</label><input type="number" id="it-in-rate" placeholder="예: 68"></div>
-      <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="it-in-note" placeholder="예: 판토스 견적, 제노바발 40ft 기준"></div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn-solid" onclick="saveFreight('it')" style="flex:1;">저장</button>
-      <button class="btn" onclick="if(confirm('전체 데이터를 초기화합니까?'))clearFreight('it')" style="color:var(--red);border-color:var(--red);">초기화</button>
-    </div>
-    <div id="it-history" style="margin-top:14px;max-height:160px;overflow-y:auto;"></div>
-  </div>
-</div>
 
-<!-- 베트남 입력 모달 -->
-<div class="modal-bg" id="modal-vn">
-  <div class="modal" style="width:520px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-      <span style="font-size:14px;font-weight:600;">🇻🇳 베트남→인천 운임 입력</span>
-      <button onclick="closeModal('vn')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
-    </div>
-    <div class="modal-grid">
-      <div class="field" style="grid-column:1/-1"><label>기준일</label><input type="date" id="vn-in-date"></div>
-      <div class="field"><label>호치민→인천 ($/CBM)</label><input type="number" id="vn-in-hcm" placeholder="예: 45"></div>
-      <div class="field"><label>하이퐁→인천 ($/CBM)</label><input type="number" id="vn-in-hp" placeholder="예: 42"></div>
-      <div class="field"><label>리드타임 (일)</label><input type="number" id="vn-in-lt" placeholder="예: 7"></div>
-      <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="vn-in-note" placeholder="예: 글로비스 견적, 20ft 기준"></div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn-solid" onclick="saveFreight('vn')" style="flex:1;">저장</button>
-      <button class="btn" onclick="if(confirm('전체 데이터를 초기화합니까?'))clearFreight('vn')" style="color:var(--red);border-color:var(--red);">초기화</button>
-    </div>
-    <div id="vn-history" style="margin-top:14px;max-height:160px;overflow-y:auto;"></div>
-  </div>
-</div>
 
 <footer class="ftr">
   <div class="ftr-item"><div class="fdot" style="background:var(--amber)"></div>유가: EIA (GitHub CSV)</div>
   <div class="ftr-item"><div class="fdot" style="background:var(--blue)"></div>환율: Frankfurter (ECB)</div>
-  <div class="ftr-item"><div class="fdot" style="background:#58A6FF"></div>아파트 거래량: 국토부 실거래가 API (공공데이터포털 키 필요)</div>
+  <div class="ftr-item"><div class="fdot" style="background:#58A6FF"></div>아파트: 국토부 실거래가 시스템 (rt.molit.go.kr) 월 1회 수동 입력</div>
   <div class="ftr-item"><div class="fdot" style="background:#484F58"></div>운임: 수동 입력 · localStorage</div>
 </footer>
 
@@ -804,19 +880,6 @@ function saveFreight(route){
     const note = document.getElementById('cn-in-note').value;
     if(!scfi&&!ccfi){ alert('SCFI 또는 CCFI 값을 입력하세요.'); return; }
     entry = {date, scfi:scfi?+scfi:null, ccfi:ccfi?+ccfi:null, note};
-  } else if(route==='it'){
-    const fbx  = document.getElementById('it-in-fbx').value;
-    const rate = document.getElementById('it-in-rate').value;
-    const note = document.getElementById('it-in-note').value;
-    if(!fbx&&!rate){ alert('FBX13 또는 견적가를 입력하세요.'); return; }
-    entry = {date, fbx:fbx?+fbx:null, rate:rate?+rate:null, note};
-  } else if(route==='vn'){
-    const hcm  = document.getElementById('vn-in-hcm').value;
-    const hp   = document.getElementById('vn-in-hp').value;
-    const lt   = document.getElementById('vn-in-lt').value;
-    const note = document.getElementById('vn-in-note').value;
-    if(!hcm&&!hp){ alert('운임을 입력하세요.'); return; }
-    entry = {date, hcm:hcm?+hcm:null, hp:hp?+hp:null, lt:lt?+lt:null, note};
   }
 
   // 같은 날짜면 덮어쓰기, 없으면 추가
@@ -899,23 +962,6 @@ function renderFreightSection(route){
       {label:'SCFI 한국', dates:allDates, values:data.map(d=>d.scfi), color:'#F0883E', fill:'rgba(240,136,62,.07)'},
       {label:'CCFI 종합', dates:allDates, values:data.map(d=>d.ccfi), color:'#F85149'},
     ], cnChart, c=>{cnChart=c;});
-  } else if(route==='it'){
-    document.getElementById('it-date').textContent = last?.date||'—';
-    setFkpi('it-fbx-val','it-fbx-chg', last?.fbx, prev?.fbx);
-    setFkpi('it-rate-val','it-rate-chg', last?.rate, prev?.rate);
-    buildFreightChart('itChart','itChartEmpty',[
-      {label:'FBX13',   dates:allDates, values:data.map(d=>d.fbx),  color:'#388BFD', fill:'rgba(56,139,253,.07)'},
-      {label:'견적 $/CBM',dates:allDates, values:data.map(d=>d.rate), color:'#D2A8FF'},
-    ], itChart, c=>{itChart=c;});
-  } else if(route==='vn'){
-    document.getElementById('vn-date').textContent = last?.date||'—';
-    setFkpi('vn-hcm-val','vn-hcm-chg', last?.hcm, prev?.hcm);
-    setFkpi('vn-hp-val','vn-hp-chg',   last?.hp,  prev?.hp);
-    setFkpi('vn-lt-val','vn-lt-chg',   last?.lt,  prev?.lt);
-    buildFreightChart('vnChart','vnChartEmpty',[
-      {label:'호치민 $/CBM', dates:allDates, values:data.map(d=>d.hcm), color:'#3FB950', fill:'rgba(63,185,80,.07)'},
-      {label:'하이퐁 $/CBM', dates:allDates, values:data.map(d=>d.hp),  color:'#39D353'},
-    ], vnChart, c=>{vnChart=c;});
   }
 }
 
@@ -935,163 +981,71 @@ function renderHistory(route){
 
 function formatHistoryRow(route, d){
   if(route==='cn') return `SCFI: ${d.scfi??'—'} / CCFI: ${d.ccfi??'—'}`;
-  if(route==='it') return `FBX13: ${d.fbx??'—'} / 견적: ${d.rate??'—'}$/CBM`;
-  if(route==='vn') return `HCM: ${d.hcm??'—'} / HP: ${d.hp??'—'} $/CBM · LT:${d.lt??'—'}일`;
+
 }
 
 /* ══════════════════════════════════════════
-   아파트 거래량 · 신규 입주물량
-   공공데이터포털 API (CORS 지원, 무료)
+   아파트 거래량 · 신규 입주물량 — 수동 입력
 ═══════════════════════════════════════════ */
-let aptApiKey = '';
 let tradeChart = null, supplyChart = null;
 
-// 서울시 25개 구 법정동코드
-const SEOUL_GU = [
-  '11110','11140','11170','11200','11215','11230','11260','11290','11305','11320',
-  '11350','11380','11410','11440','11470','11500','11530','11545','11560','11590',
-  '11620','11650','11680','11710','11740'
-];
+/* ── 거래량 localStorage ── */
+const TRADE_KEY = 'apt_trade_data';
+function getTradeData(){ try{ return JSON.parse(localStorage.getItem(TRADE_KEY)||'[]'); }catch{ return []; } }
+function setTradeData(d){ localStorage.setItem(TRADE_KEY, JSON.stringify(d)); }
 
-// API 키 저장 + 불러오기
-function saveAptKey(){
-  const key = document.getElementById('aptApiKey').value.trim();
-  if(!key){ setAptMsg('⚠ API 키를 입력하세요.', 'red'); return; }
-  aptApiKey = key;
-  localStorage.setItem('apt_api_key', key);
-  document.getElementById('aptApiPanel').style.borderColor = 'var(--green)';
-  document.getElementById('aptApiStatus').textContent = '✓ 설정됨';
-  document.getElementById('aptApiStatus').style.color = 'var(--green)';
-  setAptMsg('✓ 저장됨 — 데이터 수집 시작', 'green');
-  loadAptData();
-  loadSupplyData();
-}
-function setAptMsg(m, c){
-  const el = document.getElementById('aptApiMsg');
-  el.textContent = m;
-  el.style.color = c==='red' ? 'var(--red)' : c==='green' ? 'var(--green)' : 'var(--t3)';
+function saveTrade(){
+  const dateRaw = document.getElementById('trade-in-date').value;
+  const total   = document.getElementById('trade-in-total').value;
+  const note    = document.getElementById('trade-in-note').value.trim();
+  if(!dateRaw||!total){ alert('연월과 거래량을 입력하세요.'); return; }
+  const ym = dateRaw.replace('-','');
+  const data = getTradeData();
+  const idx = data.findIndex(d=>d.ym===ym);
+  const entry = {ym, total:+total, note};
+  if(idx>=0) data[idx]=entry; else data.push(entry);
+  data.sort((a,b)=>a.ym.localeCompare(b.ym));
+  if(data.length>52) data.splice(0,data.length-52);
+  setTradeData(data);
+  renderTradeSection();
+  renderTradeHistory();
 }
 
-// 저장된 키 복원
-(function(){
-  const saved = localStorage.getItem('apt_api_key');
-  if(saved){
-    aptApiKey = saved;
-    document.getElementById('aptApiKey').value = saved;
-    document.getElementById('aptApiStatus').textContent = '✓ 설정됨';
-    document.getElementById('aptApiStatus').style.color = 'var(--green)';
-    document.getElementById('aptApiPanel').style.borderColor = 'var(--green)';
-  }
-})();
-
-/* ── 키 인코딩 헬퍼: Encoding키(%포함)→그대로, Decoding키→encodeURIComponent ── */
-function encKey(){ return aptApiKey.includes('%') ? aptApiKey : encodeURIComponent(aptApiKey); }
-
-/* ── 국토부 아파트 매매 거래량 ── */
-async function fetchAptTradeMonth(ym){
-  const results = await Promise.allSettled(
-    SEOUL_GU.map(code => {
-      const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade` +
-        `?serviceKey=${encKey()}&LAWD_CD=${code}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1`;
-      return fetch(url, {signal: AbortSignal.timeout(12000)})
-        .then(r => r.text())
-        .then(xml => {
-          const doc = new DOMParser().parseFromString(xml, 'text/xml');
-          // 오류 응답 확인
-          const code_ = doc.querySelector('resultCode')?.textContent;
-          if(code_ && code_ !== '00' && code_ !== '0000') return 0;
-          const tc = doc.querySelector('totalCount');
-          return tc ? (parseInt(tc.textContent)||0) : 0;
-        })
-        .catch(() => 0);
-    })
-  );
-  const total = results.reduce((sum,r) => sum + (r.status==='fulfilled' ? r.value : 0), 0);
-  return total;
+function clearTrade(){
+  setTradeData([]);
+  renderTradeSection();
+  renderTradeHistory();
 }
 
-/* ── 국토부 주택건설실적 — 아파트 준공 가구수 ── */
-// API: 국토교통부 주택건설실적 (data.go.kr/data/15045033)
-// 서울 기준 아파트 준공 월별 집계
-async function fetchSupplyMonth(ym){
-  const url = `https://apis.data.go.kr/1613000/HousesBuildingService/getHousesBuildingResult` +
-    `?serviceKey=${encKey()}&pageNo=1&numOfRows=1000&strtYm=${ym}&endYm=${ym}`;
-  try{
-    const r = await fetch(url, {signal: AbortSignal.timeout(12000)});
-    const text = await r.text();
-    const doc = new DOMParser().parseFromString(text, 'text/xml');
-
-    // 오류 코드 감지
-    const resultCode = doc.querySelector('resultCode')?.textContent || '';
-    const resultMsg  = doc.querySelector('resultMsg')?.textContent  || '';
-    if(resultCode === '03' || resultMsg.includes('SERVICE_KEY') || resultMsg.includes('NOT_REGISTERED')){
-      return {err: '활용신청 필요'};
+function renderTradeSection(){
+  const data = getTradeData();
+  const last = data[data.length-1], prev = data[data.length-2];
+  const valEl = document.getElementById('apt-trade-val');
+  const chgEl = document.getElementById('apt-trade-chg');
+  if(!last){
+    valEl.innerHTML='<div class="kpi-empty" style="font-size:11px;color:var(--t3);">✎ 입력 버튼으로 추가</div>';
+    chgEl.innerHTML='—';
+  } else {
+    valEl.innerHTML=`<div><span class="kpi-num">${last.total.toLocaleString('ko-KR')}</span><span class="kpi-unit">건</span></div>`;
+    if(prev){
+      const chg=last.total-prev.total, pct=chg/prev.total*100;
+      const dir=chg>=0?'up':'dn', arr=chg>=0?'▲':'▼';
+      chgEl.innerHTML=`<div class="kpi-chg ${dir}" style="font-size:16px;">${arr} ${Math.abs(chg).toLocaleString()} (${Math.abs(pct).toFixed(1)}%)</div>`;
     }
-    if(resultCode !== '00' && resultCode !== '0000' && resultCode !== ''){
-      return {err: `오류코드: ${resultCode}`};
-    }
-
-    // 아파트 준공 가구수 합산
-    let total = 0;
-    doc.querySelectorAll('item').forEach(item => {
-      const houseType = (item.querySelector('houseType')?.textContent || '').trim();
-      const bizStat   = (item.querySelector('bizStat')?.textContent   || '').trim();
-      // 아파트 + 준공 조건
-      if((houseType === '아파트' || houseType === '' ) &&
-         (bizStat === '준공' || bizStat === '사용승인' || bizStat === '')){
-        // 여러 가구수 필드 시도
-        const cnt =
-          parseInt(item.querySelector('hhldCnt')?.textContent)  ||
-          parseInt(item.querySelector('houseCnt')?.textContent) ||
-          parseInt(item.querySelector('totCnt')?.textContent)   || 0;
-        total += cnt;
-      }
-    });
-    return {val: total};
-  } catch(e){
-    console.warn('supply fetch error:', ym, e.message);
-    return {val: 0};
   }
-}
-
-// 12개월 배열
-function getLast12Months(){
-  const months=[], now=new Date();
-  for(let i=11;i>=0;i--){
-    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    months.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`);
-  }
-  return months;
-}
-// 14개월 (실거래가 2개월 처리 지연 감안)
-function getLast14Months(){
-  const months=[], now=new Date();
-  for(let i=13;i>=0;i--){
-    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    months.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`);
-  }
-  return months;
-}
-
-function ymLabel(ym){ return `${ym.slice(0,4)}.${ym.slice(4)}`; }
-
-/* ── 아파트 차트 빌더 ── */
-function buildAptChart(canvasId, emptyId, labels, values, color, ref, setter){
-  const el=document.getElementById(canvasId), empty=document.getElementById(emptyId);
-  if(!values.some(v=>v>0)){ empty.style.display='flex'; el.style.display='none'; return; }
+  // 차트
+  const el=document.getElementById('tradeChart'), empty=document.getElementById('tradeChartEmpty');
+  if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(tradeChart)tradeChart.destroy(); tradeChart=null; return; }
   empty.style.display='none'; el.style.display='block';
-  if(ref) ref.destroy();
-  const c = new Chart(el,{
+  if(tradeChart) tradeChart.destroy();
+  tradeChart = new Chart(el,{
     type:'bar',
     data:{
-      labels,
+      labels: data.map(d=>`${d.ym.slice(0,4)}.${d.ym.slice(4)}`),
       datasets:[{
-        label: canvasId==='tradeChart'?'거래량(건)':'입주물량(가구)',
-        data: values,
-        backgroundColor: color+'33',
-        borderColor: color,
-        borderWidth:1.5,
-        borderRadius:3,
+        label:'거래량(건)', data:data.map(d=>d.total),
+        backgroundColor:'rgba(56,139,253,0.5)', borderColor:'#388BFD',
+        borderWidth:1.5, borderRadius:3,
       }]
     },
     options:{
@@ -1099,7 +1053,8 @@ function buildAptChart(canvasId, emptyId, labels, values, color, ref, setter){
       layout:{padding:{top:20,bottom:2,left:2,right:2}},
       plugins:{
         legend:{display:false},
-        tooltip:{backgroundColor:'#1C2128',borderColor:'#30363D',borderWidth:1,titleColor:'#8B949E',bodyColor:'#E6EDF3',padding:10,cornerRadius:6,
+        tooltip:{backgroundColor:'#1C2128',borderColor:'#30363D',borderWidth:1,
+          titleColor:'#8B949E',bodyColor:'#E6EDF3',padding:10,cornerRadius:6,
           callbacks:{label:ctx=>`${ctx.parsed.y.toLocaleString('ko-KR')}건`}}
       },
       scales:{
@@ -1108,127 +1063,429 @@ function buildAptChart(canvasId, emptyId, labels, values, color, ref, setter){
       }
     }
   });
-  setter(c);
 }
 
-/* ── KPI 카드 업데이트 ── */
-function updateAptKpi(valId, chgId, values, label){
-  const el = document.getElementById(valId), chgEl = document.getElementById(chgId);
-  const last = values.filter(v=>v!=null&&v>0);
-  if(!last.length){ el.innerHTML=`<div class="kpi-err">데이터 없음</div>`; return; }
-  const v = last[last.length-1], p = last[last.length-2]||null;
-  el.innerHTML=`<div><span class="kpi-num">${v.toLocaleString('ko-KR')}</span><span class="kpi-unit">${label}</span></div>`;
-  if(p){
-    const chg=v-p, pct=chg/p*100;
-    const dir=chg>=0?'up':'dn', arr=chg>=0?'▲':'▼';
-    chgEl.innerHTML=`<div class="kpi-chg ${dir}" style="font-size:16px;">${arr} ${Math.abs(chg).toLocaleString()} (${Math.abs(pct).toFixed(1)}%)</div>`;
-  }
+function renderTradeHistory(){
+  const el = document.getElementById('trade-history');
+  const data = getTradeData().slice().reverse().slice(0,12);
+  if(!data.length){ el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:8px 0;">저장된 데이터 없음</div>'; return; }
+  el.innerHTML=`<div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:6px;">최근 입력</div>`+
+    data.map(d=>`<div style="display:flex;gap:10px;align-items:center;padding:5px 8px;background:var(--s2);border-radius:4px;margin-bottom:3px;font-size:11px;">
+      <span style="font-family:'JetBrains Mono',monospace;color:var(--t3);flex-shrink:0;">${d.ym.slice(0,4)}.${d.ym.slice(4)}</span>
+      <span style="color:var(--t2);flex:1;">${d.total.toLocaleString('ko-KR')}건</span>
+      ${d.note?`<span style="color:var(--t3);font-size:10px;">${d.note}</span>`:''}
+    </div>`).join('');
 }
 
-/* ── API 응답 진단 ── */
-async function diagApt(){
-  if(!aptApiKey){ alert('먼저 API 키를 저장하세요.'); return; }
-  const now = new Date();
-  // 2개월 전 데이터 (처리 지연 감안)
-  const d = new Date(now.getFullYear(), now.getMonth()-2, 1);
-  const ym = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;
-  const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade` +
-    `?serviceKey=${encKey()}&LAWD_CD=11110&DEAL_YMD=${ym}&pageNo=1&numOfRows=3`;
-  try{
-    const r = await fetch(url, {signal: AbortSignal.timeout(10000)});
-    const txt = await r.text();
-    const resultCode = new DOMParser().parseFromString(txt,'text/xml').querySelector('resultCode')?.textContent;
-    const totalCount = new DOMParser().parseFromString(txt,'text/xml').querySelector('totalCount')?.textContent;
-    const rc2 = new DOMParser().parseFromString(txt,'text/xml').querySelector('resultCode')?.textContent;
-    const tc2 = new DOMParser().parseFromString(txt,'text/xml').querySelector('totalCount')?.textContent;
-    if(r.status===403||txt.trim()==='Forbidden'){
-      alert(`❌ Forbidden (HTTP 403)\n\n→ 마이페이지에서 Encoding 키로 교체하세요.\n  (Decoding 키 대신 Encoding 키)\n\n입력된 키 앞 20자: ${aptApiKey.slice(0,20)}`);
-    } else if(rc2==='30') alert(`❌ 인증키 오류(30) — Encoding 키로 교체하세요`);
-    else if(rc2==='03') alert(`❌ 미승인(03) — data.go.kr/data/15126469 활용신청`);
-    else if(rc2==='00') alert(`✅ 정상! ${ym} 종로구: ${tc2}건`);
-    else alert(`코드:${rc2||'없음'} HTTP:${r.status}\n${txt.slice(0,300)}`);
-  } catch(e){
-    alert(`네트워크 오류: ${e.message}`);
-  }
+document.getElementById('tradeModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+(function(){
+  const d=new Date(); d.setMonth(d.getMonth()-2); // 2개월 지연 감안
+  document.getElementById('trade-in-date').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  renderTradeSection();
+  renderTradeHistory();
+})();
+
+/* ══════════════════════════════════
+   입주물량 — localStorage 수동 입력
+═══════════════════════════════════ */
+const SUPPLY_KEY = 'apt_supply_data';
+
+function getSupplyData(){ try{ return JSON.parse(localStorage.getItem(SUPPLY_KEY)||'[]'); }catch{ return []; } }
+function setSupplyData(d){ localStorage.setItem(SUPPLY_KEY, JSON.stringify(d)); }
+
+function saveSupply(){
+  const dateRaw = document.getElementById('sup-in-date').value; // YYYY-MM
+  const total   = document.getElementById('sup-in-total').value;
+  const metro   = document.getElementById('sup-in-metro').value;
+  const note    = document.getElementById('sup-in-note').value.trim();
+  if(!dateRaw||!total){ alert('연월과 전국 준공가구수를 입력하세요.'); return; }
+  const ym = dateRaw.replace('-',''); // YYYYMM
+  const data = getSupplyData();
+  const idx = data.findIndex(d=>d.ym===ym);
+  const entry = {ym, total:+total, metro:metro?+metro:null, note};
+  if(idx>=0) data[idx]=entry; else data.push(entry);
+  data.sort((a,b)=>a.ym.localeCompare(b.ym));
+  if(data.length>52) data.splice(0,data.length-52);
+  setSupplyData(data);
+  renderSupplySection();
+  renderSupplyHistory();
 }
 
-/* ── 메인 아파트 거래량 로드 ── */
-async function loadAptData(){
-  if(!aptApiKey) return;
-  // 국토부 실거래가는 2개월 지연 → 최근 14개월 요청, 최신 12개월 표시
-  const months = getLast14Months();
-  const labels = months.map(ymLabel);
+function clearSupply(){
+  setSupplyData([]);
+  renderSupplySection();
+  renderSupplyHistory();
+}
 
-  document.getElementById('apt-trade-val').innerHTML = '<div class="kpi-loading"><span class="spin">⟳</span>수집 중 (약 1~2분)...</div>';
-  document.getElementById('tradeChartEmpty').innerHTML = '<span class="spin">⟳</span> 서울시 25개 구 데이터 수집 중...';
+function renderSupplySection(){
+  const data = getSupplyData();
+  const labels = data.map(d=>`${d.ym.slice(0,4)}.${d.ym.slice(4)}`);
+  const totals = data.map(d=>d.total);
 
-  try{
-    const tradeVals = [];
-    for(const ym of months){
-      const cnt = await fetchAptTradeMonth(ym);
-      tradeVals.push(cnt);
+  // KPI 업데이트
+  const last = data[data.length-1], prev = data[data.length-2];
+  const supplyValEl = document.getElementById('apt-supply-val');
+  const supplyChgEl = document.getElementById('apt-supply-chg');
+  if(!last){
+    supplyValEl.innerHTML='<div class="kpi-empty" style="font-size:11px;color:var(--t3);">✎ 입력 버튼으로 추가</div>';
+    supplyChgEl.innerHTML='—';
+  } else {
+    supplyValEl.innerHTML=`<div><span class="kpi-num">${last.total.toLocaleString('ko-KR')}</span><span class="kpi-unit">가구</span></div>`;
+    if(prev){
+      const chg=last.total-prev.total, pct=chg/prev.total*100;
+      const dir=chg>=0?'up':'dn', arr=chg>=0?'▲':'▼';
+      supplyChgEl.innerHTML=`<div class="kpi-chg ${dir}" style="font-size:16px;">${arr} ${Math.abs(chg).toLocaleString()} (${Math.abs(pct).toFixed(1)}%)</div>`;
     }
-    // 데이터가 있는 최근 12개월만 표시
-    const validIdx = tradeVals.map((v,i)=>v>0?i:-1).filter(i=>i>=0);
-    const slice12 = validIdx.length >= 12
-      ? {vals: tradeVals.slice(validIdx[validIdx.length-12]), labs: labels.slice(validIdx[validIdx.length-12])}
-      : {vals: tradeVals, labs: labels};
-
-    updateAptKpi('apt-trade-val','apt-trade-chg', slice12.vals, '건');
-    buildAptChart('tradeChart','tradeChartEmpty', slice12.labs, slice12.vals, '#58A6FF', tradeChart, c=>{tradeChart=c;});
-    setAptMsg('✓ 거래량 수집 완료 (2개월 처리 지연 반영)', 'green');
-  } catch(e){
-    document.getElementById('apt-trade-val').innerHTML = `<div class="kpi-err">${e.message}</div>`;
-    setAptMsg(`오류: ${e.message}`, 'red');
   }
+
+  // 차트
+  const el=document.getElementById('supplyChart'), empty=document.getElementById('supplyChartEmpty');
+  if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(supplyChart)supplyChart.destroy(); supplyChart=null; return; }
+  empty.style.display='none'; el.style.display='block';
+  if(supplyChart) supplyChart.destroy();
+  supplyChart = new Chart(el,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'전국(가구)', data:totals, backgroundColor:'rgba(240,136,62,.5)', borderColor:'#F0883E', borderWidth:1.5, borderRadius:3},
+        {label:'수도권(가구)', data:data.map(d=>d.metro), backgroundColor:'rgba(210,168,255,.4)', borderColor:'#D2A8FF', borderWidth:1.5, borderRadius:3},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:{duration:500},
+      layout:{padding:{top:16,bottom:2,left:2,right:2}},
+      plugins:{
+        legend:{display:true,labels:{color:'#8B949E',boxWidth:10,boxHeight:2,font:{size:10}}},
+        tooltip:{backgroundColor:'#1C2128',borderColor:'#30363D',borderWidth:1,titleColor:'#8B949E',bodyColor:'#E6EDF3',padding:10,cornerRadius:6,
+          callbacks:{label:ctx=>ctx.parsed.y!=null?`${ctx.parsed.y.toLocaleString('ko-KR')}가구`:'-'}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:10}}},
+        y:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v.toLocaleString('ko-KR')}}
+      }
+    }
+  });
 }
 
-/* ── 입주물량 로드 (data.go.kr 주택건설실적) ── */
-async function loadSupplyData(){
-  if(!aptApiKey) return;
-  const months = getLast12Months();
-  const labels = months.map(ymLabel);
+function renderSupplyHistory(){
+  const el = document.getElementById('sup-history');
+  const data = getSupplyData().slice().reverse().slice(0,12);
+  if(!data.length){ el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:8px 0;">저장된 데이터 없음</div>'; return; }
+  el.innerHTML=`<div style="font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">최근 입력 (최대 12건)</div>`+
+    data.map(d=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 8px;background:var(--s2);border-radius:4px;margin-bottom:3px;font-size:11px;">
+      <span style="font-family:'JetBrains Mono',monospace;color:var(--t3);flex-shrink:0;">${d.ym.slice(0,4)}.${d.ym.slice(4)}</span>
+      <span style="color:var(--t2);flex:1;">전국: ${d.total.toLocaleString()}가구${d.metro?` · 수도권: ${d.metro.toLocaleString()}가구`:''}</span>
+      ${d.note?`<span style="color:var(--t3);font-size:10px;">${d.note}</span>`:''}
+    </div>`).join('');
+}
 
-  document.getElementById('apt-supply-val').innerHTML = '<div class="kpi-loading"><span class="spin">⟳</span>수집 중...</div>';
-  document.getElementById('supplyChartEmpty').innerHTML = '<span class="spin">⟳</span> 주택건설실적 수집 중...';
+document.getElementById('supplyModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+// 기본 날짜 설정
+(function(){
+  const d=new Date(); d.setMonth(d.getMonth()-1);
+  document.getElementById('sup-in-date').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  renderSupplySection();
+  renderSupplyHistory();
+})();
 
-  const supplyVals = [];
-  let needApply = false;
+/* ── 초기 렌더 ── */
+['cn'].forEach(renderFreightSection);
 
-  for(const ym of months){
-    const res = await fetchSupplyMonth(ym);
-    if(res?.err){ needApply = true; supplyVals.push(0); }
-    else supplyVals.push(res?.val || 0);
+/* ══════════════════════════════════════════
+   네이버 소파 검색 트렌드 — localStorage 수동
+═══════════════════════════════════════════ */
+const NAVER_KEY = 'naver_sofa_trend';
+function getNaverData(){ try{ return JSON.parse(localStorage.getItem(NAVER_KEY)||'[]'); }catch{ return []; } }
+function setNaverData(d){ localStorage.setItem(NAVER_KEY, JSON.stringify(d)); }
+
+function saveNaverTrend(){
+  const dateRaw = document.getElementById('nv-in-date').value;
+  const val     = document.getElementById('nv-in-val').value;
+  const note    = document.getElementById('nv-in-note').value.trim();
+  if(!dateRaw||!val){ alert('날짜와 트렌드 지수를 입력하세요.'); return; }
+  const data = getNaverData();
+  const idx  = data.findIndex(d=>d.date===dateRaw);
+  const entry = {date:dateRaw, val:+val, note};
+  if(idx>=0) data[idx]=entry; else data.push(entry);
+  data.sort((a,b)=>a.date.localeCompare(b.date));
+  if(data.length>52) data.splice(0,data.length-52);
+  setNaverData(data);
+  renderNaverSection();
+  renderNaverHistory();
+}
+function clearNaverTrend(){ setNaverData([]); renderNaverSection(); renderNaverHistory(); }
+
+let naverChart=null;
+function renderNaverSection(){
+  const data = getNaverData();
+  // KPI
+  const last=data[data.length-1], prev=data[data.length-2];
+  const valEl=document.getElementById('naver-val'), chgEl=document.getElementById('naver-chg');
+  if(!last){
+    valEl.innerHTML='<div class="kpi-empty" style="font-size:11px;color:var(--t3);padding-top:4px;">데이터 없음</div>';
+    chgEl.innerHTML='—';
+  } else {
+    valEl.innerHTML=`<div><span class="kpi-num">${last.val}</span><span class="kpi-unit">/ 100</span></div>`;
+    if(prev){
+      const chg=last.val-prev.val, dir=chg>=0?'up':'dn', arr=chg>=0?'▲':'▼';
+      chgEl.innerHTML=`<div class="kpi-chg ${dir}" style="font-size:16px;">${arr} ${Math.abs(chg).toFixed(0)}</div>`;
+    }
+  }
+  // 차트
+  const el=document.getElementById('naverChart'), empty=document.getElementById('naverChartEmpty');
+  if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(naverChart)naverChart.destroy(); naverChart=null; return; }
+  empty.style.display='none'; el.style.display='block';
+  if(naverChart) naverChart.destroy();
+  const labels=data.map(d=>{const dt=new Date(d.date); return `${dt.getMonth()+1}/${dt.getDate()}`;});
+  naverChart=new Chart(el,{
+    type:'line',
+    data:{labels, datasets:[{
+      label:'소파 검색 트렌드', data:data.map(d=>d.val),
+      borderColor:'#58A6FF', backgroundColor:'rgba(56,139,253,0.08)',
+      fill:true, tension:0.3, pointRadius:3, pointHoverRadius:5, borderWidth:2
+    }]},
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:{duration:400},
+      layout:{padding:{top:16,bottom:2,left:2,right:2}},
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#1C2128',borderColor:'#30363D',borderWidth:1,
+          titleColor:'#8B949E',bodyColor:'#E6EDF3',padding:10,cornerRadius:6,
+          callbacks:{label:ctx=>`트렌드: ${ctx.parsed.y}`}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxTicksLimit:12}},
+        y:{min:0,max:100,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10}}}
+      }
+    }
+  });
+}
+
+function renderNaverHistory(){
+  const el=document.getElementById('nv-history');
+  const data=getNaverData().slice().reverse().slice(0,10);
+  if(!data.length){ el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:8px 0;">저장된 데이터 없음</div>'; return; }
+  el.innerHTML=`<div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:6px;">최근 입력</div>`+
+    data.map(d=>`<div style="display:flex;gap:10px;align-items:center;padding:4px 8px;background:var(--s2);border-radius:4px;margin-bottom:3px;font-size:11px;">
+      <span style="font-family:'JetBrains Mono',monospace;color:var(--t3);flex-shrink:0;">${d.date}</span>
+      <span style="color:var(--t2);flex:1;">지수: <strong>${d.val}</strong></span>
+      ${d.note?`<span style="color:var(--t3);font-size:10px;">${d.note}</span>`:''}
+    </div>`).join('');
+}
+
+document.getElementById('naverModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+(function(){
+  const d=new Date(); const diff=d.getDay();
+  d.setDate(d.getDate()-diff); // 가장 최근 일요일
+  document.getElementById('nv-in-date').value=d.toISOString().slice(0,10);
+  renderNaverSection(); renderNaverHistory();
+})();
+
+/* ══════════════════════════════════════════
+   폴리올 / TDI / MDI — 관세청 API + 수동 fallback
+═══════════════════════════════════════════ */
+const CHEM_KEY = 'chem_price_data';
+const CHEM_HS  = { poly:'3907200000', tdi:'2929101000', mdi:'2929102000' };
+const CHEM_NAMES = { poly:'폴리올', tdi:'TDI', mdi:'MDI' };
+const CHEM_COLORS = { poly:'#D2A8FF', tdi:'#F0883E', mdi:'#58A6FF' };
+let chemApiKey = localStorage.getItem('chem_api_key')||'';
+let chemCharts = { poly:null, tdi:null, mdi:null };
+
+function getChemData(){ try{ return JSON.parse(localStorage.getItem(CHEM_KEY)||'{}'); }catch{ return {}; } }
+function setChemData(d){ localStorage.setItem(CHEM_KEY, JSON.stringify(d)); }
+
+function saveChemKey(){
+  const v=document.getElementById('chemApiKey').value.trim();
+  if(!v){ alert('키를 입력하세요'); return; }
+  chemApiKey=v; localStorage.setItem('chem_api_key',v);
+  document.getElementById('chemApiStatus').textContent='저장됨';
+  loadChemData();
+}
+
+/* 관세청 무역통계 API 호출 (품목별 국가별 수출입실적) */
+async function fetchCustomsTrade(hsCd, ym){
+  // HTTPS 엔드포인트 시도
+  const key = chemApiKey.includes('%') ? chemApiKey : encodeURIComponent(chemApiKey);
+  const url = `https://apis.data.go.kr/1220000/nitemtrade/getNitemtradeList` +
+    `?serviceKey=${key}&strtYymm=${ym}&endYymm=${ym}&hsCd=${hsCd}&ctrCd=&type=json`;
+  const r = await fetch(url, {signal:AbortSignal.timeout(10000)});
+  const json = await r.json();
+  // 응답에서 수입금액, 수입중량 추출
+  const items = json?.response?.body?.items?.item || json?.items?.item || [];
+  const arr = Array.isArray(items) ? items : [items];
+  let impAmt=0, impWgt=0;
+  arr.forEach(it=>{
+    impAmt += parseFloat(it.impAmt||it.ImpAmt||0);
+    impWgt += parseFloat(it.impWgt||it.ImpWgt||0);
+  });
+  if(impWgt===0) return null;
+  return +(impAmt/impWgt).toFixed(4); // $/kg
+}
+
+function getLast12YM(){
+  const months=[], now=new Date();
+  for(let i=12;i>=1;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`);
+  }
+  return months;
+}
+
+async function loadChemData(){
+  if(!chemApiKey) return;
+  const months = getLast12YM();
+  document.getElementById('chemApiMsg').innerHTML='<span style="color:var(--amber);">⟳ 관세청 API 수집 중 (약 30초)...</span>';
+
+  const result = {}; // { poly: [{ym,val},...], tdi:[], mdi:[] }
+  for(const chem of ['poly','tdi','mdi']){
+    result[chem]=[];
+    for(const ym of months){
+      try{
+        const v = await fetchCustomsTrade(CHEM_HS[chem], ym);
+        if(v!==null) result[chem].push({ym,val:v});
+      } catch(e){ /* skip */ }
+    }
   }
 
-  if(needApply){
-    document.getElementById('apt-supply-val').innerHTML =
-      '<div class="kpi-err" style="font-size:10px;line-height:1.5;">주택건설실적 API<br>별도 활용신청 필요</div>';
-    document.getElementById('supplyChartEmpty').textContent = '';
-    setAptMsg('⚠ 입주물량: data.go.kr에서 "주택건설실적 조회" 별도 신청 필요 (무료, 자동승인) → data.go.kr/data/15045033', 'orange');
-    // supply 안내 배너 표시
-    document.getElementById('supplyApplyNote').style.display='block';
+  // 결과 확인
+  const hasData = Object.values(result).some(arr=>arr.length>0);
+  if(!hasData){
+    document.getElementById('chemApiMsg').innerHTML=
+      '<span style="color:var(--red);">❌ API 수집 실패 — ✎ 수동 입력 버튼으로 직접 입력하세요 (관세청 활용신청 or 키 확인)</span>';
     return;
   }
 
-  if(supplyVals.some(v=>v>0)){
-    updateAptKpi('apt-supply-val','apt-supply-chg', supplyVals, '가구');
-    buildAptChart('supplyChart','supplyChartEmpty', labels, supplyVals, '#F0883E', supplyChart, c=>{supplyChart=c;});
-    setAptMsg('✓ 거래량 + 입주물량 수집 완료', 'green');
-  } else {
-    document.getElementById('apt-supply-val').innerHTML = '<div class="kpi-err" style="font-size:10px;">데이터 없음 (API 신청 필요)</div>';
-    document.getElementById('supplyChartEmpty').textContent = '주택건설실적 API 활용신청 필요';
-    document.getElementById('supplyApplyNote').style.display='block';
+  // localStorage에 저장 (API 수집분 병합)
+  const stored = getChemData();
+  for(const chem of ['poly','tdi','mdi']){
+    if(!stored[chem]) stored[chem]=[];
+    result[chem].forEach(entry=>{
+      const idx=stored[chem].findIndex(e=>e.ym===entry.ym);
+      if(idx>=0) stored[chem][idx]=entry; else stored[chem].push(entry);
+    });
+    stored[chem].sort((a,b)=>a.ym.localeCompare(b.ym));
   }
+  setChemData(stored);
+  document.getElementById('chemApiMsg').innerHTML='<span style="color:var(--green);">✓ 관세청 수집 완료</span>';
+  renderChemSection();
 }
 
-// 저장된 키 있으면 자동 로드
-if(aptApiKey){ loadAptData(); loadSupplyData(); }
+/* 수동 입력 */
+function saveChemManual(){
+  const dateRaw=document.getElementById('ch-in-date').value;
+  const poly=document.getElementById('ch-in-poly').value;
+  const tdi=document.getElementById('ch-in-tdi').value;
+  const mdi=document.getElementById('ch-in-mdi').value;
+  const note=document.getElementById('ch-in-note').value.trim();
+  if(!dateRaw){ alert('연월을 입력하세요'); return; }
+  const ym=dateRaw.replace('-','');
+  const stored=getChemData();
+  ['poly','tdi','mdi'].forEach(chem=>{
+    const v = chem==='poly'?poly : chem==='tdi'?tdi : mdi;
+    if(!v) return;
+    if(!stored[chem]) stored[chem]=[];
+    const idx=stored[chem].findIndex(e=>e.ym===ym);
+    const entry={ym,val:+v,note};
+    if(idx>=0) stored[chem][idx]=entry; else stored[chem].push(entry);
+    stored[chem].sort((a,b)=>a.ym.localeCompare(b.ym));
+    if(stored[chem].length>24) stored[chem].splice(0,stored[chem].length-24);
+  });
+  setChemData(stored);
+  renderChemSection();
+  renderChemHistory();
+}
+function clearChem(){ setChemData({}); renderChemSection(); renderChemHistory(); }
 
-/* ── 초기 렌더 ── */
-['cn','it','vn'].forEach(renderFreightSection);
+function renderChemSection(){
+  const stored=getChemData();
+  ['poly','tdi','mdi'].forEach(chem=>{
+    const data=(stored[chem]||[]);
+    const last=data[data.length-1], prev=data[data.length-2];
+    const valEl=document.getElementById(`chem-${chem}-val`);
+    const chgEl=document.getElementById(`chem-${chem}-chg`);
+    if(!last){
+      valEl.innerHTML='<div class="kpi-empty" style="font-size:10px;color:var(--t3);">데이터 없음</div>';
+      chgEl.innerHTML='—'; return;
+    }
+    valEl.innerHTML=`<div><span class="kpi-num">${last.val.toFixed(2)}</span><span class="kpi-unit">$/kg</span></div>`;
+    if(prev){
+      const chg=last.val-prev.val,pct=chg/prev.val*100;
+      const dir=chg>=0?'up':'dn',arr=chg>=0?'▲':'▼';
+      chgEl.innerHTML=`<div class="kpi-chg ${dir}" style="font-size:13px;">${arr} ${Math.abs(chg).toFixed(2)} (${Math.abs(pct).toFixed(1)}%)</div>`;
+    }
+    // 차트
+    const el=document.getElementById(`${chem}Chart`), empty=document.getElementById(`${chem}ChartEmpty`);
+    if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(chemCharts[chem])chemCharts[chem].destroy(); chemCharts[chem]=null; return; }
+    empty.style.display='none'; el.style.display='block';
+    if(chemCharts[chem]) chemCharts[chem].destroy();
+    const color=CHEM_COLORS[chem];
+    const rgba=color.startsWith('#')?hexToRgba(color,0.12):color;
+    chemCharts[chem]=new Chart(el,{
+      type:'line',
+      data:{
+        labels:data.map(d=>`${d.ym.slice(0,4)}.${d.ym.slice(4)}`),
+        datasets:[{
+          label:`${CHEM_NAMES[chem]} $/kg`, data:data.map(d=>d.val),
+          borderColor:color, backgroundColor:rgba,
+          fill:true, tension:0.3, pointRadius:3, borderWidth:2
+        }]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false, animation:{duration:400},
+        layout:{padding:{top:16,bottom:2,left:2,right:2}},
+        plugins:{
+          legend:{display:false},
+          tooltip:{backgroundColor:'#1C2128',borderColor:'#30363D',borderWidth:1,
+            titleColor:'#8B949E',bodyColor:'#E6EDF3',padding:10,cornerRadius:6,
+            callbacks:{label:ctx=>`${ctx.parsed.y.toFixed(2)} $/kg`}}
+        },
+        scales:{
+          x:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxTicksLimit:8}},
+          y:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v.toFixed(2)}}
+        }
+      }
+    });
+  });
+}
 
-loadAll();
+function renderChemHistory(){
+  const el=document.getElementById('ch-history');
+  const stored=getChemData();
+  const merged={};
+  ['poly','tdi','mdi'].forEach(chem=>{
+    (stored[chem]||[]).forEach(e=>{
+      if(!merged[e.ym]) merged[e.ym]={};
+      merged[e.ym][chem]=e.val;
+    });
+  });
+  const rows=Object.entries(merged).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,8);
+  if(!rows.length){ el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:8px 0;">저장된 데이터 없음</div>'; return; }
+  el.innerHTML=`<div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:6px;">최근 데이터</div>`+
+    rows.map(([ym,v])=>`<div style="display:flex;gap:10px;align-items:center;padding:4px 8px;background:var(--s2);border-radius:4px;margin-bottom:3px;font-size:11px;">
+      <span style="font-family:'JetBrains Mono',monospace;color:var(--t3);flex-shrink:0;">${ym.slice(0,4)}.${ym.slice(4)}</span>
+      ${v.poly?`<span>폴리올: <strong>${v.poly.toFixed(2)}</strong></span>`:''}
+      ${v.tdi?`<span>TDI: <strong>${v.tdi.toFixed(2)}</strong></span>`:''}
+      ${v.mdi?`<span>MDI: <strong>${v.mdi.toFixed(2)}</strong></span>`:''}
+    </div>`).join('');
+}
+
+function hexToRgba(hex,a){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+document.getElementById('chemModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+(function(){
+  const d=new Date(); d.setMonth(d.getMonth()-1);
+  document.getElementById('ch-in-date').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  if(chemApiKey){
+    document.getElementById('chemApiStatus').textContent='저장됨';
+    loadChemData();
+  }
+  renderChemSection();
+  renderChemHistory();
+})();
 </script>
 </body>
 </html>
