@@ -128,6 +128,22 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
 .sr-chg{font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:3px;}
 .scfi-note{font-size:11px;color:var(--t3);margin-top:14px;padding:10px 14px;background:var(--s2);border-radius:6px;border-left:2px solid var(--amber);line-height:1.6;}
 
+/* ── FREIGHT ROUTES ── */
+.freight-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+.fcrd{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:20px 22px;}
+.fcrd-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.fcrd-route{display:flex;align-items:flex-start;gap:10px;}
+.fcrd-flag{font-size:22px;line-height:1;margin-top:2px;}
+.fcrd-title{font-size:14px;font-weight:600;color:var(--t1);letter-spacing:-.01em;}
+.fcrd-src{font-size:10px;color:var(--t3);margin-top:2px;}
+.fcrd-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.fkpi{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:11px 13px;}
+.fkpi-lbl{font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.fkpi-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;color:var(--t1);line-height:1;}
+.fkpi-chg{font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:5px;}
+.fkpi-date{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--t2);margin-top:6px;}
+.fcrd-note{font-size:10px;color:var(--t3);margin-top:12px;padding:8px 12px;background:var(--s2);border-radius:5px;border-left:2px solid var(--b2);line-height:1.6;}
+
 /* ── PHASE 2 ── */
 .p2{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:20px 24px;}
 .p2-title{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;}
@@ -152,7 +168,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
 .fdot{width:4px;height:4px;border-radius:50%;}
 
 /* ── RESPONSIVE ── */
-@media(max-width:1100px){.chart-grid{grid-template-columns:1fr;}.kpi-strip{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:1100px){.chart-grid,.freight-grid{grid-template-columns:1fr;}.kpi-strip{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:700px){.chart-grid,.kpi-strip{grid-template-columns:1fr 1fr;}.main{padding:16px 16px 72px;}.hdr{padding:0 16px;}.hdr-sep,.hdr-sub{display:none;}}
 @media(max-width:460px){.kpi-strip{grid-template-columns:1fr;}}
 </style>
@@ -256,49 +272,212 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
   </div>
 </div>
 
-<!-- ── SCFI ── -->
+<!-- ── 항로별 운임 ── -->
 <div class="sec-hdr">
-  <span class="sec-title">상하이 컨테이너 운임지수 (SCFI)</span>
-  <span class="sec-src">수동 업데이트 — 매주 금요일 KMI 보고서 참조</span>
+  <span class="sec-title">인천항 입항 항로별 컨테이너 운임</span>
+  <span class="sec-src">수동 입력 — 주 1회 업데이트 권장 · 1년 시계열 저장</span>
 </div>
-<div class="scfi-wrap">
-  <div class="scfi-row">
-    <div class="scfi-stat">
-      <div class="scfi-stat-lbl">SCFI 종합</div>
-      <div class="scfi-stat-val" id="scfi-overall">—</div>
+
+<div class="freight-grid">
+
+  <!-- 중국 → 인천 -->
+  <div class="fcrd">
+    <div class="fcrd-head">
+      <div class="fcrd-route">
+        <span class="fcrd-flag">🇨🇳</span>
+        <div>
+          <div class="fcrd-title">중국 → 인천</div>
+          <div class="fcrd-src">SCFI 한국 노선 · CCFI 종합 | 출처: <a href="https://www.kmi.re.kr" target="_blank">kmi.re.kr</a></div>
+        </div>
+      </div>
+      <button class="btn" onclick="openFreightModal('cn')">✎ 입력</button>
     </div>
-    <div class="scfi-stat">
-      <div class="scfi-stat-lbl">전주 대비</div>
-      <div class="scfi-stat-val" style="font-size:22px;" id="scfi-chg">—</div>
+    <div class="fcrd-kpis">
+      <div class="fkpi">
+        <div class="fkpi-lbl">SCFI 한국 노선</div>
+        <div class="fkpi-val" id="cn-scfi-val">—</div>
+        <div class="fkpi-chg" id="cn-scfi-chg">—</div>
+      </div>
+      <div class="fkpi">
+        <div class="fkpi-lbl">CCFI 종합</div>
+        <div class="fkpi-val" id="cn-ccfi-val">—</div>
+        <div class="fkpi-chg" id="cn-ccfi-chg">—</div>
+      </div>
+      <div class="fkpi">
+        <div class="fkpi-lbl">기준일</div>
+        <div class="fkpi-date" id="cn-date">—</div>
+      </div>
     </div>
-    <div class="scfi-stat">
-      <div class="scfi-stat-lbl">기준일</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);margin-top:4px;" id="scfi-date">—</div>
+    <div class="cwrap" style="height:150px;margin-top:14px;">
+      <div class="cempty" id="cnChartEmpty">데이터 없음 — ✎ 입력 버튼으로 추가하세요</div>
+      <canvas id="cnChart" style="display:none"></canvas>
     </div>
-    <div style="margin-left:auto;align-self:center;">
-      <button class="btn" onclick="document.getElementById('scfiModal').classList.add('show')">✎ 데이터 입력</button>
-    </div>
+    <div class="fcrd-note">SCFI(스팟) + CCFI(장기계약 혼합) 병행 입력 권장. 매주 금요일 KMI 보고서 참조.</div>
   </div>
-  <div class="scfi-routes">
-    <div class="sr"><div class="sr-name">상하이 → 유럽</div><div class="sr-val" id="sr-eur">—</div><div class="sr-chg" id="sc-eur">—</div></div>
-    <div class="sr"><div class="sr-name">상하이 → 미주(서)</div><div class="sr-val" id="sr-usw">—</div><div class="sr-chg" id="sc-usw">—</div></div>
-    <div class="sr"><div class="sr-name">상하이 → 미주(동)</div><div class="sr-val" id="sr-use">—</div><div class="sr-chg" id="sc-use">—</div></div>
-    <div class="sr"><div class="sr-name">상하이 → 한국</div><div class="sr-val" id="sr-kor">—</div><div class="sr-chg" id="sc-kor">—</div></div>
-    <div class="sr"><div class="sr-name">상하이 → 일본</div><div class="sr-val" id="sr-jpn">—</div><div class="sr-chg" id="sc-jpn">—</div></div>
+
+  <!-- 이탈리아 → 인천 -->
+  <div class="fcrd">
+    <div class="fcrd-head">
+      <div class="fcrd-route">
+        <span class="fcrd-flag">🇮🇹</span>
+        <div>
+          <div class="fcrd-title">이탈리아 → 인천</div>
+          <div class="fcrd-src">FBX13 지중해 지수 또는 포워더 견적가 | 출처: <a href="https://www.freightos.com/freight-resources/freightos-baltic-exchange-fbx/" target="_blank">freightos.com</a></div>
+        </div>
+      </div>
+      <button class="btn" onclick="openFreightModal('it')">✎ 입력</button>
+    </div>
+    <div class="fcrd-kpis">
+      <div class="fkpi">
+        <div class="fkpi-lbl">FBX13 (지중해)</div>
+        <div class="fkpi-val" id="it-fbx-val">—</div>
+        <div class="fkpi-chg" id="it-fbx-chg">—</div>
+      </div>
+      <div class="fkpi">
+        <div class="fkpi-lbl">실제 견적가 ($/CBM)</div>
+        <div class="fkpi-val" id="it-rate-val">—</div>
+        <div class="fkpi-chg" id="it-rate-chg">—</div>
+      </div>
+      <div class="fkpi">
+        <div class="fkpi-lbl">기준일</div>
+        <div class="fkpi-date" id="it-date">—</div>
+      </div>
+    </div>
+    <div class="cwrap" style="height:150px;margin-top:14px;">
+      <div class="cempty" id="itChartEmpty">데이터 없음 — ✎ 입력 버튼으로 추가하세요</div>
+      <canvas id="itChart" style="display:none"></canvas>
+    </div>
+    <div class="fcrd-note">전용 지수 없음. FBX13(지중해 발 아시아 방향 지수)으로 방향성 파악 + 포워더(판토스·글로비스) 실견적 병행 입력 권장.</div>
   </div>
-  <div class="scfi-note">
-    상하이항운거래소(SSE) 매주 금요일 발표 — <a href="https://www.kmi.re.kr" target="_blank">kmi.re.kr</a> 주간 보고서에서 확인
+
+  <!-- 베트남 → 인천 -->
+  <div class="fcrd" style="grid-column:1/-1;">
+    <div class="fcrd-head">
+      <div class="fcrd-route">
+        <span class="fcrd-flag">🇻🇳</span>
+        <div>
+          <div class="fcrd-title">베트남 → 인천</div>
+          <div class="fcrd-src">포워더 실제 견적가 (근해 노선, 공개 지수 없음)</div>
+        </div>
+      </div>
+      <button class="btn" onclick="openFreightModal('vn')">✎ 입력</button>
+    </div>
+    <div class="fcrd-kpis" style="grid-template-columns:repeat(4,1fr);">
+      <div class="fkpi">
+        <div class="fkpi-lbl">호치민 → 인천 ($/CBM)</div>
+        <div class="fkpi-val" id="vn-hcm-val">—</div>
+        <div class="fkpi-chg" id="vn-hcm-chg">—</div>
+      </div>
+      <div class="fkpi">
+        <div class="fkpi-lbl">하이퐁 → 인천 ($/CBM)</div>
+        <div class="fkpi-val" id="vn-hp-val">—</div>
+        <div class="fkpi-chg" id="vn-hp-chg">—</div>
+      </div>
+      <div class="fkpi">
+        <div class="fkpi-lbl">리드타임 (일)</div>
+        <div class="fkpi-val" id="vn-lt-val">—</div>
+        <div class="fkpi-chg" id="vn-lt-chg">—</div>
+      </div>
+      <div class="fkpi">
+        <div class="fkpi-lbl">기준일</div>
+        <div class="fkpi-date" id="vn-date">—</div>
+      </div>
+    </div>
+    <div class="cwrap" style="height:150px;margin-top:14px;">
+      <div class="cempty" id="vnChartEmpty">데이터 없음 — ✎ 입력 버튼으로 추가하세요</div>
+      <canvas id="vnChart" style="display:none"></canvas>
+    </div>
+    <div class="fcrd-note">근해(intra-Asia) 노선으로 대형 운임 지수에 미포함. 월 1회 포워더 견적 수집 권장. 호치민(VVHCM)·하이퐁(VNHPH) 기준.</div>
+  </div>
+
+</div>
+
+<!-- ── 아파트 거래량 · 신규 입주물량 ── -->
+<div class="sec-hdr">
+  <span class="sec-title">🏠 아파트 거래량 · 신규 입주물량</span>
+  <span class="sec-src">출처: 국토부 실거래가 API (서울시) + 공공데이터포털 — API 키 필요</span>
+</div>
+
+<!-- API 키 설정 패널 -->
+<div id="aptApiPanel" style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--t2);">공공데이터포털 API 키 설정</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:2px;">무료 발급 → <a href="https://www.data.go.kr" target="_blank">data.go.kr</a> 회원가입 후 "아파트매매 실거래 상세 자료" 활용신청 (자동승인)</div>
+    </div>
+    <span id="aptApiStatus" style="font-size:10px;color:var(--t3);">미설정</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:flex-end;">
+    <div style="flex:1;">
+      <div style="font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Decoding 키 (일반 인증키)</div>
+      <input type="password" id="aptApiKey" placeholder="공공데이터포털 일반 인증키(Decoding) 붙여넣기"
+        style="width:100%;padding:8px 12px;background:var(--bg);border:1px solid var(--b1);border-radius:6px;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:11px;transition:border .12s;"
+        onfocus="this.style.borderColor='var(--amber)'" onblur="this.style.borderColor='var(--b1)'">
+    </div>
+    <button class="btn-solid" onclick="saveAptKey()" style="height:34px;padding:0 18px;font-size:12px;white-space:nowrap;">저장 후 불러오기</button>
+  </div>
+  <div id="aptApiMsg" style="font-size:11px;color:var(--t3);margin-top:8px;"></div>
+</div>
+
+<!-- KPI 카드 -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:16px;">
+  <div class="kpi" style="--kpi-color:#58A6FF;">
+    <div class="kpi-label">서울 아파트 거래량 (건)</div>
+    <div id="apt-trade-val"><div class="kpi-loading"><div class="spin">⟳</div>API 키 필요</div></div>
+  </div>
+  <div class="kpi" style="--kpi-color:#3FB950;">
+    <div class="kpi-label">전월 대비</div>
+    <div id="apt-trade-chg" style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:500;color:var(--t2);padding-top:4px;">—</div>
+  </div>
+  <div class="kpi" style="--kpi-color:#F0883E;">
+    <div class="kpi-label">신규 입주물량 (가구)</div>
+    <div id="apt-supply-val"><div class="kpi-loading"><div class="spin">⟳</div>API 키 필요</div></div>
+  </div>
+  <div class="kpi" style="--kpi-color:#D2A8FF;">
+    <div class="kpi-label">전월 대비</div>
+    <div id="apt-supply-chg" style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:500;color:var(--t2);padding-top:4px;">—</div>
   </div>
 </div>
 
-<!-- ── PHASE 2 ── -->
+<!-- 차트 -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;">
+  <div class="ccrd">
+    <div class="ccrd-head">
+      <span class="ccrd-title" style="color:#58A6FF;">서울 아파트 매매 거래량</span>
+      <span class="ccrd-range">12개월</span>
+    </div>
+    <div class="ccrd-sub">국토부 실거래가 기준 · 서울시 전체 월별 합계</div>
+    <div class="cwrap" style="height:180px;">
+      <div class="cempty" id="tradeChartEmpty">API 키 설정 후 자동 수집</div>
+      <canvas id="tradeChart" style="display:none"></canvas>
+    </div>
+  </div>
+  <div class="ccrd">
+    <div class="ccrd-head">
+      <span class="ccrd-title" style="color:#F0883E;">신규 아파트 입주물량</span>
+      <span class="ccrd-range">12개월</span>
+    </div>
+    <div class="ccrd-sub">전국 아파트 준공 기준 · 국토부 주택건설 실적</div>
+    <div class="cwrap" style="height:180px;">
+      <div class="cempty" id="supplyChartEmpty">API 키 설정 후 자동 수집</div>
+      <canvas id="supplyChart" style="display:none"></canvas>
+    </div>
+  </div>
+</div>
+
+<div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:14px 18px;margin-bottom:28px;font-size:11px;color:var(--t3);line-height:1.8;">
+  <strong style="color:var(--t2);">소파 수요 선행 지표로 활용하는 법 —</strong>
+  입주물량 증가 후 <strong style="color:var(--t1);">3~6개월 시차</strong>로 소파 수요 피크가 옵니다.
+  거래량 증가 → 이사 수요 → 새 가구 구매 사이클.
+  거래량은 서울 기준이지만 전국 트렌드와 방향성이 일치합니다.
+</div>
+
+<!-- ── PHASE 2 (남은 항목) ── -->
 <div class="p2">
-  <div class="p2-title">Phase 2 — 추가 예정 지표</div>
+  <div class="p2-title">Phase 3 — 추가 예정 지표</div>
   <div class="p2-grid">
     <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">폴리올 · TDI · MDI</span><span class="p2-tag">수동입력+관세청</span></div>
-    <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">가죽 원자재 시세</span><span class="p2-tag">KITA 연동</span></div>
-    <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">아파트 거래량</span><span class="p2-tag">국토부 API</span></div>
-    <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">신규 입주물량</span><span class="p2-tag">한국부동산원</span></div>
+    <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">가죽 원자재 (IMF PHIDEUSDM)</span><span class="p2-tag">FRED API</span></div>
     <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">네이버 소파 검색 트렌드</span><span class="p2-tag">데이터랩 API</span></div>
     <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">가구 소매판매지수</span><span class="p2-tag">통계청 KOSIS</span></div>
   </div>
@@ -306,37 +485,75 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
 
 </main>
 
-<!-- SCFI MODAL -->
-<div class="modal-bg" id="scfiModal">
-  <div class="modal">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-      <span style="font-size:14px;font-weight:600;">SCFI 데이터 입력</span>
-      <button onclick="document.getElementById('scfiModal').classList.remove('show')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
+<!-- 중국 입력 모달 -->
+<div class="modal-bg" id="modal-cn">
+  <div class="modal" style="width:520px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <span style="font-size:14px;font-weight:600;">🇨🇳 중국→인천 운임 입력</span>
+      <button onclick="closeModal('cn')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
     </div>
     <div class="modal-grid">
-      <div class="field"><label>기준일</label><input type="text" id="m-date" placeholder="2025-03-21"></div>
-      <div class="field"><label>SCFI 종합</label><input type="number" id="m-overall"></div>
-      <div class="field"><label>전주 대비</label><input type="number" id="m-oc"></div>
-      <div class="field"><label>→ 유럽</label><input type="number" id="m-eur"></div>
-      <div class="field"><label>전주 대비 EUR</label><input type="number" id="m-eur-c"></div>
-      <div class="field"><label>→ 미주(서)</label><input type="number" id="m-usw"></div>
-      <div class="field"><label>전주 대비 USWC</label><input type="number" id="m-usw-c"></div>
-      <div class="field"><label>→ 미주(동)</label><input type="number" id="m-use"></div>
-      <div class="field"><label>전주 대비 USEC</label><input type="number" id="m-use-c"></div>
-      <div class="field"><label>→ 한국</label><input type="number" id="m-kor"></div>
-      <div class="field"><label>전주 대비 KOR</label><input type="number" id="m-kor-c"></div>
-      <div class="field"><label>→ 일본</label><input type="number" id="m-jpn"></div>
-      <div class="field"><label>전주 대비 JPN</label><input type="number" id="m-jpn-c"></div>
+      <div class="field" style="grid-column:1/-1"><label>기준일</label><input type="date" id="cn-in-date"></div>
+      <div class="field"><label>SCFI 한국 노선</label><input type="number" id="cn-in-scfi" placeholder="예: 185"></div>
+      <div class="field"><label>CCFI 종합</label><input type="number" id="cn-in-ccfi" placeholder="예: 1050"></div>
+      <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="cn-in-note" placeholder="예: 춘절 이후 급등, 선박 부족"></div>
     </div>
-    <button class="btn-solid" onclick="saveScfi()" style="width:100%;">저장</button>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-solid" onclick="saveFreight('cn')" style="flex:1;">저장</button>
+      <button class="btn" onclick="if(confirm('전체 데이터를 초기화합니까?'))clearFreight('cn')" style="color:var(--red);border-color:var(--red);">초기화</button>
+    </div>
+    <div id="cn-history" style="margin-top:14px;max-height:160px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- 이탈리아 입력 모달 -->
+<div class="modal-bg" id="modal-it">
+  <div class="modal" style="width:520px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <span style="font-size:14px;font-weight:600;">🇮🇹 이탈리아→인천 운임 입력</span>
+      <button onclick="closeModal('it')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div class="modal-grid">
+      <div class="field" style="grid-column:1/-1"><label>기준일</label><input type="date" id="it-in-date"></div>
+      <div class="field"><label>FBX13 지중해 지수</label><input type="number" id="it-in-fbx" placeholder="예: 2800"></div>
+      <div class="field"><label>실제 견적가 ($/CBM)</label><input type="number" id="it-in-rate" placeholder="예: 68"></div>
+      <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="it-in-note" placeholder="예: 판토스 견적, 제노바발 40ft 기준"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-solid" onclick="saveFreight('it')" style="flex:1;">저장</button>
+      <button class="btn" onclick="if(confirm('전체 데이터를 초기화합니까?'))clearFreight('it')" style="color:var(--red);border-color:var(--red);">초기화</button>
+    </div>
+    <div id="it-history" style="margin-top:14px;max-height:160px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- 베트남 입력 모달 -->
+<div class="modal-bg" id="modal-vn">
+  <div class="modal" style="width:520px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <span style="font-size:14px;font-weight:600;">🇻🇳 베트남→인천 운임 입력</span>
+      <button onclick="closeModal('vn')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div class="modal-grid">
+      <div class="field" style="grid-column:1/-1"><label>기준일</label><input type="date" id="vn-in-date"></div>
+      <div class="field"><label>호치민→인천 ($/CBM)</label><input type="number" id="vn-in-hcm" placeholder="예: 45"></div>
+      <div class="field"><label>하이퐁→인천 ($/CBM)</label><input type="number" id="vn-in-hp" placeholder="예: 42"></div>
+      <div class="field"><label>리드타임 (일)</label><input type="number" id="vn-in-lt" placeholder="예: 7"></div>
+      <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="vn-in-note" placeholder="예: 글로비스 견적, 20ft 기준"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-solid" onclick="saveFreight('vn')" style="flex:1;">저장</button>
+      <button class="btn" onclick="if(confirm('전체 데이터를 초기화합니까?'))clearFreight('vn')" style="color:var(--red);border-color:var(--red);">초기화</button>
+    </div>
+    <div id="vn-history" style="margin-top:14px;max-height:160px;overflow-y:auto;"></div>
   </div>
 </div>
 
 <footer class="ftr">
   <div class="ftr-item"><div class="fdot" style="background:var(--amber)"></div>유가: EIA (GitHub CSV)</div>
   <div class="ftr-item"><div class="fdot" style="background:var(--blue)"></div>환율: Frankfurter (ECB)</div>
-  <div class="ftr-item"><div class="fdot" style="background:#484F58"></div>SCFI: 수동 입력</div>
-  <div class="ftr-item"><div class="fdot" style="background:#30363D"></div>원자재·부동산·트렌드: Phase 2</div>
+  <div class="ftr-item"><div class="fdot" style="background:#58A6FF"></div>아파트 거래량: 국토부 실거래가 API (공공데이터포털 키 필요)</div>
+  <div class="ftr-item"><div class="fdot" style="background:#484F58"></div>운임: 수동 입력 · localStorage</div>
 </footer>
 
 <script>
@@ -536,32 +753,382 @@ async function loadAll(){
   btn.disabled=false; btn.textContent='↻ 새로고침';
 }
 
-/* ── SCFI ── */
-function gi(id){return document.getElementById(id).value.trim();}
-function fmtChg(v){
-  if(!v) return '<span style="color:var(--t3)">—</span>';
-  const n=parseFloat(v),cls=n>=0?'up':'dn',arr=n>=0?'▲':'▼';
-  return `<span class="${cls}">${arr} ${Math.abs(n).toLocaleString()}</span>`;
+/* ══════════════════════════════════
+   FREIGHT — localStorage 기반 운임 관리
+   각 항로 최대 52개 레코드 (1년치 주간)
+═══════════════════════════════════ */
+const LS = {
+  get: k => { try{ return JSON.parse(localStorage.getItem('freight_'+k)||'[]'); }catch{return [];} },
+  set: (k,v) => localStorage.setItem('freight_'+k, JSON.stringify(v)),
+};
+
+let cnChart=null, itChart=null, vnChart=null;
+
+/* ── 모달 열기/닫기 ── */
+function openFreightModal(route){
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById(`${route}-in-date`).value = today;
+  renderHistory(route);
+  document.getElementById(`modal-${route}`).classList.add('show');
 }
-function saveScfi(){
-  const ov=gi('m-overall'); if(!ov){alert('SCFI 종합 값을 입력하세요.');return;}
-  document.getElementById('scfi-overall').textContent=parseFloat(ov).toLocaleString();
-  document.getElementById('scfi-chg').innerHTML=fmtChg(gi('m-oc'));
-  document.getElementById('scfi-date').textContent=gi('m-date')||'—';
-  [['eur','m-eur','m-eur-c'],['usw','m-usw','m-usw-c'],['use','m-use','m-use-c'],
-   ['kor','m-kor','m-kor-c'],['jpn','m-jpn','m-jpn-c']].forEach(([id,n,c])=>{
-    const v=gi(n);
-    document.getElementById(`sr-${id}`).textContent=v?parseFloat(v).toLocaleString():'—';
-    document.getElementById(`sc-${id}`).innerHTML=fmtChg(gi(c));
+function closeModal(route){
+  document.getElementById(`modal-${route}`).classList.remove('show');
+}
+[...document.querySelectorAll('.modal-bg')].forEach(el=>{
+  el.addEventListener('click', e=>{ if(e.target===el) el.classList.remove('show'); });
+});
+
+/* ── 데이터 저장 ── */
+function saveFreight(route){
+  const date = document.getElementById(`${route}-in-date`).value;
+  if(!date){ alert('날짜를 입력하세요.'); return; }
+
+  const data = LS.get(route);
+
+  let entry = {date};
+  if(route==='cn'){
+    const scfi = document.getElementById('cn-in-scfi').value;
+    const ccfi = document.getElementById('cn-in-ccfi').value;
+    const note = document.getElementById('cn-in-note').value;
+    if(!scfi&&!ccfi){ alert('SCFI 또는 CCFI 값을 입력하세요.'); return; }
+    entry = {date, scfi:scfi?+scfi:null, ccfi:ccfi?+ccfi:null, note};
+  } else if(route==='it'){
+    const fbx  = document.getElementById('it-in-fbx').value;
+    const rate = document.getElementById('it-in-rate').value;
+    const note = document.getElementById('it-in-note').value;
+    if(!fbx&&!rate){ alert('FBX13 또는 견적가를 입력하세요.'); return; }
+    entry = {date, fbx:fbx?+fbx:null, rate:rate?+rate:null, note};
+  } else if(route==='vn'){
+    const hcm  = document.getElementById('vn-in-hcm').value;
+    const hp   = document.getElementById('vn-in-hp').value;
+    const lt   = document.getElementById('vn-in-lt').value;
+    const note = document.getElementById('vn-in-note').value;
+    if(!hcm&&!hp){ alert('운임을 입력하세요.'); return; }
+    entry = {date, hcm:hcm?+hcm:null, hp:hp?+hp:null, lt:lt?+lt:null, note};
+  }
+
+  // 같은 날짜면 덮어쓰기, 없으면 추가
+  const idx = data.findIndex(d=>d.date===date);
+  if(idx>=0) data[idx]=entry; else data.push(entry);
+  data.sort((a,b)=>a.date.localeCompare(b.date));
+  // 최대 52개 유지
+  if(data.length>52) data.splice(0, data.length-52);
+  LS.set(route, data);
+
+  renderFreightSection(route);
+  renderHistory(route);
+}
+
+function clearFreight(route){
+  LS.set(route, []);
+  renderFreightSection(route);
+  renderHistory(route);
+}
+
+/* ── KPI 렌더 ── */
+function setFkpi(valId, chgId, val, prev, fmt){
+  const vEl=document.getElementById(valId), cEl=document.getElementById(chgId);
+  if(val===null||val===undefined){ vEl.textContent='—'; cEl.textContent='—'; return; }
+  vEl.textContent = fmt ? fmt(val) : val.toLocaleString();
+  if(prev!==null&&prev!==undefined){
+    const d=val-prev, p=d/prev*100;
+    const cls=d>=0?'up':'dn', arr=d>=0?'▲':'▼';
+    cEl.innerHTML=`<span class="${cls}">${arr} ${Math.abs(d).toFixed(0)} (${Math.abs(p).toFixed(1)}%)</span>`;
+  } else { cEl.textContent='—'; }
+}
+
+/* ── 차트 렌더 ── */
+const FREIGHT_TOOLTIP={backgroundColor:'#1C2128',borderColor:'#30363D',borderWidth:1,titleColor:'#8B949E',bodyColor:'#E6EDF3',padding:10,cornerRadius:6};
+
+function buildFreightChart(canvasId, emptyId, series, ref, setter){
+  const el=document.getElementById(canvasId), empty=document.getElementById(emptyId);
+  if(!series[0].values.some(v=>v!==null)){ empty.style.display='flex'; el.style.display='none'; if(ref)ref.destroy(); setter(null); return; }
+  empty.style.display='none'; el.style.display='block';
+  if(ref) ref.destroy();
+  const c = new Chart(el,{
+    type:'line',
+    data:{
+      labels: series[0].dates.map(d=>d.slice(5)),
+      datasets: series.map(s=>({
+        label:s.label, data:s.values,
+        borderColor:s.color, backgroundColor:s.fill||'transparent',
+        borderWidth:1.5, pointRadius:2, pointHoverRadius:5,
+        tension:.35, fill:!!s.fill, spanGaps:true,
+      }))
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:{duration:400},
+      interaction:{mode:'index',intersect:false},
+      layout:{padding:{top:24,bottom:4,left:2,right:2}},
+      plugins:{
+        legend: series.length>1?{display:true,labels:{color:'#8B949E',boxWidth:10,boxHeight:2,font:{size:10}}}:{display:false},
+        tooltip:{...FREIGHT_TOOLTIP}
+      },
+      scales:{
+        x:{grid:{color:'rgba(48,54,61,.6)'},ticks:{color:'#484F58',font:{size:10},maxTicksLimit:12}},
+        y:{grid:{color:'rgba(48,54,61,.6)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v!=null?v.toLocaleString():''}}
+      }
+    }
   });
-  document.getElementById('scfiModal').classList.remove('show');
+  setter(c);
 }
-document.getElementById('scfiModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+
+/* ── 전체 섹션 렌더 ── */
+function renderFreightSection(route){
+  const data = LS.get(route);
+  const last = data[data.length-1], prev = data[data.length-2];
+  const allDates = data.map(d=>d.date);
+
+  if(route==='cn'){
+    document.getElementById('cn-date').textContent = last?.date||'—';
+    setFkpi('cn-scfi-val','cn-scfi-chg', last?.scfi, prev?.scfi);
+    setFkpi('cn-ccfi-val','cn-ccfi-chg', last?.ccfi, prev?.ccfi);
+    buildFreightChart('cnChart','cnChartEmpty',[
+      {label:'SCFI 한국', dates:allDates, values:data.map(d=>d.scfi), color:'#F0883E', fill:'rgba(240,136,62,.07)'},
+      {label:'CCFI 종합', dates:allDates, values:data.map(d=>d.ccfi), color:'#F85149'},
+    ], cnChart, c=>{cnChart=c;});
+  } else if(route==='it'){
+    document.getElementById('it-date').textContent = last?.date||'—';
+    setFkpi('it-fbx-val','it-fbx-chg', last?.fbx, prev?.fbx);
+    setFkpi('it-rate-val','it-rate-chg', last?.rate, prev?.rate);
+    buildFreightChart('itChart','itChartEmpty',[
+      {label:'FBX13',   dates:allDates, values:data.map(d=>d.fbx),  color:'#388BFD', fill:'rgba(56,139,253,.07)'},
+      {label:'견적 $/CBM',dates:allDates, values:data.map(d=>d.rate), color:'#D2A8FF'},
+    ], itChart, c=>{itChart=c;});
+  } else if(route==='vn'){
+    document.getElementById('vn-date').textContent = last?.date||'—';
+    setFkpi('vn-hcm-val','vn-hcm-chg', last?.hcm, prev?.hcm);
+    setFkpi('vn-hp-val','vn-hp-chg',   last?.hp,  prev?.hp);
+    setFkpi('vn-lt-val','vn-lt-chg',   last?.lt,  prev?.lt);
+    buildFreightChart('vnChart','vnChartEmpty',[
+      {label:'호치민 $/CBM', dates:allDates, values:data.map(d=>d.hcm), color:'#3FB950', fill:'rgba(63,185,80,.07)'},
+      {label:'하이퐁 $/CBM', dates:allDates, values:data.map(d=>d.hp),  color:'#39D353'},
+    ], vnChart, c=>{vnChart=c;});
+  }
+}
+
+/* ── 히스토리 목록 ── */
+function renderHistory(route){
+  const el = document.getElementById(`${route}-history`);
+  const data = LS.get(route).slice().reverse().slice(0,10);
+  if(!data.length){ el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:8px 0;">저장된 데이터 없음</div>'; return; }
+  el.innerHTML = `<div style="font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">최근 입력 (최대 10건)</div>`
+    + data.map(d=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 8px;background:var(--s2);border-radius:4px;margin-bottom:4px;font-size:11px;">
+      <span style="font-family:'JetBrains Mono',monospace;color:var(--t3);flex-shrink:0;">${d.date}</span>
+      <span style="color:var(--t2);flex:1;">${formatHistoryRow(route,d)}</span>
+      ${d.note?`<span style="color:var(--t3);font-size:10px;">${d.note}</span>`:''}
+    </div>`).join('');
+}
+
+function formatHistoryRow(route, d){
+  if(route==='cn') return `SCFI: ${d.scfi??'—'} / CCFI: ${d.ccfi??'—'}`;
+  if(route==='it') return `FBX13: ${d.fbx??'—'} / 견적: ${d.rate??'—'}$/CBM`;
+  if(route==='vn') return `HCM: ${d.hcm??'—'} / HP: ${d.hp??'—'} $/CBM · LT:${d.lt??'—'}일`;
+}
+
+/* ══════════════════════════════════════════
+   아파트 거래량 · 신규 입주물량
+   공공데이터포털 API (CORS 지원, 무료)
+═══════════════════════════════════════════ */
+let aptApiKey = '';
+let tradeChart = null, supplyChart = null;
+
+// 서울시 25개 구 법정동코드
+const SEOUL_GU = [
+  '11110','11140','11170','11200','11215','11230','11260','11290','11305','11320',
+  '11350','11380','11410','11440','11470','11500','11530','11545','11560','11590',
+  '11620','11650','11680','11710','11740'
+];
+
+// API 키 저장 + 불러오기
+function saveAptKey(){
+  const key = document.getElementById('aptApiKey').value.trim();
+  if(!key){ setAptMsg('⚠ API 키를 입력하세요.', 'red'); return; }
+  aptApiKey = key;
+  localStorage.setItem('apt_api_key', key);
+  setAptMsg('', '');
+  document.getElementById('aptApiPanel').style.borderColor = 'var(--green)';
+  document.getElementById('aptApiStatus').textContent = '✓ 설정됨';
+  document.getElementById('aptApiStatus').style.color = 'var(--green)';
+  loadAptData();
+}
+function setAptMsg(m, c){
+  const el = document.getElementById('aptApiMsg');
+  el.textContent = m;
+  el.style.color = c==='red' ? 'var(--red)' : 'var(--t3)';
+}
+
+// 저장된 키 복원
+(function(){
+  const saved = localStorage.getItem('apt_api_key');
+  if(saved){
+    aptApiKey = saved;
+    document.getElementById('aptApiKey').value = saved;
+    document.getElementById('aptApiStatus').textContent = '✓ 설정됨';
+    document.getElementById('aptApiStatus').style.color = 'var(--green)';
+    document.getElementById('aptApiPanel').style.borderColor = 'var(--green)';
+  }
+})();
+
+/* ── 국토부 아파트 매매 거래량 (월별 서울 전체) ── */
+async function fetchAptTradeMonth(ym){
+  // 25개 구 병렬 호출, totalCount만 조회 (numOfRows=1)
+  const results = await Promise.allSettled(
+    SEOUL_GU.map(code => {
+      const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev?serviceKey=${encodeURIComponent(aptApiKey)}&LAWD_CD=${code}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1`;
+      return fetch(url, {signal: AbortSignal.timeout(10000)})
+        .then(r => r.text())
+        .then(xml => {
+          const doc = new DOMParser().parseFromString(xml, 'text/xml');
+          const tc = doc.querySelector('totalCount');
+          return tc ? parseInt(tc.textContent)||0 : 0;
+        })
+        .catch(() => 0);
+    })
+  );
+  return results.reduce((sum, r) => sum + (r.status==='fulfilled' ? r.value : 0), 0);
+}
+
+/* ── 국토부 주택 준공 실적 (신규 입주물량) ── */
+async function fetchAptSupplyMonth(ym){
+  // 주택건설 인허가 실적 API (준공 기준)
+  const url = `https://apis.data.go.kr/1613000/HSP_NEWDATA_PLAN_INFO_OPENAPI_SERVICE/getHspNewDataPlanInfoData?serviceKey=${encodeURIComponent(aptApiKey)}&numOfRows=100&pageNo=1&strtYm=${ym}&endYm=${ym}&houseType=1`; // houseType=1: 아파트
+  try{
+    const r = await fetch(url, {signal: AbortSignal.timeout(10000)});
+    const xml = await r.text();
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    const items = doc.querySelectorAll('item');
+    let total = 0;
+    items.forEach(item => {
+      const cnt = item.querySelector('hhldCnt, houseCnt, totHhldCnt');
+      if(cnt) total += parseInt(cnt.textContent)||0;
+    });
+    // totalCount fallback
+    if(total===0){
+      const tc = doc.querySelector('totalCount');
+      if(tc) total = parseInt(tc.textContent)||0;
+    }
+    return total;
+  } catch { return null; }
+}
+
+// 12개월 배열 생성 (최근 12개월 YYYYMM 형식)
+function getLast12Months(){
+  const months = [];
+  const now = new Date();
+  for(let i=11; i>=0; i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const ym = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;
+    months.push(ym);
+  }
+  return months;
+}
+
+function ymLabel(ym){ return `${ym.slice(0,4)}.${ym.slice(4)}`; }
+
+/* ── 아파트 차트 빌더 ── */
+function buildAptChart(canvasId, emptyId, labels, values, color, ref, setter){
+  const el=document.getElementById(canvasId), empty=document.getElementById(emptyId);
+  if(!values.some(v=>v>0)){ empty.style.display='flex'; el.style.display='none'; return; }
+  empty.style.display='none'; el.style.display='block';
+  if(ref) ref.destroy();
+  const c = new Chart(el,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label: canvasId==='tradeChart'?'거래량(건)':'입주물량(가구)',
+        data: values,
+        backgroundColor: color+'33',
+        borderColor: color,
+        borderWidth:1.5,
+        borderRadius:3,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:{duration:500},
+      layout:{padding:{top:20,bottom:2,left:2,right:2}},
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#1C2128',borderColor:'#30363D',borderWidth:1,titleColor:'#8B949E',bodyColor:'#E6EDF3',padding:10,cornerRadius:6,
+          callbacks:{label:ctx=>`${ctx.parsed.y.toLocaleString('ko-KR')}건`}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:10}}},
+        y:{grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10},callback:v=>v.toLocaleString('ko-KR')}}
+      }
+    }
+  });
+  setter(c);
+}
+
+/* ── KPI 카드 업데이트 ── */
+function updateAptKpi(valId, chgId, values, label){
+  const el = document.getElementById(valId), chgEl = document.getElementById(chgId);
+  const last = values.filter(v=>v!=null&&v>0);
+  if(!last.length){ el.innerHTML=`<div class="kpi-err">데이터 없음</div>`; return; }
+  const v = last[last.length-1], p = last[last.length-2]||null;
+  el.innerHTML=`<div><span class="kpi-num">${v.toLocaleString('ko-KR')}</span><span class="kpi-unit">${label}</span></div>`;
+  if(p){
+    const chg=v-p, pct=chg/p*100;
+    const dir=chg>=0?'up':'dn', arr=chg>=0?'▲':'▼';
+    chgEl.innerHTML=`<div class="kpi-chg ${dir}" style="font-size:16px;">${arr} ${Math.abs(chg).toLocaleString()} (${Math.abs(pct).toFixed(1)}%)</div>`;
+  }
+}
+
+/* ── 메인 아파트 데이터 로드 ── */
+async function loadAptData(){
+  if(!aptApiKey) return;
+  const months = getLast12Months();
+  const labels = months.map(ymLabel);
+
+  // 거래량 로딩 표시
+  document.getElementById('apt-trade-val').innerHTML = '<div class="kpi-loading"><span class="spin">⟳</span>수집 중...</div>';
+  document.getElementById('apt-supply-val').innerHTML = '<div class="kpi-loading"><span class="spin">⟳</span>수집 중...</div>';
+  document.getElementById('tradeChartEmpty').innerHTML = '<span class="spin">⟳</span> 서울시 25개 구 데이터 수집 중...';
+
+  try{
+    // 거래량: 최근 12개월 순차 로드 (병렬이면 API 한도 초과 위험)
+    const tradeVals = [];
+    for(const ym of months){
+      const cnt = await fetchAptTradeMonth(ym);
+      tradeVals.push(cnt);
+    }
+    updateAptKpi('apt-trade-val','apt-trade-chg', tradeVals, '건');
+    buildAptChart('tradeChart','tradeChartEmpty', labels, tradeVals, '#58A6FF', tradeChart, c=>{tradeChart=c;});
+
+    // 입주물량 (별도 엔드포인트 — 실패 시 graceful)
+    const supplyVals = [];
+    for(const ym of months){
+      const cnt = await fetchAptSupplyMonth(ym);
+      supplyVals.push(cnt||0);
+    }
+    if(supplyVals.some(v=>v>0)){
+      updateAptKpi('apt-supply-val','apt-supply-chg', supplyVals, '가구');
+      buildAptChart('supplyChart','supplyChartEmpty', labels, supplyVals, '#F0883E', supplyChart, c=>{supplyChart=c;});
+    } else {
+      document.getElementById('apt-supply-val').innerHTML = '<div class="kpi-err" style="font-size:10px;">입주물량 API 별도 신청 필요</div>';
+      document.getElementById('supplyChartEmpty').textContent = '주택건설실적 API 별도 활용신청 필요';
+      setAptMsg('거래량 수집 완료. 입주물량은 data.go.kr에서 "주택건설실적" API 별도 신청 후 이용 가능합니다.','');
+    }
+  } catch(e){
+    document.getElementById('apt-trade-val').innerHTML = `<div class="kpi-err">${e.message}</div>`;
+    setAptMsg(`오류: ${e.message}`, 'red');
+  }
+}
+
+// 저장된 키 있으면 자동 로드
+if(aptApiKey) loadAptData();
+
+/* ── 초기 렌더 ── */
+['cn','it','vn'].forEach(renderFreightSection);
 
 loadAll();
 </script>
 </body>
 </html>
+
 
 
 
