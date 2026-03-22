@@ -120,6 +120,7 @@ td.del-col{width:36px;text-align:center;}
   .section{padding:16px;}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -131,10 +132,11 @@ td.del-col{width:36px;text-align:center;}
   </div>
   <div class="header-actions">
     <a class="dash-link" href="index.html">← 대시보드</a>
-    <button class="btn-export" onclick="exportAll()">⬇ 전체 내보내기</button>
+    <button class="btn-export" onclick="syncToSheets()" id="btn-sync" title="Google Sheets에 전체 데이터 동기화">☁ Sheets 동기화</button>
+    <button class="btn-export" onclick="exportExcel()">⬇ 엑셀 내보내기</button>
     <label class="btn-import" style="cursor:pointer;">
-      ⬆ 가져오기
-      <input type="file" accept=".json" style="display:none;" onchange="importAll(this)">
+      ⬆ 엑셀 가져오기
+      <input type="file" accept=".xlsx,.xls" style="display:none;" onchange="importExcel(this)">
     </label>
   </div>
 </header>
@@ -187,6 +189,39 @@ td.del-col{width:36px;text-align:center;}
   <div class="sec-head">
     <div><div class="sec-title">전체 데이터 현황</div><div class="sec-desc">모든 수동 입력 항목의 최신 상태를 한눈에 확인합니다.</div></div>
     <button class="btn-save" onclick="showSection('weekly')" style="font-size:11px;padding:7px 16px;">+ 통합 주간 입력</button>
+  </div>
+
+  <!-- Google Sheets 연동 설정 -->
+  <div id="gas-panel" style="background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:16px 20px;margin-bottom:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--t2);">☁ Google Sheets 연동</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:2px;">Apps Script 배포 URL을 입력하면 데이터가 Sheets에 저장되어 누구든 실시간으로 조회 가능합니다.</div>
+      </div>
+      <span id="gas-status" style="font-size:10px;color:var(--t4);">미연결</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-end;">
+      <input type="text" id="gas-url-input"
+        placeholder="https://script.google.com/macros/s/XXXX/exec"
+        style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--b1);border-radius:6px;color:var(--t1);font-family:var(--mono);font-size:11px;outline:none;"
+        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--b1)'">
+      <button class="btn-save" onclick="saveGasUrl()" style="height:34px;padding:0 16px;font-size:12px;white-space:nowrap;">저장</button>
+      <button class="btn-save" onclick="fetchFromSheets()" style="height:34px;padding:0 16px;font-size:12px;white-space:nowrap;background:var(--green);">⬇ Sheets에서 불러오기</button>
+      <button class="btn-save" onclick="syncToSheets()" style="height:34px;padding:0 14px;font-size:12px;white-space:nowrap;background:var(--amber);color:#000;">⬆ Sheets에 저장</button>
+    </div>
+    <div id="gas-msg" style="font-size:11px;margin-top:8px;color:var(--t3);"></div>
+    <details style="margin-top:12px;">
+      <summary style="font-size:10px;color:var(--t4);cursor:pointer;">📋 Apps Script 설치 방법 보기</summary>
+      <div style="margin-top:10px;font-size:11px;color:var(--t3);line-height:2;background:var(--s3);padding:12px;border-radius:6px;">
+        1. <a href="https://sheets.google.com" target="_blank" style="color:var(--blue);">Google Sheets</a> 새 파일 열기<br>
+        2. <strong style="color:var(--t2);">확장 프로그램 → Apps Script</strong> 클릭<br>
+        3. 기존 코드 전체 삭제 후 <strong style="color:var(--t2);">apps_script.js</strong> 내용 붙여넣기<br>
+        4. <strong style="color:var(--t2);">배포 → 새 배포 → 웹 앱</strong><br>
+        &nbsp;&nbsp;&nbsp;· 실행 계정: <em>나 (Me)</em><br>
+        &nbsp;&nbsp;&nbsp;· 액세스: <em>모든 사용자 (Anyone)</em><br>
+        5. 배포 URL 복사 → 위 입력란에 붙여넣기 → 저장
+      </div>
+    </details>
   </div>
   <div class="home-grid" id="home-grid"></div>
   <div class="input-card">
@@ -626,28 +661,265 @@ function renderHome(){
 
 function refreshAll(){renderRoute('cn');renderNaver();renderTrade();renderSupply();renderChem();renderHome();renderWeeklyRecent();}
 
-function exportAll(){
-  const data={exported_at:new Date().toISOString(),freight_cn:freight_get('cn'),naver_sofa_trend:ls_get('naver_sofa_trend',[]),apt_trade_data:ls_get('apt_trade_data',[]),apt_supply_data:ls_get('apt_supply_data',[]),chem_price_data:ls_get('chem_price_data',{})};
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`furni-dash-data-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);
+/* ══════════════════════════════════════════
+   엑셀 내보내기 / 가져오기 (SheetJS)
+═══════════════════════════════════════════ */
+function exportExcel(){
+  const wb = XLSX.utils.book_new();
+  const today = new Date().toISOString().slice(0,10);
+
+  // ── 시트 1: 중국 운임 (SCFI/CCFI) ──
+  const cnData = freight_get('cn');
+  const cnSheet = XLSX.utils.json_to_sheet(
+    cnData.map(d=>({
+      '날짜': d.date,
+      'SCFI 한국노선': d.scfi,
+      'CCFI 종합': d.ccfi,
+      '메모': d.note||''
+    }))
+  );
+  cnSheet['!cols'] = [{wch:14},{wch:16},{wch:14},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, cnSheet, '중국운임(SCFI_CCFI)');
+
+  // ── 시트 2: 소파 검색 트렌드 ──
+  const nvData = ls_get('naver_sofa_trend',[]);
+  const nvSheet = XLSX.utils.json_to_sheet(
+    nvData.map(d=>({'날짜':d.date,'트렌드지수':d.val,'메모':d.note||''}))
+  );
+  nvSheet['!cols'] = [{wch:14},{wch:12},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, nvSheet, '소파검색트렌드');
+
+  // ── 시트 3: 아파트 거래량 ──
+  const trData = ls_get('apt_trade_data',[]);
+  const trSheet = XLSX.utils.json_to_sheet(
+    trData.map(d=>({
+      '연월': `${d.ym.slice(0,4)}-${d.ym.slice(4)}`,
+      '서울거래량(건)': d.total,
+      '메모': d.note||''
+    }))
+  );
+  trSheet['!cols'] = [{wch:10},{wch:16},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, trSheet, '아파트거래량');
+
+  // ── 시트 4: 입주물량 ──
+  const supData = ls_get('apt_supply_data',[]);
+  const supSheet = XLSX.utils.json_to_sheet(
+    supData.map(d=>({
+      '연월': `${d.ym.slice(0,4)}-${d.ym.slice(4)}`,
+      '전국준공(가구)': d.total,
+      '수도권(가구)': d.metro||'',
+      '메모': d.note||''
+    }))
+  );
+  supSheet['!cols'] = [{wch:10},{wch:16},{wch:14},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, supSheet, '입주물량');
+
+  // ── 시트 5: 원자재 (폴리올/TDI/MDI) ──
+  const chemS = ls_get('chem_price_data',{});
+  const merged={};
+  ['poly','tdi','mdi'].forEach(c=>{
+    (chemS[c]||[]).forEach(e=>{
+      if(!merged[e.ym]) merged[e.ym]={note:e.note||''};
+      merged[e.ym][c]=e.val;
+    });
+  });
+  const chemRows = Object.entries(merged).sort().map(([ym,v])=>({
+    '연월': `${ym.slice(0,4)}-${ym.slice(4)}`,
+    '폴리올($/kg)': v.poly||'',
+    'TDI($/kg)': v.tdi||'',
+    'MDI($/kg)': v.mdi||'',
+    '메모': v.note||''
+  }));
+  const chemSheet = XLSX.utils.json_to_sheet(chemRows);
+  chemSheet['!cols'] = [{wch:10},{wch:14},{wch:12},{wch:12},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, chemSheet, '원자재(폴리올_TDI_MDI)');
+
+  XLSX.writeFile(wb, `furni-dash-${today}.xlsx`);
 }
-function importAll(input){
-  const file=input.files[0];if(!file)return;
+
+function importExcel(input){
+  const file=input.files[0]; if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
     try{
-      const data=JSON.parse(e.target.result);
-      if(data.freight_cn)freight_set('cn',data.freight_cn);
-      if(data.naver_sofa_trend)ls_set('naver_sofa_trend',data.naver_sofa_trend);
-      if(data.apt_trade_data)ls_set('apt_trade_data',data.apt_trade_data);
-      if(data.apt_supply_data)ls_set('apt_supply_data',data.apt_supply_data);
-      if(data.chem_price_data)ls_set('chem_price_data',data.chem_price_data);
-      refreshAll();alert('✅ 가져오기 완료!');
-    }catch(err){alert('파일 형식이 올바르지 않습니다: '+err.message);}
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      let imported=0;
+
+      // 중국 운임
+      if(wb.SheetNames.includes('중국운임(SCFI_CCFI)')){
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets['중국운임(SCFI_CCFI)']);
+        const data=rows.filter(r=>r['날짜']).map(r=>({
+          date: String(r['날짜']).trim(),
+          scfi: r['SCFI 한국노선']?+r['SCFI 한국노선']:null,
+          ccfi: r['CCFI 종합']?+r['CCFI 종합']:null,
+          note: r['메모']||''
+        }));
+        if(data.length){freight_set('cn',data.sort((a,b)=>a.date.localeCompare(b.date)));imported++;}
+      }
+
+      // 소파 트렌드
+      if(wb.SheetNames.includes('소파검색트렌드')){
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets['소파검색트렌드']);
+        const data=rows.filter(r=>r['날짜']&&r['트렌드지수']!=null).map(r=>({
+          date:String(r['날짜']).trim(),
+          val:+r['트렌드지수'],
+          note:r['메모']||''
+        }));
+        if(data.length){ls_set('naver_sofa_trend',data.sort((a,b)=>a.date.localeCompare(b.date)));imported++;}
+      }
+
+      // 아파트 거래량
+      if(wb.SheetNames.includes('아파트거래량')){
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets['아파트거래량']);
+        const data=rows.filter(r=>r['연월']&&r['서울거래량(건)']!=null).map(r=>({
+          ym:String(r['연월']).replace('-',''),
+          total:+r['서울거래량(건)'],
+          note:r['메모']||''
+        }));
+        if(data.length){ls_set('apt_trade_data',data.sort((a,b)=>a.ym.localeCompare(b.ym)));imported++;}
+      }
+
+      // 입주물량
+      if(wb.SheetNames.includes('입주물량')){
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets['입주물량']);
+        const data=rows.filter(r=>r['연월']&&r['전국준공(가구)']!=null).map(r=>({
+          ym:String(r['연월']).replace('-',''),
+          total:+r['전국준공(가구)'],
+          metro:r['수도권(가구)']?+r['수도권(가구)']:null,
+          note:r['메모']||''
+        }));
+        if(data.length){ls_set('apt_supply_data',data.sort((a,b)=>a.ym.localeCompare(b.ym)));imported++;}
+      }
+
+      // 원자재
+      if(wb.SheetNames.includes('원자재(폴리올_TDI_MDI)')){
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets['원자재(폴리올_TDI_MDI)']);
+        const stored={poly:[],tdi:[],mdi:[]};
+        rows.filter(r=>r['연월']).forEach(r=>{
+          const ym=String(r['연월']).replace('-','');
+          const note=r['메모']||'';
+          if(r['폴리올($/kg)']!=null&&r['폴리올($/kg)']!=='') stored.poly.push({ym,val:+r['폴리올($/kg)'],note});
+          if(r['TDI($/kg)']!=null&&r['TDI($/kg)']!=='') stored.tdi.push({ym,val:+r['TDI($/kg)'],note});
+          if(r['MDI($/kg)']!=null&&r['MDI($/kg)']!=='') stored.mdi.push({ym,val:+r['MDI($/kg)'],note});
+        });
+        if(stored.poly.length||stored.tdi.length||stored.mdi.length){
+          ls_set('chem_price_data',stored);imported++;
+        }
+      }
+
+      refreshAll();
+      alert(`✅ 엑셀 가져오기 완료! (${imported}개 시트 반영)`);
+    }catch(err){
+      alert('가져오기 실패: '+err.message);
+      console.error(err);
+    }
   };
-  reader.readAsText(file);input.value='';
+  reader.readAsArrayBuffer(file);
+  input.value='';
 }
+
+/* ══════════════════════════════════════════
+   Google Apps Script 연동
+═══════════════════════════════════════════ */
+let GAS_URL = localStorage.getItem('gas_url') || '';
+
+function saveGasUrl(){
+  const v = document.getElementById('gas-url-input').value.trim();
+  if(!v){ alert('URL을 입력하세요'); return; }
+  GAS_URL = v;
+  localStorage.setItem('gas_url', v);
+  setGasStatus('저장됨', 'var(--amber)');
+  setGasMsg('URL 저장 완료 — ⬇ 불러오기 또는 ⬆ 저장 버튼을 눌러 동기화하세요', 'var(--amber)');
+}
+
+function setGasStatus(msg, color){
+  const el = document.getElementById('gas-status');
+  el.textContent = msg; el.style.color = color;
+}
+function setGasMsg(msg, color='var(--t3)'){
+  const el = document.getElementById('gas-msg');
+  el.textContent = msg; el.style.color = color;
+}
+
+/* ── Sheets → LocalStorage (불러오기) ── */
+async function fetchFromSheets(){
+  if(!GAS_URL){ alert('먼저 Apps Script URL을 저장하세요'); return; }
+  setGasMsg('⟳ Google Sheets에서 불러오는 중...', 'var(--amber)');
+  try{
+    const r = await fetch(`${GAS_URL}?action=getAll`, {method:'GET'});
+    const json = await r.json();
+    if(!json.ok) throw new Error(json.error);
+    const d = json.data;
+    if(d.freight_cn)       freight_set('cn', d.freight_cn);
+    if(d.naver_sofa_trend) ls_set('naver_sofa_trend', d.naver_sofa_trend);
+    if(d.apt_trade_data)   ls_set('apt_trade_data', d.apt_trade_data);
+    if(d.apt_supply_data)  ls_set('apt_supply_data', d.apt_supply_data);
+    if(d.chem_price_data)  ls_set('chem_price_data', d.chem_price_data);
+    refreshAll();
+    setGasStatus('연결됨', 'var(--green)');
+    setGasMsg(`✅ 불러오기 완료 (${d.updated_at?.slice(0,16).replace('T',' ')})`, 'var(--green)');
+  } catch(err){
+    setGasMsg('❌ 불러오기 실패: ' + err.message, 'var(--red)');
+    setGasStatus('오류', 'var(--red)');
+  }
+}
+
+/* ── LocalStorage → Sheets (저장) ── */
+async function syncToSheets(){
+  if(!GAS_URL){ alert('먼저 Apps Script URL을 저장하세요'); return; }
+  const btn = document.getElementById('btn-sync');
+  if(btn){ btn.textContent = '☁ 동기화 중...'; btn.disabled = true; }
+  setGasMsg('⟳ Google Sheets에 저장 중...', 'var(--amber)');
+
+  try{
+    // 각 시트를 순서대로 전송
+    const tasks = [
+      { sheet:'cn', rows: freight_get('cn').map(d=>[d.date, d.scfi||'', d.ccfi||'', d.note||'']) },
+      { sheet:'naver', rows: ls_get('naver_sofa_trend',[]).map(d=>[d.date, d.val, d.note||'']) },
+      { sheet:'trade', rows: ls_get('apt_trade_data',[]).map(d=>[`${d.ym.slice(0,4)}-${d.ym.slice(4)}`, d.total, d.note||'']) },
+      { sheet:'supply', rows: ls_get('apt_supply_data',[]).map(d=>[`${d.ym.slice(0,4)}-${d.ym.slice(4)}`, d.total, d.metro||'', d.note||'']) },
+    ];
+
+    // 원자재는 별도 조합
+    const chemS = ls_get('chem_price_data',{});
+    const chemMerged = {};
+    ['poly','tdi','mdi'].forEach(k=>{
+      (chemS[k]||[]).forEach(e=>{
+        if(!chemMerged[e.ym]) chemMerged[e.ym]={note:e.note||''};
+        chemMerged[e.ym][k]=e.val;
+      });
+    });
+    tasks.push({ sheet:'chem', rows: Object.entries(chemMerged).sort().map(([ym,v])=>[
+      `${ym.slice(0,4)}-${ym.slice(4)}`, v.poly||'', v.tdi||'', v.mdi||'', v.note||''
+    ])});
+
+    let success = 0;
+    for(const t of tasks){
+      const r = await fetch(GAS_URL, {
+        method:'POST',
+        body: JSON.stringify({ action:'replaceAll', sheet:t.sheet, rows:t.rows }),
+      });
+      const json = await r.json();
+      if(json.ok) success++;
+      else console.warn(`시트 ${t.sheet} 저장 실패:`, json.error);
+    }
+
+    setGasStatus('연결됨', 'var(--green)');
+    setGasMsg(`✅ 동기화 완료 (${success}/5 시트)`, 'var(--green)');
+  } catch(err){
+    setGasMsg('❌ 동기화 실패: ' + err.message, 'var(--red)');
+  } finally {
+    if(btn){ btn.textContent = '☁ Sheets 동기화'; btn.disabled = false; }
+  }
+}
+
+/* ── 초기화 시 URL 복원 ── */
+(function(){
+  if(GAS_URL){
+    document.getElementById('gas-url-input').value = GAS_URL;
+    setGasStatus('URL 설정됨', 'var(--amber)');
+  }
+})();
 
 setDefaults();
 refreshAll();
