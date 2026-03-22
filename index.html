@@ -764,7 +764,7 @@ function buildChart(canvasId,emptyId,datasets,yFmt,ref,setter){
   const el=document.getElementById(canvasId),empty=document.getElementById(emptyId);
   empty.style.display='none'; el.style.display='block';
   if(ref) ref.destroy();
-  const labels=datasets[0].rawDates.map(d=>{ const p=d.slice(5).split('-'); return `${+p[0]}/${+p[1]}`; });
+  const labels=datasets[0].rawDates.map(d=>{ const s=String(d); return (+s.slice(5,7))+'/'+( +s.slice(8,10)); });
   const c=new Chart(el,{
     type:'line',
     data:{
@@ -957,7 +957,7 @@ function buildFreightChart(canvasId, emptyId, series, ref, setter){
   const c = new Chart(el,{
     type:'line',
     data:{
-      labels: series[0].dates.map(d=>{ const p=d.slice(5).split('-'); return `${+p[0]}/${+p[1]}`; }),
+      labels: series[0].dates.map(d=>{ const s=String(d); return (+s.slice(5,7))+'/'+( +s.slice(8,10)); }),
       datasets: series.map(s=>({
         label:s.label, data:s.values,
         borderColor:s.color, backgroundColor:s.fill||'transparent',
@@ -1077,7 +1077,7 @@ function renderTradeSection(){
   tradeChart = new Chart(el,{
     type:'bar',
     data:{
-      labels: data.map(d=>`'${d.ym.slice(2,4)}.${d.ym.slice(4)}`),
+      labels: data.map(d=>{ const s=String(d.ym); return "'" +s.slice(2,4)+'.'+s.slice(4,6); }),
       datasets:[{
         label:'거래량(건)', data:data.map(d=>d.total),
         backgroundColor:'rgba(56,139,253,0.5)', borderColor:'#388BFD',
@@ -1153,7 +1153,7 @@ function clearSupply(){
 
 function renderSupplySection(){
   const data = getSupplyData();
-  const labels = data.map(d=>`'${d.ym.slice(2,4)}.${d.ym.slice(4)}`);
+  const labels = data.map(d=>{ const s=String(d.ym); return "'" +s.slice(2,4)+'.'+s.slice(4,6); });
   const totals = data.map(d=>d.total);
 
   // KPI 업데이트
@@ -1271,7 +1271,7 @@ function renderNaverSection(){
   if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(naverChart)naverChart.destroy(); naverChart=null; return; }
   empty.style.display='none'; el.style.display='block';
   if(naverChart) naverChart.destroy();
-  const labels=data.map(d=>{const dt=new Date(d.date); return `${dt.getMonth()+1}/${dt.getDate()}`;});
+  const labels=data.map(d=>{ const s=String(d.date); return (+s.slice(5,7))+'/'+( +s.slice(8,10)); });
   naverChart=new Chart(el,{
     type:'line',
     data:{labels, datasets:[{
@@ -1458,7 +1458,7 @@ function renderChemSection(){
     chemCharts[chem]=new Chart(el,{
       type:'line',
       data:{
-        labels:data.map(d=>`'${d.ym.slice(2,4)}.${d.ym.slice(4)}`),
+        labels:data.map(d=>{ const s=String(d.ym); return "'" +s.slice(2,4)+'.'+s.slice(4,6); }),
         datasets:[{
           label:`${CHEM_NAMES[chem]} $/kg`, data:data.map(d=>d.val),
           borderColor:color, backgroundColor:rgba,
