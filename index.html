@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소파·가구 시장 인텔리전스</title>
+<!-- build: 20260322_112552 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Design tokens (Linear / GitHub Dark) ── */
@@ -644,7 +645,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
 </footer>
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
 Chart.defaults.font.family = "'Inter', sans-serif";
 let oilChart=null, usdChart=null, eurChart=null, cnyChart=null;
@@ -1077,7 +1078,7 @@ function renderTradeSection(){
   tradeChart = new Chart(el,{
     type:'bar',
     data:{
-      labels: data.map(d=>{ const s=String(d.ym); return "'" +s.slice(2,4)+'.'+s.slice(4,6); }),
+      labels: data.map(d=>{ const s=String(d.ym); return s.slice(2,4)+'.'+String(+s.slice(4,6)); }),
       datasets:[{
         label:'거래량(건)', data:data.map(d=>d.total),
         backgroundColor:'rgba(56,139,253,0.5)', borderColor:'#388BFD',
@@ -1153,7 +1154,7 @@ function clearSupply(){
 
 function renderSupplySection(){
   const data = getSupplyData();
-  const labels = data.map(d=>{ const s=String(d.ym); return "'" +s.slice(2,4)+'.'+s.slice(4,6); });
+  const labels = data.map(d=>{ const s=String(d.ym); return s.slice(2,4)+'.'+String(+s.slice(4,6)); });
   const totals = data.map(d=>d.total);
 
   // KPI 업데이트
@@ -1458,7 +1459,7 @@ function renderChemSection(){
     chemCharts[chem]=new Chart(el,{
       type:'line',
       data:{
-        labels:data.map(d=>{ const s=String(d.ym); return "'" +s.slice(2,4)+'.'+s.slice(4,6); }),
+        labels:data.map(d=>{ const s=String(d.ym); return s.slice(2,4)+'.'+String(+s.slice(4,6)); }),
         datasets:[{
           label:`${CHEM_NAMES[chem]} $/kg`, data:data.map(d=>d.val),
           borderColor:color, backgroundColor:rgba,
