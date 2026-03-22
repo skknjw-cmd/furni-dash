@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소파·가구 시장 인텔리전스</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 /* ── Design tokens (Linear / GitHub Dark) ── */
 :root{
@@ -644,6 +643,8 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
   <div class="ftr-item"><div class="fdot" style="background:#484F58"></div>운임: 수동 입력 · localStorage</div>
 </footer>
 
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 Chart.defaults.font.family = "'Inter', sans-serif";
 let oilChart=null, usdChart=null, eurChart=null, cnyChart=null;
@@ -1082,10 +1083,8 @@ function renderTradeHistory(){
 
 document.getElementById('tradeModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
 (function(){
-  const d=new Date(); d.setMonth(d.getMonth()-2); // 2개월 지연 감안
+  const d=new Date(); d.setMonth(d.getMonth()-2);
   document.getElementById('trade-in-date').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-  renderTradeSection();
-  renderTradeHistory();
 })();
 
 /* ══════════════════════════════════
@@ -1489,12 +1488,18 @@ document.getElementById('chemModal').addEventListener('click',function(e){if(e.t
   renderChemSection();
   renderChemHistory();
 })();
-/* ── 페이지 로드 시 자동 실행 ── */
-loadAll();
+/* ── 페이지 로드 시 자동 실행 (Chart.js 로드 완료 후) ── */
+window.addEventListener('load', function(){
+  // 수동 입력 섹션 초기 렌더 (Chart 필요)
+  renderTradeSection();
+  renderSupplySection();
+  renderNaverSection();
+  renderChemSection();
+  // 자동 수집 (유가·환율)
+  loadAll();
+});
 </script>
 </body>
 </html>
-
-
 
 
