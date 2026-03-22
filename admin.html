@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>데이터 관리 — Furni Dash Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0A0E14;
+  --s1:#0D1117;
+  --s2:#161B22;
+  --s3:#21262D;
+  --b1:#30363D;
+  --b2:#444C56;
+  --t1:#E6EDF3;
+  --t2:#C9D1D9;
+  --t3:#8B949E;
+  --t4:#484F58;
+  --blue:#388BFD;
+  --green:#3FB950;
+  --amber:#D29922;
+  --red:#F85149;
+  --purple:#D2A8FF;
+  --orange:#F0883E;
+  --cyan:#79C0FF;
+  --r:8px;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Pretendard',sans-serif;
+}
+html{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px;line-height:1.6;}
+body{min-height:100vh;display:grid;grid-template-columns:220px 1fr;grid-template-rows:auto 1fr;}
+
+/* ── 상단 헤더 ── */
+header{
+  grid-column:1/-1;
+  display:flex;align-items:center;gap:16px;
+  padding:14px 24px;
+  background:var(--s1);
+  border-bottom:1px solid var(--b1);
+  position:sticky;top:0;z-index:100;
+}
+.logo{
+  font-family:var(--mono);font-size:13px;font-weight:600;
+  color:var(--t3);letter-spacing:.08em;
+}
+.logo span{color:var(--blue);}
+.header-center{flex:1;text-align:center;}
+.header-title{font-size:13px;font-weight:600;color:var(--t2);letter-spacing:.04em;}
+.header-sub{font-size:10px;color:var(--t4);margin-top:1px;}
+.header-actions{display:flex;gap:8px;}
+.btn-export{
+  padding:6px 14px;font-size:11px;font-weight:600;font-family:var(--mono);
+  background:transparent;border:1px solid var(--b2);color:var(--t2);
+  border-radius:6px;cursor:pointer;transition:all .15s;
+}
+.btn-export:hover{border-color:var(--blue);color:var(--blue);}
+.btn-import{
+  padding:6px 14px;font-size:11px;font-weight:600;font-family:var(--mono);
+  background:var(--blue);border:1px solid var(--blue);color:#fff;
+  border-radius:6px;cursor:pointer;transition:all .15s;
+}
+.btn-import:hover{background:#5A9EFF;}
+.dash-link{
+  padding:6px 14px;font-size:11px;font-family:var(--mono);
+  background:transparent;border:1px solid var(--b1);color:var(--t3);
+  border-radius:6px;cursor:pointer;text-decoration:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;
+}
+.dash-link:hover{border-color:var(--t3);color:var(--t2);}
+
+/* ── 사이드바 ── */
+nav{
+  background:var(--s1);border-right:1px solid var(--b1);
+  padding:16px 0;position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;
+}
+.nav-section{
+  padding:0 12px;margin-bottom:4px;
+}
+.nav-label{
+  font-size:9px;font-weight:600;color:var(--t4);letter-spacing:.1em;text-transform:uppercase;
+  padding:8px 8px 4px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:6px;cursor:pointer;
+  font-size:12px;font-weight:500;color:var(--t3);
+  transition:all .12s;margin-bottom:1px;border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--s2);color:var(--t2);}
+.nav-item.active{background:rgba(56,139,253,.12);color:var(--blue);}
+.nav-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.nav-badge{margin-left:auto;font-size:9px;font-family:var(--mono);background:var(--s3);color:var(--t4);padding:1px 6px;border-radius:10px;}
+.nav-divider{height:1px;background:var(--b1);margin:10px 12px;}
+.nav-freq{font-size:9px;color:var(--t4);font-family:var(--mono);margin-left:auto;flex-shrink:0;}
+
+/* ── 메인 콘텐츠 ── */
+main{padding:0;overflow-y:auto;}
+
+.section{display:none;padding:24px;}
+.section.active{display:block;}
+
+/* ── 섹션 헤더 ── */
+.sec-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding-bottom:16px;border-bottom:1px solid var(--b1);margin-bottom:20px;
+}
+.sec-title{font-size:16px;font-weight:700;color:var(--t1);}
+.sec-desc{font-size:11px;color:var(--t3);margin-top:3px;line-height:1.6;}
+.sec-link{font-size:10px;color:var(--blue);text-decoration:none;}
+.sec-link:hover{text-decoration:underline;}
+
+/* ── 입력 카드 ── */
+.input-card{
+  background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);
+  padding:20px;margin-bottom:16px;
+}
+.input-card-title{
+  font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.input-card-title::after{content:'';flex:1;height:1px;background:var(--b1);}
+
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field.wide{grid-column:1/-1;}
+.field.half{grid-column:span 2;}
+label{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;}
+input,textarea,select{
+  padding:8px 11px;
+  background:var(--s1);border:1px solid var(--b1);border-radius:6px;
+  color:var(--t1);font-family:var(--mono);font-size:12px;
+  transition:border .12s,box-shadow .12s;outline:none;width:100%;
+}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(56,139,253,.1);}
+input::placeholder{color:var(--t4);}
+input[type="number"]{-moz-appearance:textfield;}
+input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;}
+
+.form-actions{display:flex;gap:8px;margin-top:14px;align-items:center;}
+.btn-save{
+  padding:8px 20px;font-size:12px;font-weight:600;font-family:var(--mono);
+  background:var(--blue);border:none;color:#fff;border-radius:6px;cursor:pointer;
+  transition:all .15s;
+}
+.btn-save:hover{background:#5A9EFF;transform:translateY(-1px);}
+.btn-clear{
+  padding:8px 14px;font-size:11px;font-family:var(--mono);
+  background:transparent;border:1px solid var(--b1);color:var(--t3);
+  border-radius:6px;cursor:pointer;transition:all .15s;
+}
+.btn-clear:hover{border-color:var(--red);color:var(--red);}
+.save-msg{font-size:11px;color:var(--green);font-family:var(--mono);margin-left:4px;opacity:0;transition:opacity .3s;}
+.save-msg.show{opacity:1;}
+
+/* ── 데이터 테이블 ── */
+.table-wrap{
+  background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);
+  overflow:hidden;margin-top:16px;
+}
+.table-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;border-bottom:1px solid var(--b1);background:var(--s3);
+}
+.table-title{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;}
+.table-count{font-size:10px;color:var(--t4);font-family:var(--mono);}
+table{width:100%;border-collapse:collapse;}
+thead th{
+  padding:8px 14px;text-align:left;
+  font-size:10px;font-weight:600;color:var(--t4);text-transform:uppercase;
+  letter-spacing:.07em;border-bottom:1px solid var(--b1);background:var(--s2);
+}
+tbody tr{border-bottom:1px solid rgba(48,54,61,.5);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(33,38,45,.7);}
+td{padding:8px 14px;font-size:11px;font-family:var(--mono);color:var(--t2);}
+td.date-col{color:var(--t3);}
+td.val-col{color:var(--t1);font-weight:500;}
+td.note-col{font-family:var(--sans);color:var(--t3);font-size:11px;}
+td.del-col{width:36px;text-align:center;}
+.del-btn{
+  background:none;border:none;color:var(--t4);cursor:pointer;
+  font-size:14px;padding:2px 6px;border-radius:4px;transition:all .12s;
+}
+.del-btn:hover{color:var(--red);background:rgba(248,81,73,.1);}
+.empty-row td{text-align:center;color:var(--t4);padding:20px;font-family:var(--sans);}
+
+/* ── 대시보드 홈 ── */
+.home-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.home-card{
+  background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);
+  padding:16px;cursor:pointer;transition:all .15s;
+}
+.home-card:hover{border-color:var(--b2);transform:translateY(-2px);}
+.home-card.weekly{border-top:2px solid var(--blue);}
+.home-card.monthly{border-top:2px solid var(--orange);}
+.hc-icon{font-size:20px;margin-bottom:8px;}
+.hc-title{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:4px;}
+.hc-desc{font-size:10px;color:var(--t3);line-height:1.5;}
+.hc-count{font-family:var(--mono);font-size:11px;color:var(--t4);margin-top:8px;}
+.hc-freq{
+  display:inline-block;font-size:9px;font-family:var(--mono);font-weight:600;
+  padding:2px 7px;border-radius:10px;margin-top:6px;
+}
+.hc-freq.weekly{background:rgba(56,139,253,.12);color:var(--blue);}
+.hc-freq.monthly{background:rgba(240,136,62,.12);color:var(--orange);}
+
+.quick-entry{
+  background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);
+  padding:16px 20px;margin-bottom:12px;
+}
+.qe-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;}
+.qe-grid{display:grid;grid-template-columns:140px repeat(auto-fill,minmax(130px,1fr));gap:8px;align-items:end;}
+.qe-label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+
+/* ── 통합 주간 입력 ── */
+.weekly-unified{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+  padding:20px;margin-bottom:16px;
+}
+.wu-date-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--b1);}
+.wu-date-label{font-size:11px;font-weight:600;color:var(--t2);white-space:nowrap;}
+.wu-sections{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:14px;}
+.wu-sec{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:14px;}
+.wu-sec-title{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;}
+.wu-field{margin-bottom:8px;}
+.wu-field:last-child{margin-bottom:0;}
+
+/* ── 상태 배지 ── */
+.status{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:10px;}
+.status.ok{background:rgba(63,185,80,.12);color:var(--green);}
+.status.warn{background:rgba(210,153,34,.12);color:var(--amber);}
+.status.empty{background:var(--s3);color:var(--t4);}
+
+/* ── 스크롤바 ── */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px;}
+
+/* ── 모바일 반응형 ── */
+@media(max-width:900px){
+  body{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;}
+  nav{position:relative;top:0;height:auto;display:flex;flex-wrap:wrap;padding:8px;gap:4px;border-right:none;border-bottom:1px solid var(--b1);}
+  .nav-label,.nav-divider{display:none;}
+  .nav-section{padding:0;}
+  .nav-item{padding:6px 10px;font-size:11px;}
+  .nav-freq{display:none;}
+  .wu-sections{grid-template-columns:1fr;}
+  .home-grid{grid-template-columns:1fr 1fr;}
+  main{padding:0;}
+  .section{padding:16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── 헤더 ── -->
+<header>
+  <div class="logo">furni<span>.</span>dash</div>
+  <div class="header-center">
+    <div class="header-title">데이터 관리 센터</div>
+    <div class="header-sub">수동 입력 데이터 통합 관리 · localStorage 동기화</div>
+  </div>
+  <div class="header-actions">
+    <a class="dash-link" href="index.html">← 대시보드</a>
+    <button class="btn-export" onclick="exportAll()">⬇ 전체 내보내기</button>
+    <label class="btn-import" style="cursor:pointer;">
+      ⬆ 가져오기
+      <input type="file" accept=".json" style="display:none;" onchange="importAll(this)">
+    </label>
+  </div>
+</header>
+
+<!-- ── 사이드바 ── -->
+<nav>
+  <div class="nav-section">
+    <div class="nav-label">홈</div>
+    <button class="nav-item active" onclick="showSection('home')">
+      <span class="nav-dot" style="background:var(--blue);"></span>
+      전체 현황
+    </button>
+  </div>
+
+  <div class="nav-divider"></div>
+
+  <div class="nav-section">
+    <div class="nav-label">주간 입력</div>
+    <button class="nav-item" onclick="showSection('weekly')">
+      <span class="nav-dot" style="background:var(--blue);"></span>
+      📦 통합 주간 입력
+      <span class="nav-freq">WEEKLY</span>
+    </button>
+    <button class="nav-item" onclick="showSection('cn')">
+      <span class="nav-dot" style="background:var(--cyan);"></span>
+      🇨🇳 중국 운임
+      <span id="nav-cnt-cn" class="nav-badge">0</span>
+    </button>
+    <button class="nav-item" onclick="showSection('it')">
+      <span class="nav-dot" style="background:var(--orange);"></span>
+      🇮🇹 이탈리아 운임
+      <span id="nav-cnt-it" class="nav-badge">0</span>
+    </button>
+    <button class="nav-item" onclick="showSection('vn')">
+      <span class="nav-dot" style="background:var(--green);"></span>
+      🇻🇳 베트남 운임
+      <span id="nav-cnt-vn" class="nav-badge">0</span>
+    </button>
+    <button class="nav-item" onclick="showSection('naver')">
+      <span class="nav-dot" style="background:#03C75A;"></span>
+      🔍 소파 검색 트렌드
+      <span id="nav-cnt-naver" class="nav-badge">0</span>
+    </button>
+  </div>
+
+  <div class="nav-divider"></div>
+
+  <div class="nav-section">
+    <div class="nav-label">월간 입력</div>
+    <button class="nav-item" onclick="showSection('supply')">
+      <span class="nav-dot" style="background:var(--orange);"></span>
+      🏗 입주물량
+      <span id="nav-cnt-supply" class="nav-badge">0</span>
+    </button>
+    <button class="nav-item" onclick="showSection('chem')">
+      <span class="nav-dot" style="background:var(--purple);"></span>
+      🧪 폴리올·TDI·MDI
+      <span id="nav-cnt-chem" class="nav-badge">0</span>
+    </button>
+  </div>
+
+  <div class="nav-divider"></div>
+
+  <div class="nav-section">
+    <div class="nav-label">설정</div>
+    <button class="nav-item" onclick="showSection('settings')">
+      <span class="nav-dot" style="background:var(--t4);"></span>
+      ⚙ API 키 관리
+    </button>
+  </div>
+</nav>
+
+<!-- ── 메인 ── -->
+<main>
+
+<!-- 홈 -->
+<div class="section active" id="sec-home">
+  <div class="sec-head">
+    <div>
+      <div class="sec-title">전체 데이터 현황</div>
+      <div class="sec-desc">모든 수동 입력 항목의 최신 상태를 한눈에 확인합니다.</div>
+    </div>
+    <button class="btn-save" onclick="showSection('weekly')" style="font-size:11px;padding:7px 16px;">+ 통합 주간 입력</button>
+  </div>
+
+  <div class="home-grid" id="home-grid"><!-- JS render --></div>
+
+  <!-- 최근 입력 요약 -->
+  <div class="input-card">
+    <div class="input-card-title">최근 입력 데이터 요약</div>
+    <div id="home-summary" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
+  </div>
+</div>
+
+<!-- 통합 주간 입력 -->
+<div class="section" id="sec-weekly">
+  <div class="sec-head">
+    <div>
+      <div class="sec-title">📦 통합 주간 입력</div>
+      <div class="sec-desc">주간 수집 항목을 한 화면에서 한 번에 입력합니다. 날짜를 선택하면 모든 항목에 적용됩니다.</div>
+    </div>
+  </div>
+
+  <div class="weekly-unified">
+    <div class="wu-date-row">
+      <div class="wu-date-label">기준 날짜</div>
+      <input type="date" id="w-date" style="width:160px;font-size:13px;font-weight:500;">
+      <span style="font-size:11px;color:var(--t3);">— 아래 모든 항목에 동일 날짜 적용</span>
+    </div>
+
+    <div class="wu-sections">
+      <!-- 중국 운임 -->
+      <div class="wu-sec">
+        <div class="wu-sec-title" style="color:var(--cyan);">🇨🇳 중국 → 인천 운임</div>
+        <div class="wu-field">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">SCFI 한국 노선</div>
+          <input type="number" id="w-cn-scfi" placeholder="예: 185">
+        </div>
+        <div class="wu-field">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">CCFI 종합</div>
+          <input type="number" id="w-cn-ccfi" placeholder="예: 1050">
+        </div>
+        <div class="wu-field">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">메모</div>
+          <input type="text" id="w-cn-note" placeholder="선택">
+        </div>
+      </div>
+
+      <!-- 이탈리아 운임 -->
+      <div class="wu-sec">
+        <div class="wu-sec-title" style="color:var(--orange);">🇮🇹 이탈리아 → 인천</div>
+        <div class="wu-field">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">FBX13 지중해 지수</div>
+          <input type="number" id="w-it-fbx" placeholder="예: 2800">
+        </div>
+        <div class="wu-field">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">실제 견적가 ($/CBM)</div>
+          <input type="number" id="w-it-rate" placeholder="예: 95">
+        </div>
+        <div class="wu-field">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">메모</div>
+          <input type="text" id="w-it-note" placeholder="선택">
+        </div>
+      </div>
+
+      <!-- 네이버 트렌드 -->
+      <div class="wu-sec">
+        <div class="wu-sec-title" style="color:#03C75A;">🔍 소파 검색 트렌드</div>
+        <div class="wu-field">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">트렌드 지수 (0~100)</div>
+          <input type="number" id="w-nv-val" placeholder="예: 74" min="0" max="100">
+        </div>
+        <div style="margin-top:6px;">
+          <a href="https://datalab.naver.com/keyword/trendResult.naver?hashKey=N_84c3e00e8cdf9ddf13bb4ae3fee3de35"
+            target="_blank" style="font-size:10px;color:var(--blue);">→ 데이터랩 바로가기</a>
+        </div>
+        <div class="wu-field" style="margin-top:8px;">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">메모</div>
+          <input type="text" id="w-nv-note" placeholder="선택">
+        </div>
+      </div>
+    </div>
+
+    <!-- 베트남 (별도 행) -->
+    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:14px;margin-bottom:14px;">
+      <div class="wu-sec-title" style="color:var(--green);margin-bottom:10px;">🇻🇳 베트남 → 인천 운임</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        <div class="wu-field">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">호치민 ($/CBM)</div>
+          <input type="number" id="w-vn-hcm" placeholder="예: 55">
+        </div>
+        <div class="wu-field">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">하이퐁 ($/CBM)</div>
+          <input type="number" id="w-vn-hp" placeholder="예: 48">
+        </div>
+        <div class="wu-field">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">리드타임 (일)</div>
+          <input type="number" id="w-vn-lt" placeholder="예: 7">
+        </div>
+        <div class="wu-field">
+          <div class="wu-date-label" style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">메모</div>
+          <input type="text" id="w-vn-note" placeholder="선택">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-save" onclick="saveWeeklyAll()" style="padding:10px 28px;font-size:13px;">✓ 전체 저장</button>
+      <button class="btn-clear" onclick="clearWeeklyForm()">입력 초기화</button>
+      <span class="save-msg" id="weekly-msg">저장 완료!</span>
+    </div>
+  </div>
+
+  <!-- 이번주 저장 확인 -->
+  <div class="input-card">
+    <div class="input-card-title">최근 저장 확인</div>
+    <div id="weekly-recent" style="font-size:11px;color:var(--t3);"></div>
+  </div>
+</div>
+
+<!-- 중국 운임 -->
+<div class="section" id="sec-cn">
+  <div class="sec-head">
+    <div>
+      <div class="sec-title">🇨🇳 중국 → 인천 운임</div>
+      <div class="sec-desc">SCFI 한국 노선 · CCFI 종합 · 매주 금요일 KMI 보고서 기준</div>
+    </div>
+  </div>
+  <div class="input-card">
+    <div class="input-card-title">신규 데이터 입력</div>
+    <div class="form-grid">
+      <div class="field"><label>날짜</label><input type="date" id="cn-date"></div>
+      <div class="field"><label>SCFI 한국 노선</label><input type="number" id="cn-scfi" placeholder="예: 185"></div>
+      <div class="field"><label>CCFI 종합</label><input type="number" id="cn-ccfi" placeholder="예: 1050"></div>
+      <div class="field wide"><label>메모</label><input type="text" id="cn-note" placeholder="선택사항"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" onclick="saveRoute('cn')">저장</button>
+      <span class="save-msg" id="cn-msg">저장됨</span>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-head">
+      <span class="table-title">전체 데이터</span>
+      <span class="table-count" id="cn-cnt">0건</span>
+    </div>
+    <table><thead><tr>
+      <th>날짜</th><th>SCFI</th><th>CCFI</th><th>메모</th><th></th>
+    </tr></thead><tbody id="cn-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 이탈리아 운임 -->
+<div class="section" id="sec-it">
+  <div class="sec-head">
+    <div>
+      <div class="sec-title">🇮🇹 이탈리아 → 인천 운임</div>
+      <div class="sec-desc">FBX13 지중해 지수 · 실제 견적가 ($/CBM)</div>
+    </div>
+  </div>
+  <div class="input-card">
+    <div class="input-card-title">신규 데이터 입력</div>
+    <div class="form-grid">
+      <div class="field"><label>날짜</label><input type="date" id="it-date"></div>
+      <div class="field"><label>FBX13 지중해 지수</label><input type="number" id="it-fbx" placeholder="예: 2800"></div>
+      <div class="field"><label>실제 견적가 ($/CBM)</label><input type="number" id="it-rate" placeholder="예: 95"></div>
+      <div class="field wide"><label>메모</label><input type="text" id="it-note" placeholder="선택사항"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" onclick="saveRoute('it')">저장</button>
+      <span class="save-msg" id="it-msg">저장됨</span>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-head">
+      <span class="table-title">전체 데이터</span>
+      <span class="table-count" id="it-cnt">0건</span>
+    </div>
+    <table><thead><tr>
+      <th>날짜</th><th>FBX13</th><th>견적가($/CBM)</th><th>메모</th><th></th>
+    </tr></thead><tbody id="it-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 베트남 운임 -->
+<div class="section" id="sec-vn">
+  <div class="sec-head">
+    <div>
+      <div class="sec-title">🇻🇳 베트남 → 인천 운임</div>
+      <div class="sec-desc">호치민(VVHCM) / 하이퐁(VNHPH) 실제 포워더 견적</div>
+    </div>
+  </div>
+  <div class="input-card">
+    <div class="input-card-title">신규 데이터 입력</div>
+    <div class="form-grid">
+      <div class="field"><label>날짜</label><input type="date" id="vn-date"></div>
+      <div class="field"><label>호치민 ($/CBM)</label><input type="number" id="vn-hcm" placeholder="예: 55"></div>
+      <div class="field"><label>하이퐁 ($/CBM)</label><input type="number" id="vn-hp" placeholder="예: 48"></div>
+      <div class="field"><label>리드타임 (일)</label><input type="number" id="vn-lt" placeholder="예: 7"></div>
+      <div class="field wide"><label>메모</label><input type="text" id="vn-note" placeholder="선택사항"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" onclick="saveRoute('vn')">저장</button>
+      <span class="save-msg" id="vn-msg">저장됨</span>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-head">
+      <span class="table-title">전체 데이터</span>
+      <span class="table-count" id="vn-cnt">0건</span>
+    </div>
+    <table><thead><tr>
+      <th>날짜</th><th>호치민($/CBM)</th><th>하이퐁($/CBM)</th><th>리드타임</th><th>메모</th><th></th>
+    </tr></thead><tbody id="vn-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 네이버 트렌드 -->
+<div class="section" id="sec-naver">
+  <div class="sec-head">
+    <div>
+      <div class="sec-title">🔍 소파 검색 트렌드</div>
+      <div class="sec-desc">
+        <a class="sec-link" href="https://datalab.naver.com/keyword/trendResult.naver?hashKey=N_84c3e00e8cdf9ddf13bb4ae3fee3de35" target="_blank">네이버 데이터랩 →</a>
+        소파 / 소파추천 / 가죽소파 / 패브릭소파 통합 상대값 (0~100)
+      </div>
+    </div>
+  </div>
+  <div class="input-card">
+    <div class="input-card-title">신규 데이터 입력</div>
+    <div class="form-grid">
+      <div class="field"><label>기준 날짜 (주 시작일)</label><input type="date" id="nv-date"></div>
+      <div class="field"><label>트렌드 지수 (0~100)</label><input type="number" id="nv-val" placeholder="예: 74" min="0" max="100"></div>
+      <div class="field wide"><label>메모</label><input type="text" id="nv-note" placeholder="예: 이사철 시작, 봄 성수기"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" onclick="saveNaver()">저장</button>
+      <button class="btn-clear" onclick="if(confirm('전체 삭제?')){ls_set('naver_sofa_trend',[]); renderNaver();}">전체 삭제</button>
+      <span class="save-msg" id="nv-msg">저장됨</span>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-head">
+      <span class="table-title">전체 데이터</span>
+      <span class="table-count" id="nv-cnt">0건</span>
+    </div>
+    <table><thead><tr>
+      <th>날짜</th><th>트렌드 지수</th><th>메모</th><th></th>
+    </tr></thead><tbody id="nv-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 입주물량 -->
+<div class="section" id="sec-supply">
+  <div class="sec-head">
+    <div>
+      <div class="sec-title">🏗 신규 아파트 입주물량</div>
+      <div class="sec-desc">
+        <a class="sec-link" href="https://stat.molit.go.kr" target="_blank">국토부 통계누리 →</a>
+        주택 → 주택건설실적 → 준공 → 아파트 (전국). 매월 익월 말 발표.
+      </div>
+    </div>
+  </div>
+  <div class="input-card">
+    <div class="input-card-title">신규 데이터 입력</div>
+    <div class="form-grid">
+      <div class="field"><label>기준 연월</label><input type="month" id="sup-ym"></div>
+      <div class="field"><label>전국 아파트 준공 (가구)</label><input type="number" id="sup-total" placeholder="예: 28500"></div>
+      <div class="field"><label>수도권 (가구, 선택)</label><input type="number" id="sup-metro" placeholder="예: 14200"></div>
+      <div class="field wide"><label>메모</label><input type="text" id="sup-note" placeholder="예: 강남권 대단지 집중"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" onclick="saveSupply()">저장</button>
+      <button class="btn-clear" onclick="if(confirm('전체 삭제?')){ls_set('apt_supply_data',[]); renderSupply();}">전체 삭제</button>
+      <span class="save-msg" id="sup-msg">저장됨</span>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-head">
+      <span class="table-title">전체 데이터</span>
+      <span class="table-count" id="sup-cnt">0건</span>
+    </div>
+    <table><thead><tr>
+      <th>연월</th><th>전국 (가구)</th><th>수도권 (가구)</th><th>메모</th><th></th>
+    </tr></thead><tbody id="sup-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 원자재 -->
+<div class="section" id="sec-chem">
+  <div class="sec-head">
+    <div>
+      <div class="sec-title">🧪 폴리올 · TDI · MDI 수입단가</div>
+      <div class="sec-desc">
+        <a class="sec-link" href="https://tradedata.go.kr" target="_blank">관세청 무역통계 →</a>
+        폴리올 3907200000 · TDI 2929101000 · MDI 2929102000 · 단위: $/kg (CIF)
+      </div>
+    </div>
+  </div>
+  <div class="input-card">
+    <div class="input-card-title">신규 데이터 입력</div>
+    <div class="form-grid">
+      <div class="field"><label>기준 연월</label><input type="month" id="ch-ym"></div>
+      <div class="field"><label>폴리올 ($/kg)</label><input type="number" id="ch-poly" placeholder="예: 1.85" step="0.001"></div>
+      <div class="field"><label>TDI ($/kg)</label><input type="number" id="ch-tdi" placeholder="예: 2.10" step="0.001"></div>
+      <div class="field"><label>MDI ($/kg)</label><input type="number" id="ch-mdi" placeholder="예: 1.95" step="0.001"></div>
+      <div class="field wide"><label>메모</label><input type="text" id="ch-note" placeholder="예: 중국 TDI 증설 영향 하락세"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" onclick="saveChem()">저장</button>
+      <button class="btn-clear" onclick="if(confirm('전체 삭제?')){ls_set('chem_price_data',{}); renderChem();}">전체 삭제</button>
+      <span class="save-msg" id="ch-msg">저장됨</span>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-head">
+      <span class="table-title">전체 데이터</span>
+      <span class="table-count" id="ch-cnt">0건</span>
+    </div>
+    <table><thead><tr>
+      <th>연월</th><th>폴리올 ($/kg)</th><th>TDI ($/kg)</th><th>MDI ($/kg)</th><th>메모</th><th></th>
+    </tr></thead><tbody id="ch-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- 설정 -->
+<div class="section" id="sec-settings">
+  <div class="sec-head">
+    <div>
+      <div class="sec-title">⚙ API 키 관리</div>
+      <div class="sec-desc">대시보드와 공유되는 API 키를 이곳에서 한꺼번에 관리합니다.</div>
+    </div>
+  </div>
+  <div class="input-card">
+    <div class="input-card-title">공공데이터포털 API 키 (아파트 거래량)</div>
+    <div class="form-grid">
+      <div class="field wide">
+        <label>Encoding 키</label>
+        <input type="text" id="set-apt-key" placeholder="공공데이터포털 마이페이지 → 인증키 → Encoding 키">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" onclick="saveApiKey('apt_api_key','set-apt-key','set-apt-msg')">저장</button>
+      <span class="save-msg" id="set-apt-msg">저장됨</span>
+    </div>
+    <div style="margin-top:10px;font-size:10px;color:var(--t3);">
+      <a href="https://www.data.go.kr/data/15126469/openapi.do" target="_blank" style="color:var(--blue);">아파트매매 실거래 상세 자료 신청 →</a>
+    </div>
+  </div>
+  <div class="input-card">
+    <div class="input-card-title">관세청 무역통계 API 키 (폴리올/TDI/MDI)</div>
+    <div class="form-grid">
+      <div class="field wide">
+        <label>Encoding 키 (아파트 키와 동일 가능)</label>
+        <input type="text" id="set-chem-key" placeholder="공공데이터포털 마이페이지 → 인증키 → Encoding 키">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" onclick="saveApiKey('chem_api_key','set-chem-key','set-chem-msg')">저장</button>
+      <span class="save-msg" id="set-chem-msg">저장됨</span>
+    </div>
+    <div style="margin-top:10px;font-size:10px;color:var(--t3);">
+      <a href="https://www.data.go.kr/data/15100475/openapi.do" target="_blank" style="color:var(--blue);">품목별 국가별 수출입실적 신청 →</a>
+    </div>
+  </div>
+</div>
+
+</main><!-- /main -->
+
+<script>
+/* ── localStorage 헬퍼 ── */
+const ls_get = (k,def=[]) => { try{ return JSON.parse(localStorage.getItem(k)||JSON.stringify(def)); }catch{ return def; } };
+const ls_set = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+const freight_get = k => ls_get('freight_'+k,[]);
+const freight_set = (k,v) => ls_set('freight_'+k,v);
+
+/* ── 섹션 전환 ── */
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  const btns = document.querySelectorAll('.nav-item');
+  btns.forEach(b=>{ if(b.getAttribute('onclick')?.includes("'"+id+"'")) b.classList.add('active'); });
+  refreshAll();
+}
+
+/* ── 저장 메시지 ── */
+function flashMsg(id){ const el=document.getElementById(id); el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2000); }
+
+/* ── 날짜 기본값 ── */
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function thisMonthStr(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function setDefaults(){
+  ['cn-date','it-date','vn-date','nv-date','w-date'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=todayStr(); });
+  ['sup-ym','ch-ym'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=thisMonthStr(); });
+}
+
+/* ══ 저장 함수들 ══ */
+
+/* 운임 공통 */
+function saveRoute(r){
+  const date = document.getElementById(r+'-date').value;
+  if(!date){ alert('날짜를 입력하세요'); return; }
+  let entry={date};
+  if(r==='cn'){
+    const scfi=document.getElementById('cn-scfi').value, ccfi=document.getElementById('cn-ccfi').value, note=document.getElementById('cn-note').value;
+    if(!scfi&&!ccfi){ alert('SCFI 또는 CCFI를 입력하세요'); return; }
+    entry={date,scfi:scfi?+scfi:null,ccfi:ccfi?+ccfi:null,note};
+  } else if(r==='it'){
+    const fbx=document.getElementById('it-fbx').value, rate=document.getElementById('it-rate').value, note=document.getElementById('it-note').value;
+    if(!fbx&&!rate){ alert('FBX13 또는 견적가를 입력하세요'); return; }
+    entry={date,fbx:fbx?+fbx:null,rate:rate?+rate:null,note};
+  } else if(r==='vn'){
+    const hcm=document.getElementById('vn-hcm').value, hp=document.getElementById('vn-hp').value, lt=document.getElementById('vn-lt').value, note=document.getElementById('vn-note').value;
+    if(!hcm&&!hp){ alert('운임을 입력하세요'); return; }
+    entry={date,hcm:hcm?+hcm:null,hp:hp?+hp:null,lt:lt?+lt:null,note};
+  }
+  const data=freight_get(r);
+  const idx=data.findIndex(d=>d.date===date);
+  if(idx>=0) data[idx]=entry; else data.push(entry);
+  data.sort((a,b)=>a.date.localeCompare(b.date));
+  if(data.length>52) data.splice(0,data.length-52);
+  freight_set(r,data);
+  refreshAll(); flashMsg(r+'-msg');
+}
+
+/* 네이버 */
+function saveNaver(){
+  const date=document.getElementById('nv-date').value, val=document.getElementById('nv-val').value, note=document.getElementById('nv-note').value;
+  if(!date||!val){ alert('날짜와 지수를 입력하세요'); return; }
+  const data=ls_get('naver_sofa_trend',[]);
+  const idx=data.findIndex(d=>d.date===date);
+  const entry={date,val:+val,note};
+  if(idx>=0) data[idx]=entry; else data.push(entry);
+  data.sort((a,b)=>a.date.localeCompare(b.date));
+  if(data.length>52) data.splice(0,data.length-52);
+  ls_set('naver_sofa_trend',data);
+  refreshAll(); flashMsg('nv-msg');
+}
+
+/* 입주물량 */
+function saveSupply(){
+  const ym=(document.getElementById('sup-ym').value||'').replace('-','');
+  const total=document.getElementById('sup-total').value;
+  if(!ym||!total){ alert('연월과 준공가구수를 입력하세요'); return; }
+  const data=ls_get('apt_supply_data',[]);
+  const idx=data.findIndex(d=>d.ym===ym);
+  const entry={ym,total:+total,metro:document.getElementById('sup-metro').value?+document.getElementById('sup-metro').value:null,note:document.getElementById('sup-note').value};
+  if(idx>=0) data[idx]=entry; else data.push(entry);
+  data.sort((a,b)=>a.ym.localeCompare(b.ym));
+  if(data.length>52) data.splice(0,data.length-52);
+  ls_set('apt_supply_data',data);
+  refreshAll(); flashMsg('sup-msg');
+}
+
+/* 원자재 */
+function saveChem(){
+  const ym=(document.getElementById('ch-ym').value||'').replace('-','');
+  if(!ym){ alert('연월을 입력하세요'); return; }
+  const note=document.getElementById('ch-note').value;
+  const stored=ls_get('chem_price_data',{});
+  ['poly','tdi','mdi'].forEach(c=>{
+    const v=document.getElementById('ch-'+c).value;
+    if(!v) return;
+    if(!stored[c]) stored[c]=[];
+    const idx=stored[c].findIndex(e=>e.ym===ym);
+    const entry={ym,val:+v,note};
+    if(idx>=0) stored[c][idx]=entry; else stored[c].push(entry);
+    stored[c].sort((a,b)=>a.ym.localeCompare(b.ym));
+    if(stored[c].length>24) stored[c].splice(0,stored[c].length-24);
+  });
+  ls_set('chem_price_data',stored);
+  refreshAll(); flashMsg('ch-msg');
+}
+
+/* API 키 */
+function saveApiKey(lsKey, inputId, msgId){
+  const v=document.getElementById(inputId).value.trim();
+  if(!v){ alert('키를 입력하세요'); return; }
+  localStorage.setItem(lsKey,v);
+  flashMsg(msgId);
+}
+
+/* ══ 통합 주간 저장 ══ */
+function saveWeeklyAll(){
+  const date=document.getElementById('w-date').value;
+  if(!date){ alert('날짜를 선택하세요'); return; }
+  let saved=0;
+
+  // 중국
+  const cn_s=document.getElementById('w-cn-scfi').value, cn_c=document.getElementById('w-cn-ccfi').value;
+  if(cn_s||cn_c){
+    const data=freight_get('cn');
+    const entry={date,scfi:cn_s?+cn_s:null,ccfi:cn_c?+cn_c:null,note:document.getElementById('w-cn-note').value};
+    const idx=data.findIndex(d=>d.date===date); if(idx>=0)data[idx]=entry; else data.push(entry);
+    data.sort((a,b)=>a.date.localeCompare(b.date)); if(data.length>52)data.splice(0,data.length-52);
+    freight_set('cn',data); saved++;
+  }
+  // 이탈리아
+  const it_f=document.getElementById('w-it-fbx').value, it_r=document.getElementById('w-it-rate').value;
+  if(it_f||it_r){
+    const data=freight_get('it');
+    const entry={date,fbx:it_f?+it_f:null,rate:it_r?+it_r:null,note:document.getElementById('w-it-note').value};
+    const idx=data.findIndex(d=>d.date===date); if(idx>=0)data[idx]=entry; else data.push(entry);
+    data.sort((a,b)=>a.date.localeCompare(b.date)); if(data.length>52)data.splice(0,data.length-52);
+    freight_set('it',data); saved++;
+  }
+  // 베트남
+  const vn_h=document.getElementById('w-vn-hcm').value, vn_hp=document.getElementById('w-vn-hp').value;
+  if(vn_h||vn_hp){
+    const data=freight_get('vn');
+    const entry={date,hcm:vn_h?+vn_h:null,hp:vn_hp?+vn_hp:null,lt:document.getElementById('w-vn-lt').value?+document.getElementById('w-vn-lt').value:null,note:document.getElementById('w-vn-note').value};
+    const idx=data.findIndex(d=>d.date===date); if(idx>=0)data[idx]=entry; else data.push(entry);
+    data.sort((a,b)=>a.date.localeCompare(b.date)); if(data.length>52)data.splice(0,data.length-52);
+    freight_set('vn',data); saved++;
+  }
+  // 네이버
+  const nv=document.getElementById('w-nv-val').value;
+  if(nv){
+    const data=ls_get('naver_sofa_trend',[]);
+    const entry={date,val:+nv,note:document.getElementById('w-nv-note').value};
+    const idx=data.findIndex(d=>d.date===date); if(idx>=0)data[idx]=entry; else data.push(entry);
+    data.sort((a,b)=>a.date.localeCompare(b.date)); if(data.length>52)data.splice(0,data.length-52);
+    ls_set('naver_sofa_trend',data); saved++;
+  }
+
+  if(!saved){ alert('입력된 값이 없습니다. 최소 하나 이상 입력해주세요.'); return; }
+  refreshAll(); flashMsg('weekly-msg');
+  renderWeeklyRecent();
+}
+
+function clearWeeklyForm(){
+  ['w-cn-scfi','w-cn-ccfi','w-cn-note','w-it-fbx','w-it-rate','w-it-note',
+   'w-vn-hcm','w-vn-hp','w-vn-lt','w-vn-note','w-nv-val','w-nv-note'].forEach(id=>{ document.getElementById(id).value=''; });
+}
+
+function renderWeeklyRecent(){
+  const el=document.getElementById('weekly-recent');
+  const lines=[];
+  const cn=freight_get('cn'), it=freight_get('it'), vn=freight_get('vn'), nv=ls_get('naver_sofa_trend',[]);
+  if(cn.length){ const l=cn[cn.length-1]; lines.push(`🇨🇳 중국: ${l.date} — SCFI ${l.scfi??'—'} / CCFI ${l.ccfi??'—'}`); }
+  if(it.length){ const l=it[it.length-1]; lines.push(`🇮🇹 이탈리아: ${l.date} — FBX13 ${l.fbx??'—'} / 견적 $${l.rate??'—'}`); }
+  if(vn.length){ const l=vn[vn.length-1]; lines.push(`🇻🇳 베트남: ${l.date} — HCM $${l.hcm??'—'} / HP $${l.hp??'—'}`); }
+  if(nv.length){ const l=nv[nv.length-1]; lines.push(`🔍 트렌드: ${l.date} — ${l.val}/100`); }
+  el.innerHTML = lines.length
+    ? lines.map(l=>`<div style="padding:5px 0;border-bottom:1px solid var(--b1);font-family:var(--mono);font-size:11px;color:var(--t2);">${l}</div>`).join('')
+    : '<div style="color:var(--t4);font-size:11px;">아직 저장된 데이터가 없습니다.</div>';
+}
+
+/* ══ 테이블 렌더 ══ */
+function fmtDate(s){ return s?s.replace(/-/g,'.'):'-'; }
+function fmtYM(s){ return s?`${s.slice(0,4)}.${s.slice(4)}`:'-'; }
+function delRow(lsKey,idx,render){ const d=ls_get(lsKey,[]); d.splice(idx,1); ls_set(lsKey,d); render(); refreshAll(); }
+function delChemRow(chem,idx){ const s=ls_get('chem_price_data',{}); s[chem].splice(idx,1); ls_set('chem_price_data',s); renderChem(); refreshAll(); }
+function delFreight(route,idx){ const d=freight_get(route); d.splice(idx,1); freight_set(route,d); renderRoute(route); refreshAll(); }
+
+function renderRoute(r){
+  const data=freight_get(r);
+  const tbody=document.getElementById(r+'-tbody');
+  const cnt=document.getElementById(r+'-cnt');
+  cnt.textContent=data.length+'건';
+  if(!data.length){ tbody.innerHTML=`<tr class="empty-row"><td colspan="6">데이터 없음</td></tr>`; return; }
+  if(r==='cn') tbody.innerHTML=[...data].reverse().map((d,i)=>`<tr>
+    <td class="date-col">${fmtDate(d.date)}</td>
+    <td class="val-col">${d.scfi??'—'}</td>
+    <td class="val-col">${d.ccfi??'—'}</td>
+    <td class="note-col">${d.note||''}</td>
+    <td class="del-col"><button class="del-btn" onclick="delFreight('cn',${data.length-1-i})">✕</button></td>
+  </tr>`).join('');
+  else if(r==='it') tbody.innerHTML=[...data].reverse().map((d,i)=>`<tr>
+    <td class="date-col">${fmtDate(d.date)}</td>
+    <td class="val-col">${d.fbx??'—'}</td>
+    <td class="val-col">${d.rate!=null?'$'+d.rate:'—'}</td>
+    <td class="note-col">${d.note||''}</td>
+    <td class="del-col"><button class="del-btn" onclick="delFreight('it',${data.length-1-i})">✕</button></td>
+  </tr>`).join('');
+  else if(r==='vn') tbody.innerHTML=[...data].reverse().map((d,i)=>`<tr>
+    <td class="date-col">${fmtDate(d.date)}</td>
+    <td class="val-col">${d.hcm!=null?'$'+d.hcm:'—'}</td>
+    <td class="val-col">${d.hp!=null?'$'+d.hp:'—'}</td>
+    <td class="val-col">${d.lt!=null?d.lt+'일':'—'}</td>
+    <td class="note-col">${d.note||''}</td>
+    <td class="del-col"><button class="del-btn" onclick="delFreight('vn',${data.length-1-i})">✕</button></td>
+  </tr>`).join('');
+}
+
+function renderNaver(){
+  const data=ls_get('naver_sofa_trend',[]);
+  const tbody=document.getElementById('nv-tbody');
+  document.getElementById('nv-cnt').textContent=data.length+'건';
+  if(!data.length){ tbody.innerHTML=`<tr class="empty-row"><td colspan="4">데이터 없음</td></tr>`; return; }
+  tbody.innerHTML=[...data].reverse().map((d,i)=>`<tr>
+    <td class="date-col">${fmtDate(d.date)}</td>
+    <td class="val-col">${d.val} / 100</td>
+    <td class="note-col">${d.note||''}</td>
+    <td class="del-col"><button class="del-btn" onclick="delRow('naver_sofa_trend',${data.length-1-i},renderNaver)">✕</button></td>
+  </tr>`).join('');
+}
+
+function renderSupply(){
+  const data=ls_get('apt_supply_data',[]);
+  const tbody=document.getElementById('sup-tbody');
+  document.getElementById('sup-cnt').textContent=data.length+'건';
+  if(!data.length){ tbody.innerHTML=`<tr class="empty-row"><td colspan="5">데이터 없음</td></tr>`; return; }
+  tbody.innerHTML=[...data].reverse().map((d,i)=>`<tr>
+    <td class="date-col">${fmtYM(d.ym)}</td>
+    <td class="val-col">${d.total?.toLocaleString('ko-KR')??'—'}가구</td>
+    <td class="val-col">${d.metro!=null?d.metro.toLocaleString('ko-KR')+'가구':'—'}</td>
+    <td class="note-col">${d.note||''}</td>
+    <td class="del-col"><button class="del-btn" onclick="delRow('apt_supply_data',${data.length-1-i},renderSupply)">✕</button></td>
+  </tr>`).join('');
+}
+
+function renderChem(){
+  const s=ls_get('chem_price_data',{});
+  // 병합: 연월별로 통합
+  const merged={};
+  ['poly','tdi','mdi'].forEach(c=>{
+    (s[c]||[]).forEach(e=>{
+      if(!merged[e.ym]) merged[e.ym]={note:e.note};
+      merged[e.ym][c]=e.val;
+    });
+  });
+  const rows=Object.entries(merged).sort((a,b)=>b[0].localeCompare(a[0]));
+  const cnt=Math.max(...['poly','tdi','mdi'].map(c=>(s[c]||[]).length));
+  document.getElementById('ch-cnt').textContent=(isFinite(cnt)?cnt:0)+'건';
+  const tbody=document.getElementById('ch-tbody');
+  if(!rows.length){ tbody.innerHTML=`<tr class="empty-row"><td colspan="6">데이터 없음</td></tr>`; return; }
+  tbody.innerHTML=rows.map(([ym,v])=>`<tr>
+    <td class="date-col">${fmtYM(ym)}</td>
+    <td class="val-col">${v.poly!=null?v.poly.toFixed(2)+'$/kg':'—'}</td>
+    <td class="val-col">${v.tdi!=null?v.tdi.toFixed(2)+'$/kg':'—'}</td>
+    <td class="val-col">${v.mdi!=null?v.mdi.toFixed(2)+'$/kg':'—'}</td>
+    <td class="note-col">${v.note||''}</td>
+    <td class="del-col" style="white-space:nowrap;">
+      <button class="del-btn" title="삭제" onclick="
+        const s=ls_get('chem_price_data',{});
+        ['poly','tdi','mdi'].forEach(c=>{ if(s[c]){const i=s[c].findIndex(e=>e.ym==='${ym}');if(i>=0)s[c].splice(i,1);} });
+        ls_set('chem_price_data',s); renderChem(); refreshAll();">✕</button>
+    </td>
+  </tr>`).join('');
+}
+
+/* ══ 홈 렌더 ══ */
+function renderHome(){
+  const counts={
+    cn: freight_get('cn').length,
+    it: freight_get('it').length,
+    vn: freight_get('vn').length,
+    naver: ls_get('naver_sofa_trend',[]).length,
+    supply: ls_get('apt_supply_data',[]).length,
+    chem: Math.max(...['poly','tdi','mdi'].map(c=>(ls_get('chem_price_data',{})[c]||[]).length),0),
+  };
+  const latest={
+    cn: freight_get('cn').slice(-1)[0],
+    it: freight_get('it').slice(-1)[0],
+    vn: freight_get('vn').slice(-1)[0],
+    naver: ls_get('naver_sofa_trend',[]).slice(-1)[0],
+    supply: ls_get('apt_supply_data',[]).slice(-1)[0],
+  };
+  const cards=[
+    {id:'cn', icon:'🇨🇳', title:'중국 운임', desc:'SCFI·CCFI', freq:'weekly', last:latest.cn?.date, cnt:counts.cn},
+    {id:'it', icon:'🇮🇹', title:'이탈리아 운임', desc:'FBX13·견적가', freq:'weekly', last:latest.it?.date, cnt:counts.it},
+    {id:'vn', icon:'🇻🇳', title:'베트남 운임', desc:'HCM·하이퐁', freq:'weekly', last:latest.vn?.date, cnt:counts.vn},
+    {id:'naver', icon:'🔍', title:'소파 검색 트렌드', desc:'0~100 상대값', freq:'weekly', last:latest.naver?.date, cnt:counts.naver},
+    {id:'supply', icon:'🏗', title:'신규 입주물량', desc:'전국 준공 가구수', freq:'monthly', last:latest.supply?fmtYM(latest.supply.ym):null, cnt:counts.supply},
+    {id:'chem', icon:'🧪', title:'폴리올·TDI·MDI', desc:'수입단가 $/kg', freq:'monthly', last:null, cnt:counts.chem},
+  ];
+  document.getElementById('home-grid').innerHTML=cards.map(c=>`
+    <div class="home-card ${c.freq}" onclick="showSection('${c.id}')">
+      <div class="hc-icon">${c.icon}</div>
+      <div class="hc-title">${c.title}</div>
+      <div class="hc-desc">${c.desc}</div>
+      <div class="hc-count">${c.cnt}건 저장됨${c.last?` · 최근: ${c.last}`:''}</div>
+      <span class="hc-freq ${c.freq}">${c.freq==='weekly'?'주간':'월간'}</span>
+    </div>`).join('');
+
+  // nav badges
+  Object.entries(counts).forEach(([k,v])=>{
+    const el=document.getElementById('nav-cnt-'+k); if(el) el.textContent=v;
+  });
+
+  // 요약
+  document.getElementById('home-summary').innerHTML=`
+    <div style="background:var(--s3);border-radius:6px;padding:14px;">
+      <div style="font-size:10px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">주간 항목 최근 입력</div>
+      ${['cn','it','vn','naver'].map(k=>{
+        const l=k==='naver'?latest.naver:latest[k];
+        const label={cn:'🇨🇳 중국',it:'🇮🇹 이탈리아',vn:'🇻🇳 베트남',naver:'🔍 트렌드'}[k];
+        const val=l ? (k==='naver'?`지수 ${l.val}/100` : k==='cn'?`SCFI ${l.scfi??'—'}` : k==='it'?`FBX ${l.fbx??'—'}` : `HCM $${l.hcm??'—'}`) : '없음';
+        const status=l?'ok':'empty';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--b1);font-size:11px;">
+          <span style="color:var(--t2);">${label}</span>
+          <span class="status ${status}">${l?`${l.date} · ${val}`:'미입력'}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="background:var(--s3);border-radius:6px;padding:14px;">
+      <div style="font-size:10px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">월간 항목 최근 입력</div>
+      ${[['supply','🏗 입주물량'], ['chem','🧪 원자재']].map(([k,label])=>{
+        const l=k==='supply'?latest.supply:null;
+        const val=k==='supply'?(l?`${fmtYM(l.ym)} · ${l.total?.toLocaleString()}가구`:'없음')
+          : (counts.chem>0?`${counts.chem}건 저장`:'없음');
+        const status=(k==='supply'?l:counts.chem>0)?'ok':'empty';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--b1);font-size:11px;">
+          <span style="color:var(--t2);">${label}</span>
+          <span class="status ${status}">${val}</span>
+        </div>`;
+      }).join('')}
+      <div style="margin-top:10px;font-size:10px;color:var(--t4);">
+        API 키: apt ${localStorage.getItem('apt_api_key')?'<span style="color:var(--green);">✓ 설정됨</span>':'<span style="color:var(--red);">미설정</span>'} &nbsp;|&nbsp;
+        관세청 ${localStorage.getItem('chem_api_key')?'<span style="color:var(--green);">✓ 설정됨</span>':'<span style="color:var(--red);">미설정</span>'}
+      </div>
+    </div>`;
+}
+
+/* ══ 전체 갱신 ══ */
+function refreshAll(){
+  renderRoute('cn'); renderRoute('it'); renderRoute('vn');
+  renderNaver(); renderSupply(); renderChem(); renderHome(); renderWeeklyRecent();
+  // 설정 키 로드
+  const aptKey=localStorage.getItem('apt_api_key')||'';
+  const chemKey=localStorage.getItem('chem_api_key')||'';
+  if(aptKey) document.getElementById('set-apt-key').value=aptKey;
+  if(chemKey) document.getElementById('set-chem-key').value=chemKey;
+}
+
+/* ══ 내보내기 / 가져오기 ══ */
+function exportAll(){
+  const data={
+    exported_at: new Date().toISOString(),
+    freight_cn: freight_get('cn'),
+    freight_it: freight_get('it'),
+    freight_vn: freight_get('vn'),
+    naver_sofa_trend: ls_get('naver_sofa_trend',[]),
+    apt_supply_data: ls_get('apt_supply_data',[]),
+    chem_price_data: ls_get('chem_price_data',{}),
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`furni-dash-data-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function importAll(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.freight_cn) freight_set('cn',data.freight_cn);
+      if(data.freight_it) freight_set('it',data.freight_it);
+      if(data.freight_vn) freight_set('vn',data.freight_vn);
+      if(data.naver_sofa_trend) ls_set('naver_sofa_trend',data.naver_sofa_trend);
+      if(data.apt_supply_data) ls_set('apt_supply_data',data.apt_supply_data);
+      if(data.chem_price_data) ls_set('chem_price_data',data.chem_price_data);
+      refreshAll();
+      alert('✅ 가져오기 완료!');
+    } catch(err){ alert('파일 형식이 올바르지 않습니다: '+err.message); }
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+
+/* ── 초기화 ── */
+setDefaults();
+refreshAll();
+renderWeeklyRecent();
+</script>
+</body>
+</html>
