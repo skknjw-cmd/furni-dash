@@ -114,8 +114,8 @@ a{color:var(--blue);text-decoration:none;}
 <div class="src-info">
   <div class="src-card">
     <div class="src-badge">✓ 무료 · 키 없음</div>
-    <div class="src-name">유가 — EIA Open Data (미국 에너지부)</div>
-    <div class="src-desc">WTI · Brent 실제 달러/배럴 공식 수치. DEMO_KEY 사용 (1,000 req/일 무료). 1영업일 지연.</div>
+    <div class="src-name">유가 — EIA 공공데이터 (GitHub 미러)</div>
+    <div class="src-desc">WTI · Brent 실제 달러/배럴. 미국 에너지부(EIA) 공공도메인 데이터. GitHub raw CSV 직접 수신. 1영업일 지연.</div>
   </div>
   <div class="src-card">
     <div class="src-badge">✓ 무료 · 키 없음</div>
@@ -258,7 +258,7 @@ a{color:var(--blue);text-decoration:none;}
 </div>
 
 <footer class="ftr">
-  <div class="ftr-item"><div class="fdot" style="background:var(--green)"></div>유가: EIA (DEMO_KEY)</div>
+  <div class="ftr-item"><div class="fdot" style="background:var(--green)"></div>유가: EIA 공공데이터 (GitHub raw CSV)</div>
   <div class="ftr-item"><div class="fdot" style="background:var(--blue)"></div>환율: Frankfurter (ECB)</div>
   <div class="ftr-item"><div class="fdot" style="background:var(--amber)"></div>SCFI: 수동 입력</div>
   <div class="ftr-item"><div class="fdot" style="background:var(--t3)"></div>원자재·부동산·트렌드: Phase 2</div>
@@ -268,18 +268,23 @@ a{color:var(--blue);text-decoration:none;}
 Chart.defaults.font.family = "'DM Sans', sans-serif";
 let oilChart = null, fxChart = null;
 
-/* ── EIA API (WTI · Brent, 실제 $/배럴, CORS 지원) ── */
-async function fetchEIA(series){
-  const url = `https://api.eia.gov/v2/petroleum/pri/spt/data/?api_key=DEMO_KEY&frequency=daily&data[0]=value&facets[series][]=${series}&sort[0][column]=period&sort[0][direction]=desc&length=65`;
+/* ── 유가: GitHub raw CSV (EIA 공공도메인 데이터, CORS 지원, 키 불필요) ── */
+async function fetchOilCSV(type){
+  // type: 'wti' or 'brent'
+  const url = `https://raw.githubusercontent.com/datasets/oil-prices/master/data/${type}-daily.csv`;
   const r = await fetch(url, {signal: AbortSignal.timeout(15000)});
-  if(!r.ok) throw new Error(`EIA HTTP ${r.status}`);
-  const j = await r.json();
-  const rows = j?.response?.data;
-  if(!rows || rows.length === 0) throw new Error('EIA 데이터 없음');
-  return rows
-    .filter(d => d.value !== null && d.value !== undefined)
-    .map(d => ({date: d.period, value: parseFloat(d.value)}))
-    .sort((a,b) => a.date.localeCompare(b.date));
+  if(!r.ok) throw new Error(`유가 데이터 로드 실패 (${r.status})`);
+  const text = await r.text();
+  const lines = text.trim().split('\n').slice(1); // 헤더 제거
+  return lines
+    .map(line => {
+      const [date, val] = line.split(',');
+      const value = parseFloat(val);
+      if(!date || isNaN(value)) return null;
+      return {date: date.trim(), value};
+    })
+    .filter(Boolean)
+    .slice(-65); // 최근 65일
 }
 
 /* ── Frankfurter API (환율, 키 없음, CORS 지원) ── */
@@ -365,7 +370,7 @@ async function loadAll(){
   ['wti-val','brent-val','usd-val','cny-val','eur-val'].forEach(setLoading);
 
   const [oilRes, fxRes] = await Promise.allSettled([
-    Promise.all([fetchEIA('RWTC'), fetchEIA('RBRTE')]),
+    Promise.all([fetchOilCSV('wti'), fetchOilCSV('brent')]),
     fetchFX()
   ]);
 
