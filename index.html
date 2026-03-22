@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소파·가구 시장 인텔리전스</title>
-<!-- build: 20260322_114438 -->
+<!-- build: 20260322_115057 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Design tokens (Linear / GitHub Dark) ── */
@@ -767,18 +767,46 @@ const TOOLTIP={
    → 일별: "03/22"  / 월별: "24.01"
 ──────────────────────────────────────────────────────── */
 function fmtYM(val) {
-  // YYYYMM / YYYY-MM / 2024.01 등 → YY.MM
-  const d = String(val).replace(/[^0-9]/g, '');
-  if (d.length < 6) return String(val);
-  return d.slice(2,4) + '.' + d.slice(4,6);
+  if (!val) return '';
+  const s = String(val);
+  // 하이픈·슬래시·점 구분자 있는 경우
+  if (s.includes('-') || s.includes('/') || s.includes('.')) {
+    const parts = s.split(/[-\/. ]/);
+    // "2024-01" or "2024.01" → YY.MM
+    if (parts.length >= 2) {
+      const yy = parts[0].slice(-2);  // 연도 뒤 2자리
+      const mm = String(parts[1]).padStart(2,'0');
+      return yy + '.' + mm;
+    }
+  }
+  // 순수 숫자 YYYYMM
+  const d = s.replace(/[^0-9]/g, '');
+  if (d.length >= 6) return d.slice(2,4) + '.' + d.slice(4,6);
+  return s;
 }
 function fmtDay(val) {
-  // YYYY-MM-DD / YYYYMMDD 등 → MM/DD
-  const d = String(val).replace(/[^0-9]/g, '');
-  if (d.length < 8) return fmtYM(val);
-  return d.slice(4,6) + '/' + d.slice(6,8);
+  if (!val) return '';
+  const s = String(val);
+  // YYYY-MM-DD 형식
+  if (s.includes('-')) {
+    const parts = s.split('-');
+    if (parts.length >= 3) return parts[1].padStart(2,'0') + '/' + parts[2].slice(0,2).padStart(2,'0');
+    if (parts.length === 2) return fmtYM(val);
+  }
+  // 슬래시 YYYY/MM/DD
+  if (s.includes('/')) {
+    const parts = s.split('/');
+    if (parts.length >= 3) return parts[1].padStart(2,'0') + '/' + parts[2].slice(0,2).padStart(2,'0');
+    if (parts.length === 2) return fmtYM(val);
+  }
+  // 순수 숫자 YYYYMMDD
+  const d = s.replace(/[^0-9]/g, '');
+  if (d.length >= 8) return d.slice(4,6) + '/' + d.slice(6,8);
+  if (d.length >= 6) return fmtYM(val);
+  return s;
 }
 function fmtDateLabel(val) {
+  if (!val) return '';
   const d = String(val).replace(/[^0-9]/g, '');
   return d.length >= 8 ? fmtDay(val) : fmtYM(val);
 }
