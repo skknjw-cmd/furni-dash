@@ -650,7 +650,7 @@ let oilChart=null, usdChart=null, eurChart=null, cnyChart=null;
 
 /* ── DATA FETCHERS ── */
 async function fetchOilCSV(type){
-  const url=`https://raw.githubusercontent.com/datasets/oil-prices/master/data/${type}-daily.csv`;
+  const url=`https://raw.githubusercontent.com/datasets/oil-prices/main/data/${type}-daily.csv`;
   const r=await fetch(url,{signal:AbortSignal.timeout(15000)});
   if(!r.ok) throw new Error(`유가 로드 실패 (${r.status})`);
   const text=await r.text();
@@ -665,7 +665,8 @@ async function fetchOilCSV(type){
 async function fetchFX(){
   const end=new Date(), start=new Date(+end-91*864e5);
   const fmt=d=>d.toISOString().split('T')[0];
-  const url=`https://api.frankfurter.app/${fmt(start)}..${fmt(end)}?from=USD&to=KRW,CNY,EUR`;
+  // 신규 도메인: api.frankfurter.dev/v1 (기존 api.frankfurter.app 변경됨)
+  const url=`https://api.frankfurter.dev/v1/${fmt(start)}..${fmt(end)}?base=USD&symbols=KRW,CNY,EUR`;
   const r=await fetch(url,{signal:AbortSignal.timeout(15000)});
   if(!r.ok) throw new Error(`환율 로드 실패 (${r.status})`);
   const j=await r.json();
@@ -1489,8 +1490,6 @@ document.getElementById('chemModal').addEventListener('click',function(e){if(e.t
 </script>
 </body>
 </html>
-
-
 
 
 
