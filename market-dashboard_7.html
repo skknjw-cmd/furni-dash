@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>소파·가구 시장 인텔리전스</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg0:#080A0E;--bg2:#131620;--bg3:#1A1D28;
+  --border:#222536;--border2:#2E3248;
+  --t1:#E2E5EF;--t2:#838799;--t3:#464A62;
+  --amber:#F5A623;--blue:#4E9BF5;--green:#22C55E;--red:#EF4444;
+  --purple:#A78BFA;--teal:#2DD4BF;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg0);color:var(--t1);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;}
+a{color:var(--blue);text-decoration:none;}
+.hdr{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:var(--bg0);border-bottom:1px solid var(--border);}
+.brand-badge{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.brand-name{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--t2);text-transform:uppercase;}
+.hdr-right{display:flex;align-items:center;gap:14px;}
+.ts-stamp{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t3);}
+.btn{padding:6px 14px;border-radius:6px;background:transparent;border:1px solid var(--border2);color:var(--t2);font:inherit;font-size:12px;cursor:pointer;transition:all .15s;}
+.btn:hover{border-color:var(--amber);color:var(--amber);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-primary{background:var(--amber);color:#000;border:none;font-weight:600;padding:9px 22px;border-radius:7px;cursor:pointer;font:inherit;font-size:13px;transition:opacity .15s;}
+.btn-primary:hover{opacity:.85;}
+.main{max-width:1440px;margin:0 auto;padding:24px 28px 60px;}
+.setup{background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:28px;overflow:hidden;}
+.setup-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;cursor:pointer;background:transparent;border:none;width:100%;color:var(--t2);font:inherit;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;}
+.setup-hdr:hover{background:var(--bg3);}
+.setup-arrow{transition:transform .2s;font-size:10px;}
+.setup-arrow.open{transform:rotate(180deg);}
+.setup-body{display:none;padding:20px;}
+.setup-body.open{display:block;}
+.step-block{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:16px 18px;margin-bottom:14px;}
+.step-num{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.08em;margin-bottom:6px;}
+.step-title{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:8px;}
+.step-desc{font-size:11px;color:var(--t3);line-height:1.7;}
+.code-block{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--bg0);border:1px solid var(--border);border-radius:5px;padding:10px 12px;margin-top:8px;color:var(--teal);line-height:1.9;}
+.field label{display:block;font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.field input{width:100%;padding:9px 12px;background:var(--bg0);border:1px solid var(--border);border-radius:7px;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:12px;transition:border .15s;}
+.field input:focus{outline:none;border-color:var(--amber);}
+.field-note{font-size:11px;color:var(--t3);margin-top:5px;line-height:1.5;}
+.section{margin-bottom:28px;}
+.sec-label{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:14px;}
+.sec-label span{white-space:nowrap;}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.sec-src{font-size:10px;color:var(--t3);font-weight:400;letter-spacing:0;}
+.cards{display:grid;gap:12px;}
+.g2{grid-template-columns:repeat(2,1fr);}
+.g3{grid-template-columns:repeat(3,1fr);}
+.mcard{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:18px 20px;position:relative;overflow:hidden;}
+.mcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--card-accent,var(--border2));}
+.mcard-label{font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;}
+.mcard-num{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:500;color:var(--t1);line-height:1;}
+.mcard-unit{font-size:12px;color:var(--t2);margin-left:4px;}
+.mcard-chg{font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:9px;}
+.up{color:var(--green);}.dn{color:var(--red);}
+.mcard-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);margin-top:5px;}
+.mcard-empty{color:var(--t3);font-size:12px;padding:6px 0;line-height:1.7;}
+.mcard-err{color:var(--red);font-size:11px;padding:4px 0;line-height:1.6;}
+.mcard-loading{color:var(--t3);font-size:12px;padding:6px 0;display:flex;align-items:center;gap:8px;}
+.spin{display:inline-block;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+.ccrd{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:20px;}
+.ctitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:18px;}
+.cwrap{position:relative;height:180px;}
+.chart-empty{display:flex;align-items:center;justify-content:center;height:180px;font-size:12px;color:var(--t3);text-align:center;padding:0 20px;}
+.scfi-main{display:flex;align-items:flex-start;gap:24px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;flex-wrap:wrap;}
+.scfi-stat{display:flex;flex-direction:column;gap:4px;}
+.scfi-stat-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;}
+.scfi-stat-val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:600;color:var(--t1);}
+.scfi-routes{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
+.scfi-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.scfi-route{font-size:9px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.scfi-val{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:500;}
+.scfi-chg{font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:3px;}
+.scfi-note{font-size:11px;color:var(--t3);margin-top:12px;padding:10px 14px;background:var(--bg3);border-radius:7px;border-left:2px solid var(--amber);line-height:1.6;}
+.p2-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:20px 24px;}
+.p2-title{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;}
+.p2-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.p2-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;}
+.p2-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--t3);}
+.p2-text{font-size:12px;color:var(--t2);}
+.p2-badge{font-size:9px;padding:2px 7px;border-radius:20px;background:var(--bg0);color:var(--t3);border:1px solid var(--border);margin-left:auto;white-space:nowrap;}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.ftr{position:fixed;bottom:0;left:0;right:0;display:flex;flex-wrap:wrap;gap:20px;align-items:center;padding:10px 28px;background:var(--bg0);border-top:1px solid var(--border);font-size:11px;color:var(--t3);}
+.ftr-item{display:flex;align-items:center;gap:6px;}
+.fdot{width:5px;height:5px;border-radius:50%;}
+@media(max-width:1000px){.charts{grid-template-columns:1fr;}}
+@media(max-width:700px){.g2,.g3,.charts{grid-template-columns:1fr;}.main{padding:16px;}.hdr{padding:12px 16px;}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="brand-badge">
+    <div class="live-dot"></div>
+    <span class="brand-name">Furniture Market Intelligence</span>
+  </div>
+  <div class="hdr-right">
+    <span class="ts-stamp" id="ts">마지막 업데이트: —</span>
+    <button class="btn" id="btnRefresh" onclick="loadAll()">↻ 새로고침</button>
+  </div>
+</header>
+
+<main class="main">
+
+<!-- ── SETUP ── -->
+<div class="setup">
+  <button class="setup-hdr" onclick="toggleSetup()">
+    <span>⚙ Google Sheets 연동 설정</span>
+    <span class="setup-arrow open" id="setupArrow">▼</span>
+  </button>
+  <div class="setup-body open" id="setupBody">
+
+    <div class="step-block">
+      <div class="step-num">STEP 01 — 스프레드시트 ID 확인</div>
+      <div class="step-title">Google Sheets 편집 화면 URL에서 ID 복사</div>
+      <div class="step-desc">
+        웹에 게시된 URL(2PACX-...)이 아닌, 평소 편집할 때 보이는 <strong style="color:var(--t1)">일반 편집 URL</strong>이 필요합니다.
+      </div>
+      <div class="code-block">편집 URL 예시:
+https://docs.google.com/spreadsheets/d/<span style="color:var(--amber)">1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms</span>/edit
+
+↑ /d/ 와 /edit 사이의 노란 부분이 Sheet ID입니다</div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-num">STEP 02 — 탭별 수식 입력 (각 탭 A1 셀에)</div>
+      <div class="code-block">[WTI 탭]    =GOOGLEFINANCE("NYSEARCA:USO","close",TODAY()-60,TODAY(),"DAILY")
+[Brent 탭]  =GOOGLEFINANCE("NYSEARCA:BNO","close",TODAY()-60,TODAY(),"DAILY")
+[USDKRW 탭] =GOOGLEFINANCE("CURRENCY:USDKRW","close",TODAY()-40,TODAY(),"DAILY")
+[CNYKRW 탭] =GOOGLEFINANCE("CURRENCY:CNYKRW","close",TODAY()-40,TODAY(),"DAILY")
+[EURKRW 탭] =GOOGLEFINANCE("CURRENCY:EURKRW","close",TODAY()-40,TODAY(),"DAILY")</div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-num">STEP 03 — 시트 공유 설정 (웹에 게시 불필요!)</div>
+      <div class="step-title">링크 공유를 "링크가 있는 사용자 모두"로 설정</div>
+      <div class="step-desc">
+        오른쪽 상단 <strong style="color:var(--t1)">공유</strong> 버튼 → <strong style="color:var(--t1)">"링크가 있는 사용자"</strong> → <strong style="color:var(--t1)">뷰어</strong> 선택 후 저장<br>
+        <span style="color:var(--teal)">✓ "웹에 게시"는 필요 없습니다. 이 방법이 더 간단합니다.</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:flex-end;">
+      <div class="field">
+        <label>Google Sheet ID (편집 URL에서 복사)</label>
+        <input type="text" id="sheetInput" placeholder="예: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+        <div class="field-note">
+          편집 URL 전체를 붙여넣어도 자동 추출됩니다.<br>
+          탭 이름: <strong style="color:var(--t1)">WTI / Brent / USDKRW / CNYKRW / EURKRW</strong> (대소문자 정확히)
+        </div>
+      </div>
+      <div><button class="btn-primary" onclick="saveAndLoad()">데이터 불러오기</button></div>
+    </div>
+    <div id="setupMsg" style="margin-top:8px;font-size:12px;color:var(--t3);"></div>
+  </div>
+</div>
+
+<!-- ── 유가 ── -->
+<div class="section">
+  <div class="sec-label">
+    <span>🛢 국제유가</span>
+    <span class="sec-src">출처: Google Finance (USO·BNO ETF)</span>
+  </div>
+  <div class="cards g2">
+    <div class="mcard" style="--card-accent:var(--amber)">
+      <div class="mcard-label">WTI 추종 — USO ETF (USD/주)</div>
+      <div id="wti-val"><div class="mcard-empty">설정 후 데이터를 불러오세요.</div></div>
+    </div>
+    <div class="mcard" style="--card-accent:#FB923C">
+      <div class="mcard-label">Brent 추종 — BNO ETF (USD/주)</div>
+      <div id="brent-val"><div class="mcard-empty">설정 후 데이터를 불러오세요.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 환율 ── -->
+<div class="section">
+  <div class="sec-label">
+    <span>💱 환율</span>
+    <span class="sec-src">출처: Google Finance</span>
+  </div>
+  <div class="cards g3">
+    <div class="mcard" style="--card-accent:var(--blue)">
+      <div class="mcard-label">USD / KRW</div>
+      <div id="usd-val"><div class="mcard-empty">설정 후 데이터를 불러오세요.</div></div>
+    </div>
+    <div class="mcard" style="--card-accent:var(--green)">
+      <div class="mcard-label">CNY / KRW</div>
+      <div id="cny-val"><div class="mcard-empty">설정 후 데이터를 불러오세요.</div></div>
+    </div>
+    <div class="mcard" style="--card-accent:var(--purple)">
+      <div class="mcard-label">EUR / KRW</div>
+      <div id="eur-val"><div class="mcard-empty">설정 후 데이터를 불러오세요.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 차트 ── -->
+<div class="charts">
+  <div class="ccrd">
+    <div class="ctitle">유가 추이 (USD/주)</div>
+    <div class="cwrap">
+      <div class="chart-empty" id="oilChartEmpty">데이터를 불러오면 차트가 표시됩니다</div>
+      <canvas id="oilChart" style="display:none"></canvas>
+    </div>
+  </div>
+  <div class="ccrd">
+    <div class="ctitle">환율 추이 (원)</div>
+    <div class="cwrap">
+      <div class="chart-empty" id="fxChartEmpty">데이터를 불러오면 차트가 표시됩니다</div>
+      <canvas id="fxChart" style="display:none"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCFI ── -->
+<div class="section">
+  <div class="sec-label">
+    <span>🚢 상하이 컨테이너 운임지수 (SCFI)</span>
+    <span class="sec-src">수동 업데이트</span>
+  </div>
+  <div class="mcard">
+    <div class="scfi-main">
+      <div class="scfi-stat">
+        <div class="scfi-stat-label">SCFI 종합</div>
+        <div class="scfi-stat-val" id="scfi-overall">—</div>
+      </div>
+      <div class="scfi-stat">
+        <div class="scfi-stat-label">전주 대비</div>
+        <div class="scfi-chg" style="font-size:18px;font-family:'JetBrains Mono',monospace;" id="scfi-chg">—</div>
+      </div>
+      <div class="scfi-stat">
+        <div class="scfi-stat-label">기준일</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);" id="scfi-date">—</div>
+      </div>
+      <div style="margin-left:auto;">
+        <button class="btn" onclick="document.getElementById('scfiModal').classList.add('show')">✎ 데이터 입력</button>
+      </div>
+    </div>
+    <div class="scfi-routes">
+      <div class="scfi-item"><div class="scfi-route">상하이 → 유럽</div><div class="scfi-val" id="sr-eur">—</div><div class="scfi-chg" id="sc-eur">—</div></div>
+      <div class="scfi-item"><div class="scfi-route">상하이 → 미주(서)</div><div class="scfi-val" id="sr-usw">—</div><div class="scfi-chg" id="sc-usw">—</div></div>
+      <div class="scfi-item"><div class="scfi-route">상하이 → 미주(동)</div><div class="scfi-val" id="sr-use">—</div><div class="scfi-chg" id="sc-use">—</div></div>
+      <div class="scfi-item"><div class="scfi-route">상하이 → 한국</div><div class="scfi-val" id="sr-kor">—</div><div class="scfi-chg" id="sc-kor">—</div></div>
+      <div class="scfi-item"><div class="scfi-route">상하이 → 일본</div><div class="scfi-val" id="sr-jpn">—</div><div class="scfi-chg" id="sc-jpn">—</div></div>
+    </div>
+    <div class="scfi-note">
+      💡 상하이항운거래소 매주 금요일 발표 → <a href="https://www.kmi.re.kr" target="_blank">kmi.re.kr</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── Phase 2 ── -->
+<div class="p2-card">
+  <div class="p2-title">📋 Phase 2 — 추가 예정 지표</div>
+  <div class="p2-items">
+    <div class="p2-item"><div class="p2-dot"></div><span class="p2-text">폴리올 · TDI · MDI</span><span class="p2-badge">수동입력+관세청</span></div>
+    <div class="p2-item"><div class="p2-dot"></div><span class="p2-text">가죽 원자재 시세</span><span class="p2-badge">KITA 연동</span></div>
+    <div class="p2-item"><div class="p2-dot"></div><span class="p2-text">아파트 거래량</span><span class="p2-badge">국토부 API</span></div>
+    <div class="p2-item"><div class="p2-dot"></div><span class="p2-text">신규 입주물량</span><span class="p2-badge">한국부동산원</span></div>
+    <div class="p2-item"><div class="p2-dot"></div><span class="p2-text">네이버 소파 검색 트렌드</span><span class="p2-badge">데이터랩 API</span></div>
+    <div class="p2-item"><div class="p2-dot"></div><span class="p2-text">가구 소매판매지수</span><span class="p2-badge">통계청 KOSIS</span></div>
+  </div>
+</div>
+
+</main>
+
+<!-- ── SCFI MODAL ── -->
+<div class="modal-bg" id="scfiModal">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <span style="font-size:14px;font-weight:600;">SCFI 데이터 입력</span>
+      <button onclick="document.getElementById('scfiModal').classList.remove('show')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div class="modal-grid">
+      <div class="field"><label>기준일</label><input type="text" id="m-date" placeholder="예: 2025-03-21"></div>
+      <div class="field"><label>SCFI 종합</label><input type="number" id="m-overall" placeholder="예: 1243"></div>
+      <div class="field"><label>전주 대비</label><input type="number" id="m-oc"></div>
+      <div class="field"><label>→ 유럽 EUR</label><input type="number" id="m-eur"></div>
+      <div class="field"><label>전주 대비 EUR</label><input type="number" id="m-eur-c"></div>
+      <div class="field"><label>→ 미주(서)</label><input type="number" id="m-usw"></div>
+      <div class="field"><label>전주 대비 USWC</label><input type="number" id="m-usw-c"></div>
+      <div class="field"><label>→ 미주(동)</label><input type="number" id="m-use"></div>
+      <div class="field"><label>전주 대비 USEC</label><input type="number" id="m-use-c"></div>
+      <div class="field"><label>→ 한국</label><input type="number" id="m-kor"></div>
+      <div class="field"><label>전주 대비 KOR</label><input type="number" id="m-kor-c"></div>
+      <div class="field"><label>→ 일본</label><input type="number" id="m-jpn"></div>
+      <div class="field"><label>전주 대비 JPN</label><input type="number" id="m-jpn-c"></div>
+    </div>
+    <button class="btn-primary" onclick="saveScfi()" style="width:100%;">저장</button>
+  </div>
+</div>
+
+<footer class="ftr">
+  <div class="ftr-item"><div class="fdot" style="background:var(--green)"></div>유가·환율: Google Finance (JSONP, CORS 없음)</div>
+  <div class="ftr-item"><div class="fdot" style="background:var(--amber)"></div>SCFI: 수동 입력</div>
+  <div class="ftr-item"><div class="fdot" style="background:var(--t3)"></div>원자재·부동산·트렌드: Phase 2</div>
+</footer>
+
+<script>
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+let sheetId = '';
+let oilChart = null, fxChart = null;
+
+/* ── SETUP ── */
+function toggleSetup(){
+  const b=document.getElementById('setupBody'), a=document.getElementById('setupArrow');
+  const open=b.classList.toggle('open');
+  a.classList.toggle('open',open);
+}
+function saveAndLoad(){
+  const raw=document.getElementById('sheetInput').value.trim();
+  if(!raw){ showMsg('⚠ Sheet ID를 입력하세요.'); return; }
+  // Accept full edit URL or just ID
+  const m=raw.match(/\/spreadsheets\/d\/([^/?#\s]+)/);
+  sheetId = m ? m[1].replace(/\/.*$/,'') : raw.split('/')[0];
+  showMsg('');
+  document.getElementById('setupBody').classList.remove('open');
+  document.getElementById('setupArrow').classList.remove('open');
+  loadAll();
+}
+function showMsg(m){ document.getElementById('setupMsg').textContent=m; }
+
+/* ──────────────────────────────────────────────────
+   JSONP via Google Visualization API (gviz/tq)
+   Works from file:// — no CORS restriction
+   Sheet must be shared as "anyone with link can view"
+──────────────────────────────────────────────────── */
+function fetchSheetJsonp(tabName){
+  return new Promise((resolve, reject) => {
+    const cbName = '_gviz_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&callback=${cbName}&sheet=${encodeURIComponent(tabName)}`;
+
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error(`'${tabName}' 타임아웃 — 시트 공유 설정을 확인하세요.`));
+    }, 15000);
+
+    function cleanup(){
+      clearTimeout(timer);
+      delete window[cbName];
+      const s = document.getElementById(cbName);
+      if(s) s.remove();
+    }
+
+    window[cbName] = function(data){
+      cleanup();
+      try{ resolve(parseGviz(data, tabName)); }
+      catch(e){ reject(e); }
+    };
+
+    const script = document.createElement('script');
+    script.id = cbName;
+    script.src = url;
+    script.onerror = () => {
+      cleanup();
+      reject(new Error(`'${tabName}' 로드 실패 — Sheet ID 또는 공유 설정을 확인하세요.`));
+    };
+    document.head.appendChild(script);
+  });
+}
+
+function parseGviz(data, tabName){
+  if(!data || !data.table) throw new Error(`'${tabName}': 데이터 없음`);
+  const rows = data.table.rows;
+  if(!rows || rows.length === 0) throw new Error(`'${tabName}': 행 없음 — 수식이 입력되었는지 확인하세요.`);
+  const result = [];
+  for(const row of rows){
+    if(!row.c || row.c.length < 2) continue;
+    const dateCell = row.c[0], valCell = row.c[1];
+    if(!dateCell || !valCell || valCell.v === null) continue;
+    // gviz date format: Date(year, month0indexed, day)
+    let dateStr = '';
+    if(dateCell.v && typeof dateCell.v === 'string' && dateCell.v.startsWith('Date(')){
+      const parts = dateCell.v.replace('Date(','').replace(')','').split(',').map(Number);
+      const d = new Date(parts[0], parts[1], parts[2]);
+      dateStr = d.toISOString().split('T')[0];
+    } else if(dateCell.f){
+      // formatted value fallback
+      const d = new Date(dateCell.f);
+      if(!isNaN(d.getTime())) dateStr = d.toISOString().split('T')[0];
+    }
+    if(!dateStr) continue;
+    const val = typeof valCell.v === 'number' ? valCell.v : parseFloat(valCell.v);
+    if(isNaN(val)) continue;
+    result.push({date: dateStr, value: val});
+  }
+  if(result.length === 0) throw new Error(`'${tabName}': 파싱 가능한 데이터 없음`);
+  return result.sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+/* ── CARDS ── */
+function renderCard(elId, data, unit, dec){
+  const el=document.getElementById(elId);
+  if(!data||data.length<2){ el.innerHTML=`<div class="mcard-err">⚠ 데이터 부족</div>`; return; }
+  const last=data[data.length-1], prev=data[data.length-2];
+  const v=last.value, p=prev.value, chg=v-p, pct=chg/p*100;
+  const dir=chg>=0?'up':'dn', arr=chg>=0?'▲':'▼';
+  el.innerHTML=`
+    <div><span class="mcard-num">${v.toLocaleString('ko-KR',{minimumFractionDigits:dec,maximumFractionDigits:dec})}</span><span class="mcard-unit">${unit}</span></div>
+    <div class="mcard-chg ${dir}">${arr} ${Math.abs(chg).toFixed(dec)} (${Math.abs(pct).toFixed(1)}%)</div>
+    <div class="mcard-date">기준: ${last.date} · Google Finance</div>`;
+}
+function setLoading(id){ document.getElementById(id).innerHTML=`<div class="mcard-loading"><span class="spin">⟳</span>불러오는 중...</div>`; }
+function setError(id, msg){ document.getElementById(id).innerHTML=`<div class="mcard-err">⚠ ${msg}</div>`; }
+
+/* ── CHARTS ── */
+const COPT={responsive:true,maintainAspectRatio:false,animation:{duration:500},interaction:{mode:'index',intersect:false},
+  plugins:{legend:{display:false},tooltip:{backgroundColor:'#1A1D28',borderColor:'#2E3248',borderWidth:1,titleColor:'#838799',bodyColor:'#E2E5EF',padding:10,cornerRadius:8}},
+  scales:{x:{grid:{color:'#222536'},ticks:{color:'#464A62',font:{size:10},maxTicksLimit:8}},y:{grid:{color:'#222536'},ticks:{color:'#838799',font:{size:10}}}}};
+
+function buildOilChart(wti, brent){
+  const el=document.getElementById('oilChart'), empty=document.getElementById('oilChartEmpty');
+  const n=Math.min(wti.length,brent.length,50), w=wti.slice(-n), b=brent.slice(-n);
+  empty.style.display='none'; el.style.display='block';
+  if(oilChart) oilChart.destroy();
+  oilChart=new Chart(el,{type:'line',data:{labels:w.map(d=>d.date.slice(5)),datasets:[
+    {label:'USO(WTI)',data:w.map(d=>d.value.toFixed(2)),borderColor:'#F5A623',backgroundColor:'rgba(245,166,35,.08)',borderWidth:1.5,pointRadius:0,tension:.35,fill:true},
+    {label:'BNO(Brent)',data:b.map(d=>d.value.toFixed(2)),borderColor:'#FB923C',borderWidth:1.5,pointRadius:0,tension:.35}
+  ]},options:{...COPT,plugins:{...COPT.plugins,legend:{display:true,labels:{color:'#838799',boxWidth:10,boxHeight:2,font:{size:11}}}}}});
+}
+
+function buildFxChart(usd, cny, eur){
+  const el=document.getElementById('fxChart'), empty=document.getElementById('fxChartEmpty');
+  const n=30, us=usd.slice(-n);
+  const cnMap=Object.fromEntries(cny.map(d=>[d.date,d.value]));
+  const euMap=Object.fromEntries(eur.map(d=>[d.date,d.value]));
+  empty.style.display='none'; el.style.display='block';
+  if(fxChart) fxChart.destroy();
+  fxChart=new Chart(el,{type:'line',data:{labels:us.map(d=>d.date.slice(5)),datasets:[
+    {label:'USD/KRW',data:us.map(d=>Math.round(d.value)),borderColor:'#4E9BF5',backgroundColor:'rgba(78,155,245,.07)',borderWidth:1.5,pointRadius:0,tension:.35,fill:true},
+    {label:'EUR/KRW',data:us.map(d=>Math.round(euMap[d.date]||0)||null),borderColor:'#A78BFA',borderWidth:1.5,pointRadius:0,tension:.35},
+    {label:'CNY×10',data:us.map(d=>cnMap[d.date]?(cnMap[d.date]*10).toFixed(1):null),borderColor:'#22C55E',borderWidth:1.5,pointRadius:0,tension:.35}
+  ]},options:{...COPT,plugins:{...COPT.plugins,legend:{display:true,labels:{color:'#838799',boxWidth:10,boxHeight:2,font:{size:11}}}},
+    scales:{x:{grid:{color:'#222536'},ticks:{color:'#464A62',font:{size:10},maxTicksLimit:8}},y:{grid:{color:'#222536'},ticks:{color:'#838799',font:{size:10},callback:v=>v.toLocaleString('ko-KR')}}}}});
+}
+
+/* ── MAIN LOAD ── */
+async function loadAll(){
+  if(!sheetId){ showMsg('⚠ Sheet ID를 먼저 입력하세요.'); return; }
+  const btn=document.getElementById('btnRefresh');
+  btn.disabled=true; btn.textContent='로딩 중...';
+  ['wti-val','brent-val','usd-val','cny-val','eur-val'].forEach(setLoading);
+
+  const [oilRes, fxRes] = await Promise.allSettled([
+    Promise.all([fetchSheetJsonp('WTI'), fetchSheetJsonp('Brent')]),
+    Promise.all([fetchSheetJsonp('USDKRW'), fetchSheetJsonp('CNYKRW'), fetchSheetJsonp('EURKRW')])
+  ]);
+
+  if(oilRes.status==='fulfilled'){
+    const [wti,brent]=oilRes.value;
+    renderCard('wti-val',wti,'USD/주',2);
+    renderCard('brent-val',brent,'USD/주',2);
+    if(wti.length&&brent.length) buildOilChart(wti,brent);
+  } else {
+    setError('wti-val',oilRes.reason.message);
+    setError('brent-val',oilRes.reason.message);
+    document.getElementById('oilChartEmpty').textContent='로드 실패 — 설정 확인 필요';
+  }
+
+  if(fxRes.status==='fulfilled'){
+    const [usd,cny,eur]=fxRes.value;
+    renderCard('usd-val',usd,'원',2);
+    renderCard('cny-val',cny,'원/위안',2);
+    renderCard('eur-val',eur,'원/유로',2);
+    if(usd.length) buildFxChart(usd,cny,eur);
+  } else {
+    ['usd-val','cny-val','eur-val'].forEach(id=>setError(id,fxRes.reason.message));
+    document.getElementById('fxChartEmpty').textContent='로드 실패 — 설정 확인 필요';
+  }
+
+  document.getElementById('ts').textContent='마지막 업데이트: '+new Date().toLocaleString('ko-KR');
+  btn.disabled=false; btn.textContent='↻ 새로고침';
+}
+
+/* ── SCFI ── */
+function gi(id){ return document.getElementById(id).value.trim(); }
+function fmtChg(v){
+  if(!v) return '<span style="color:var(--t3)">—</span>';
+  const n=parseFloat(v),cls=n>=0?'up':'dn',arr=n>=0?'▲':'▼';
+  return `<span class="${cls}">${arr} ${Math.abs(n).toLocaleString()}</span>`;
+}
+function saveScfi(){
+  const ov=gi('m-overall');
+  if(!ov){ alert('SCFI 종합 값을 입력하세요.'); return; }
+  document.getElementById('scfi-overall').textContent=parseFloat(ov).toLocaleString();
+  document.getElementById('scfi-chg').innerHTML=fmtChg(gi('m-oc'));
+  document.getElementById('scfi-date').textContent=gi('m-date')||'—';
+  [['eur','m-eur','m-eur-c'],['usw','m-usw','m-usw-c'],['use','m-use','m-use-c'],
+   ['kor','m-kor','m-kor-c'],['jpn','m-jpn','m-jpn-c']].forEach(([id,n,c])=>{
+    const v=gi(n);
+    document.getElementById(`sr-${id}`).textContent=v?parseFloat(v).toLocaleString():'—';
+    document.getElementById(`sc-${id}`).innerHTML=fmtChg(gi(c));
+  });
+  document.getElementById('scfiModal').classList.remove('show');
+}
+document.getElementById('scfiModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+</script>
+</body>
+</html>
