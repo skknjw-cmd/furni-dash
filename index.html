@@ -395,28 +395,29 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
 <!-- ── 아파트 거래량 · 신규 입주물량 ── -->
 <div class="sec-hdr">
   <span class="sec-title">🏠 아파트 거래량 · 신규 입주물량</span>
-  <span class="sec-src">출처: 국토부 실거래가 API (서울시) + 공공데이터포털 — API 키 필요</span>
+  <span class="sec-src">거래량: 국토부 실거래가 API · 입주물량: 국토부 주택건설실적 API · 모두 공공데이터포털 키 사용</span>
 </div>
 
 <!-- API 키 설정 패널 -->
 <div id="aptApiPanel" style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
     <div>
-      <div style="font-size:12px;font-weight:600;color:var(--t2);">공공데이터포털 API 키 설정</div>
-      <div style="font-size:10px;color:var(--t3);margin-top:2px;">무료 발급 → <a href="https://www.data.go.kr" target="_blank">data.go.kr</a> 회원가입 후 "아파트매매 실거래 상세 자료" 활용신청 (자동승인)</div>
+      <div style="font-size:12px;font-weight:600;color:var(--t2);">공공데이터포털 API 키 (거래량 + 입주물량 동시 사용)</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:2px;">
+        <a href="https://www.data.go.kr/data/15126469/openapi.do" target="_blank">아파트매매 실거래 상세 자료</a> +
+        <a href="https://www.data.go.kr/data/15045033/openapi.do" target="_blank">주택건설실적 조회</a> — 동일 키로 두 API 모두 사용 (각각 활용신청 필요)
+      </div>
     </div>
     <span id="aptApiStatus" style="font-size:10px;color:var(--t3);">미설정</span>
   </div>
-  <div style="display:flex;gap:10px;align-items:flex-end;">
-    <div style="flex:1;">
-      <div style="font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Decoding 키 (일반 인증키)</div>
-      <input type="password" id="aptApiKey" placeholder="공공데이터포털 일반 인증키(Decoding) 붙여넣기"
-        style="width:100%;padding:8px 12px;background:var(--bg);border:1px solid var(--b1);border-radius:6px;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:11px;transition:border .12s;"
-        onfocus="this.style.borderColor='var(--amber)'" onblur="this.style.borderColor='var(--b1)'">
-    </div>
+  <div style="display:flex;gap:8px;align-items:flex-end;">
+    <input type="password" id="aptApiKey" placeholder="공공데이터포털 Decoding 키 붙여넣기"
+      style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--b1);border-radius:6px;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:11px;transition:border .12s;"
+      onfocus="this.style.borderColor='var(--amber)'" onblur="this.style.borderColor='var(--b1)'">
     <button class="btn-solid" onclick="saveAptKey()" style="height:34px;padding:0 18px;font-size:12px;white-space:nowrap;">저장 후 불러오기</button>
+    <button class="btn" onclick="diagApt()" style="height:34px;padding:0 12px;font-size:11px;white-space:nowrap;" title="API 연결 테스트">🔍 진단</button>
   </div>
-  <div id="aptApiMsg" style="font-size:11px;color:var(--t3);margin-top:8px;"></div>
+  <div id="aptApiMsg" style="font-size:11px;margin-top:8px;"></div>
 </div>
 
 <!-- KPI 카드 -->
@@ -470,6 +471,17 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
   입주물량 증가 후 <strong style="color:var(--t1);">3~6개월 시차</strong>로 소파 수요 피크가 옵니다.
   거래량 증가 → 이사 수요 → 새 가구 구매 사이클.
   거래량은 서울 기준이지만 전국 트렌드와 방향성이 일치합니다.
+</div>
+
+<!-- 주택건설실적 API 신청 안내 (미신청 시 표시) -->
+<div id="supplyApplyNote" style="display:none;background:var(--s1);border:1px solid var(--amber);border-radius:var(--r);padding:14px 18px;margin-bottom:12px;font-size:11px;color:var(--t3);line-height:1.8;">
+  <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:6px;">입주물량 API 활용신청 안내</div>
+  거래량과 동일한 data.go.kr 계정으로 신청합니다. 자동승인 · 무료.<br>
+  <a href="https://www.data.go.kr/data/15045033/openapi.do" target="_blank"
+    style="display:inline-block;margin-top:6px;padding:5px 14px;background:var(--amber);color:#000;border-radius:5px;font-weight:600;font-size:11px;text-decoration:none;">
+    → data.go.kr 주택건설실적 조회 서비스 활용신청
+  </a>
+  <span style="margin-left:10px;font-size:10px;color:var(--t3);">신청 후 키 저장을 다시 누르면 자동 수집됩니다.</span>
 </div>
 
 <!-- ── PHASE 2 (남은 항목) ── -->
@@ -947,16 +959,17 @@ function saveAptKey(){
   if(!key){ setAptMsg('⚠ API 키를 입력하세요.', 'red'); return; }
   aptApiKey = key;
   localStorage.setItem('apt_api_key', key);
-  setAptMsg('', '');
   document.getElementById('aptApiPanel').style.borderColor = 'var(--green)';
   document.getElementById('aptApiStatus').textContent = '✓ 설정됨';
   document.getElementById('aptApiStatus').style.color = 'var(--green)';
+  setAptMsg('✓ 저장됨 — 데이터 수집 시작', 'green');
   loadAptData();
+  loadSupplyData();
 }
 function setAptMsg(m, c){
   const el = document.getElementById('aptApiMsg');
   el.textContent = m;
-  el.style.color = c==='red' ? 'var(--red)' : 'var(--t3)';
+  el.style.color = c==='red' ? 'var(--red)' : c==='green' ? 'var(--green)' : 'var(--t3)';
 }
 
 // 저장된 키 복원
@@ -971,56 +984,90 @@ function setAptMsg(m, c){
   }
 })();
 
-/* ── 국토부 아파트 매매 거래량 (월별 서울 전체) ── */
+/* ── 국토부 아파트 매매 거래량 ── */
+// ※ serviceKey는 Decoding 키를 그대로 사용 (encodeURIComponent 금지)
 async function fetchAptTradeMonth(ym){
-  // 25개 구 병렬 호출, totalCount만 조회 (numOfRows=1)
+  // 서울 대표 구 코드 25개 (법정동 앞 5자리)
   const results = await Promise.allSettled(
     SEOUL_GU.map(code => {
-      const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev?serviceKey=${encodeURIComponent(aptApiKey)}&LAWD_CD=${code}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1`;
-      return fetch(url, {signal: AbortSignal.timeout(10000)})
+      const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev` +
+        `?serviceKey=${aptApiKey}&LAWD_CD=${code}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1`;
+      return fetch(url, {signal: AbortSignal.timeout(12000)})
         .then(r => r.text())
         .then(xml => {
           const doc = new DOMParser().parseFromString(xml, 'text/xml');
+          // 오류 응답 확인
+          const code_ = doc.querySelector('resultCode')?.textContent;
+          if(code_ && code_ !== '00' && code_ !== '0000') return 0;
           const tc = doc.querySelector('totalCount');
-          return tc ? parseInt(tc.textContent)||0 : 0;
+          return tc ? (parseInt(tc.textContent)||0) : 0;
         })
         .catch(() => 0);
     })
   );
-  return results.reduce((sum, r) => sum + (r.status==='fulfilled' ? r.value : 0), 0);
+  const total = results.reduce((sum,r) => sum + (r.status==='fulfilled' ? r.value : 0), 0);
+  return total;
 }
 
-/* ── 국토부 주택 준공 실적 (신규 입주물량) ── */
-async function fetchAptSupplyMonth(ym){
-  // 주택건설 인허가 실적 API (준공 기준)
-  const url = `https://apis.data.go.kr/1613000/HSP_NEWDATA_PLAN_INFO_OPENAPI_SERVICE/getHspNewDataPlanInfoData?serviceKey=${encodeURIComponent(aptApiKey)}&numOfRows=100&pageNo=1&strtYm=${ym}&endYm=${ym}&houseType=1`; // houseType=1: 아파트
+/* ── 국토부 주택건설실적 — 아파트 준공 가구수 ── */
+// API: 국토교통부 주택건설실적 (data.go.kr/data/15045033)
+// 서울 기준 아파트 준공 월별 집계
+async function fetchSupplyMonth(ym){
+  const url = `https://apis.data.go.kr/1613000/HousesBuildingService/getHousesBuildingResult` +
+    `?serviceKey=${aptApiKey}&pageNo=1&numOfRows=1000&strtYm=${ym}&endYm=${ym}`;
   try{
-    const r = await fetch(url, {signal: AbortSignal.timeout(10000)});
-    const xml = await r.text();
-    const doc = new DOMParser().parseFromString(xml, 'text/xml');
-    const items = doc.querySelectorAll('item');
-    let total = 0;
-    items.forEach(item => {
-      const cnt = item.querySelector('hhldCnt, houseCnt, totHhldCnt');
-      if(cnt) total += parseInt(cnt.textContent)||0;
-    });
-    // totalCount fallback
-    if(total===0){
-      const tc = doc.querySelector('totalCount');
-      if(tc) total = parseInt(tc.textContent)||0;
+    const r = await fetch(url, {signal: AbortSignal.timeout(12000)});
+    const text = await r.text();
+    const doc = new DOMParser().parseFromString(text, 'text/xml');
+
+    // 오류 코드 감지
+    const resultCode = doc.querySelector('resultCode')?.textContent || '';
+    const resultMsg  = doc.querySelector('resultMsg')?.textContent  || '';
+    if(resultCode === '03' || resultMsg.includes('SERVICE_KEY') || resultMsg.includes('NOT_REGISTERED')){
+      return {err: '활용신청 필요'};
     }
-    return total;
-  } catch { return null; }
+    if(resultCode !== '00' && resultCode !== '0000' && resultCode !== ''){
+      return {err: `오류코드: ${resultCode}`};
+    }
+
+    // 아파트 준공 가구수 합산
+    let total = 0;
+    doc.querySelectorAll('item').forEach(item => {
+      const houseType = (item.querySelector('houseType')?.textContent || '').trim();
+      const bizStat   = (item.querySelector('bizStat')?.textContent   || '').trim();
+      // 아파트 + 준공 조건
+      if((houseType === '아파트' || houseType === '' ) &&
+         (bizStat === '준공' || bizStat === '사용승인' || bizStat === '')){
+        // 여러 가구수 필드 시도
+        const cnt =
+          parseInt(item.querySelector('hhldCnt')?.textContent)  ||
+          parseInt(item.querySelector('houseCnt')?.textContent) ||
+          parseInt(item.querySelector('totCnt')?.textContent)   || 0;
+        total += cnt;
+      }
+    });
+    return {val: total};
+  } catch(e){
+    console.warn('supply fetch error:', ym, e.message);
+    return {val: 0};
+  }
 }
 
-// 12개월 배열 생성 (최근 12개월 YYYYMM 형식)
+// 12개월 배열
 function getLast12Months(){
-  const months = [];
-  const now = new Date();
-  for(let i=11; i>=0; i--){
-    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    const ym = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;
-    months.push(ym);
+  const months=[], now=new Date();
+  for(let i=11;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`);
+  }
+  return months;
+}
+// 14개월 (실거래가 2개월 처리 지연 감안)
+function getLast14Months(){
+  const months=[], now=new Date();
+  for(let i=13;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`);
   }
   return months;
 }
@@ -1077,49 +1124,101 @@ function updateAptKpi(valId, chgId, values, label){
   }
 }
 
-/* ── 메인 아파트 데이터 로드 ── */
+/* ── API 응답 진단 ── */
+async function diagApt(){
+  if(!aptApiKey){ alert('먼저 API 키를 저장하세요.'); return; }
+  const now = new Date();
+  // 2개월 전 데이터 (처리 지연 감안)
+  const d = new Date(now.getFullYear(), now.getMonth()-2, 1);
+  const ym = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;
+  const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev` +
+    `?serviceKey=${aptApiKey}&LAWD_CD=11110&DEAL_YMD=${ym}&pageNo=1&numOfRows=3`;
+  try{
+    const r = await fetch(url, {signal: AbortSignal.timeout(10000)});
+    const txt = await r.text();
+    const resultCode = new DOMParser().parseFromString(txt,'text/xml').querySelector('resultCode')?.textContent;
+    const totalCount = new DOMParser().parseFromString(txt,'text/xml').querySelector('totalCount')?.textContent;
+    if(resultCode === '30') alert(`❌ API 키 오류 (resultCode:${resultCode})\n공공데이터포털에서 Decoding 키를 다시 확인하세요.`);
+    else if(resultCode === '03') alert(`❌ API 미신청 (resultCode:${resultCode})\ndata.go.kr에서 "아파트매매 실거래 상세 자료" 활용신청을 확인하세요.`);
+    else if(resultCode === '00') alert(`✅ API 정상 (resultCode:00)\n${ym} 종로구 거래건수: ${totalCount}건\n\n데이터가 0이면 국토부 처리 지연입니다. 2~3개월 전 데이터가 정상 범위입니다.`);
+    else alert(`응답 코드: ${resultCode}\n\n원본 응답(첫 300자):\n${txt.slice(0,300)}`);
+  } catch(e){
+    alert(`네트워크 오류: ${e.message}`);
+  }
+}
+
+/* ── 메인 아파트 거래량 로드 ── */
 async function loadAptData(){
   if(!aptApiKey) return;
-  const months = getLast12Months();
+  // 국토부 실거래가는 2개월 지연 → 최근 14개월 요청, 최신 12개월 표시
+  const months = getLast14Months();
   const labels = months.map(ymLabel);
 
-  // 거래량 로딩 표시
-  document.getElementById('apt-trade-val').innerHTML = '<div class="kpi-loading"><span class="spin">⟳</span>수집 중...</div>';
-  document.getElementById('apt-supply-val').innerHTML = '<div class="kpi-loading"><span class="spin">⟳</span>수집 중...</div>';
+  document.getElementById('apt-trade-val').innerHTML = '<div class="kpi-loading"><span class="spin">⟳</span>수집 중 (약 1~2분)...</div>';
   document.getElementById('tradeChartEmpty').innerHTML = '<span class="spin">⟳</span> 서울시 25개 구 데이터 수집 중...';
 
   try{
-    // 거래량: 최근 12개월 순차 로드 (병렬이면 API 한도 초과 위험)
     const tradeVals = [];
     for(const ym of months){
       const cnt = await fetchAptTradeMonth(ym);
       tradeVals.push(cnt);
     }
-    updateAptKpi('apt-trade-val','apt-trade-chg', tradeVals, '건');
-    buildAptChart('tradeChart','tradeChartEmpty', labels, tradeVals, '#58A6FF', tradeChart, c=>{tradeChart=c;});
+    // 데이터가 있는 최근 12개월만 표시
+    const validIdx = tradeVals.map((v,i)=>v>0?i:-1).filter(i=>i>=0);
+    const slice12 = validIdx.length >= 12
+      ? {vals: tradeVals.slice(validIdx[validIdx.length-12]), labs: labels.slice(validIdx[validIdx.length-12])}
+      : {vals: tradeVals, labs: labels};
 
-    // 입주물량 (별도 엔드포인트 — 실패 시 graceful)
-    const supplyVals = [];
-    for(const ym of months){
-      const cnt = await fetchAptSupplyMonth(ym);
-      supplyVals.push(cnt||0);
-    }
-    if(supplyVals.some(v=>v>0)){
-      updateAptKpi('apt-supply-val','apt-supply-chg', supplyVals, '가구');
-      buildAptChart('supplyChart','supplyChartEmpty', labels, supplyVals, '#F0883E', supplyChart, c=>{supplyChart=c;});
-    } else {
-      document.getElementById('apt-supply-val').innerHTML = '<div class="kpi-err" style="font-size:10px;">입주물량 API 별도 신청 필요</div>';
-      document.getElementById('supplyChartEmpty').textContent = '주택건설실적 API 별도 활용신청 필요';
-      setAptMsg('거래량 수집 완료. 입주물량은 data.go.kr에서 "주택건설실적" API 별도 신청 후 이용 가능합니다.','');
-    }
+    updateAptKpi('apt-trade-val','apt-trade-chg', slice12.vals, '건');
+    buildAptChart('tradeChart','tradeChartEmpty', slice12.labs, slice12.vals, '#58A6FF', tradeChart, c=>{tradeChart=c;});
+    setAptMsg('✓ 거래량 수집 완료 (2개월 처리 지연 반영)', 'green');
   } catch(e){
     document.getElementById('apt-trade-val').innerHTML = `<div class="kpi-err">${e.message}</div>`;
     setAptMsg(`오류: ${e.message}`, 'red');
   }
 }
 
+/* ── 입주물량 로드 (data.go.kr 주택건설실적) ── */
+async function loadSupplyData(){
+  if(!aptApiKey) return;
+  const months = getLast12Months();
+  const labels = months.map(ymLabel);
+
+  document.getElementById('apt-supply-val').innerHTML = '<div class="kpi-loading"><span class="spin">⟳</span>수집 중...</div>';
+  document.getElementById('supplyChartEmpty').innerHTML = '<span class="spin">⟳</span> 주택건설실적 수집 중...';
+
+  const supplyVals = [];
+  let needApply = false;
+
+  for(const ym of months){
+    const res = await fetchSupplyMonth(ym);
+    if(res?.err){ needApply = true; supplyVals.push(0); }
+    else supplyVals.push(res?.val || 0);
+  }
+
+  if(needApply){
+    document.getElementById('apt-supply-val').innerHTML =
+      '<div class="kpi-err" style="font-size:10px;line-height:1.5;">주택건설실적 API<br>별도 활용신청 필요</div>';
+    document.getElementById('supplyChartEmpty').textContent = '';
+    setAptMsg('⚠ 입주물량: data.go.kr에서 "주택건설실적 조회" 별도 신청 필요 (무료, 자동승인) → data.go.kr/data/15045033', 'orange');
+    // supply 안내 배너 표시
+    document.getElementById('supplyApplyNote').style.display='block';
+    return;
+  }
+
+  if(supplyVals.some(v=>v>0)){
+    updateAptKpi('apt-supply-val','apt-supply-chg', supplyVals, '가구');
+    buildAptChart('supplyChart','supplyChartEmpty', labels, supplyVals, '#F0883E', supplyChart, c=>{supplyChart=c;});
+    setAptMsg('✓ 거래량 + 입주물량 수집 완료', 'green');
+  } else {
+    document.getElementById('apt-supply-val').innerHTML = '<div class="kpi-err" style="font-size:10px;">데이터 없음 (API 신청 필요)</div>';
+    document.getElementById('supplyChartEmpty').textContent = '주택건설실적 API 활용신청 필요';
+    document.getElementById('supplyApplyNote').style.display='block';
+  }
+}
+
 // 저장된 키 있으면 자동 로드
-if(aptApiKey) loadAptData();
+if(aptApiKey){ loadAptData(); loadSupplyData(); }
 
 /* ── 초기 렌더 ── */
 ['cn','it','vn'].forEach(renderFreightSection);
@@ -1128,6 +1227,7 @@ loadAll();
 </script>
 </body>
 </html>
+
 
 
 
