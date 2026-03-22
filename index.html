@@ -167,17 +167,31 @@ a{color:var(--blue);text-decoration:none;}
 <!-- 차트 -->
 <div class="charts">
   <div class="ccrd">
-    <div class="ctitle">유가 추이 ($/bbl)</div>
+    <div class="ctitle">유가 추이 — 3개월 ($/bbl)</div>
     <div class="cwrap">
       <div class="chart-empty" id="oilChartEmpty">불러오는 중...</div>
       <canvas id="oilChart" style="display:none"></canvas>
     </div>
   </div>
   <div class="ccrd">
-    <div class="ctitle">환율 추이 (원)</div>
+    <div class="ctitle">USD / KRW — 3개월</div>
     <div class="cwrap">
-      <div class="chart-empty" id="fxChartEmpty">불러오는 중...</div>
-      <canvas id="fxChart" style="display:none"></canvas>
+      <div class="chart-empty" id="usdChartEmpty">불러오는 중...</div>
+      <canvas id="usdChart" style="display:none"></canvas>
+    </div>
+  </div>
+  <div class="ccrd">
+    <div class="ctitle">EUR / KRW — 3개월</div>
+    <div class="cwrap">
+      <div class="chart-empty" id="eurChartEmpty">불러오는 중...</div>
+      <canvas id="eurChart" style="display:none"></canvas>
+    </div>
+  </div>
+  <div class="ccrd">
+    <div class="ctitle">CNY / KRW — 3개월</div>
+    <div class="cwrap">
+      <div class="chart-empty" id="cnyChartEmpty">불러오는 중...</div>
+      <canvas id="cnyChart" style="display:none"></canvas>
     </div>
   </div>
 </div>
@@ -266,7 +280,7 @@ a{color:var(--blue);text-decoration:none;}
 
 <script>
 Chart.defaults.font.family = "'DM Sans', sans-serif";
-let oilChart = null, fxChart = null;
+let oilChart = null;
 
 /* ── 유가: GitHub raw CSV (EIA 공공도메인 데이터, CORS 지원, 키 불필요) ── */
 async function fetchOilCSV(type){
@@ -287,10 +301,10 @@ async function fetchOilCSV(type){
     .slice(-65); // 최근 65일
 }
 
-/* ── Frankfurter API (환율, 키 없음, CORS 지원) ── */
+/* ── Frankfurter API — 3개월 (91일) ── */
 async function fetchFX(){
   const end   = new Date();
-  const start = new Date(+end - 45 * 864e5);
+  const start = new Date(+end - 91 * 864e5);
   const fmt   = d => d.toISOString().split('T')[0];
   const url   = `https://api.frankfurter.app/${fmt(start)}..${fmt(end)}?from=USD&to=KRW,CNY,EUR`;
   const r = await fetch(url, {signal: AbortSignal.timeout(15000)});
@@ -320,17 +334,25 @@ function renderCard(id, data, unit, dec){
 function setLoading(id){ document.getElementById(id).innerHTML=`<div class="mcard-loading"><span class="spin">⟳</span>불러오는 중...</div>`; }
 function setError(id, msg){ document.getElementById(id).innerHTML=`<div class="mcard-err">⚠ ${msg}</div>`; }
 
-/* ── 차트 ── */
+/* ── 차트 공통 옵션 ── */
 const CO = {
   responsive:true, maintainAspectRatio:false, animation:{duration:500},
   interaction:{mode:'index', intersect:false},
   plugins:{legend:{display:false}, tooltip:{backgroundColor:'#1A1D28',borderColor:'#2E3248',borderWidth:1,titleColor:'#838799',bodyColor:'#E2E5EF',padding:10,cornerRadius:8}},
-  scales:{x:{grid:{color:'#222536'},ticks:{color:'#464A62',font:{size:10},maxTicksLimit:8}}, y:{grid:{color:'#222536'},ticks:{color:'#838799',font:{size:10}}}}
 };
+
+function makeScales(callback){
+  return {
+    x:{grid:{color:'#222536'}, ticks:{color:'#464A62',font:{size:10},maxTicksLimit:10}},
+    y:{grid:{color:'#222536'}, ticks:{color:'#838799',font:{size:10}, callback: callback || (v=>v)}}
+  };
+}
+
+let usdChart=null, eurChart=null, cnyChart=null;
 
 function buildOilChart(wti, brent){
   const el=document.getElementById('oilChart'), empty=document.getElementById('oilChartEmpty');
-  const n=Math.min(wti.length, brent.length, 50), w=wti.slice(-n), b=brent.slice(-n);
+  const n=Math.min(wti.length, brent.length, 65), w=wti.slice(-n), b=brent.slice(-n);
   empty.style.display='none'; el.style.display='block';
   if(oilChart) oilChart.destroy();
   oilChart = new Chart(el,{type:'line',data:{
@@ -339,28 +361,33 @@ function buildOilChart(wti, brent){
       {label:'WTI',  data:w.map(d=>d.value.toFixed(2)), borderColor:'#F5A623', backgroundColor:'rgba(245,166,35,.08)', borderWidth:1.5, pointRadius:0, tension:.35, fill:true},
       {label:'Brent',data:b.map(d=>d.value.toFixed(2)), borderColor:'#FB923C', borderWidth:1.5, pointRadius:0, tension:.35}
     ]
-  }, options:{...CO, plugins:{...CO.plugins, legend:{display:true, labels:{color:'#838799',boxWidth:10,boxHeight:2,font:{size:11}}}}}});
-}
-
-function buildFxChart(fx){
-  const el=document.getElementById('fxChart'), empty=document.getElementById('fxChartEmpty');
-  const n=30, us=fx.usd.slice(-n), cn=fx.cny.slice(-n), eu=fx.eur.slice(-n);
-  empty.style.display='none'; el.style.display='block';
-  if(fxChart) fxChart.destroy();
-  fxChart = new Chart(el,{type:'line',data:{
-    labels: us.map(d=>d.date.slice(5)),
-    datasets:[
-      {label:'USD/KRW', data:us.map(d=>Math.round(d.value)), borderColor:'#4E9BF5', backgroundColor:'rgba(78,155,245,.07)', borderWidth:1.5, pointRadius:0, tension:.35, fill:true},
-      {label:'EUR/KRW', data:eu.map(d=>Math.round(d.value)), borderColor:'#A78BFA', borderWidth:1.5, pointRadius:0, tension:.35},
-      {label:'CNY×10',  data:cn.map(d=>(d.value*10).toFixed(1)), borderColor:'#22C55E', borderWidth:1.5, pointRadius:0, tension:.35}
-    ]
   }, options:{...CO,
     plugins:{...CO.plugins, legend:{display:true, labels:{color:'#838799',boxWidth:10,boxHeight:2,font:{size:11}}}},
-    scales:{
-      x:{grid:{color:'#222536'},ticks:{color:'#464A62',font:{size:10},maxTicksLimit:8}},
-      y:{grid:{color:'#222536'},ticks:{color:'#838799',font:{size:10}, callback:v=>v.toLocaleString('ko-KR')}}
-    }
+    scales: makeScales(v => v.toFixed(0))
   }});
+}
+
+function buildSingleFxChart(canvasId, emptyId, data, color, label, chartRef, setter){
+  const el=document.getElementById(canvasId), empty=document.getElementById(emptyId);
+  empty.style.display='none'; el.style.display='block';
+  if(chartRef) chartRef.destroy();
+  const c = new Chart(el,{type:'line',data:{
+    labels: data.map(d=>d.date.slice(5)),
+    datasets:[{
+      label, data: data.map(d=>Math.round(d.value)),
+      borderColor: color, backgroundColor: color.replace(')',',0.08)').replace('rgb','rgba'),
+      borderWidth:1.5, pointRadius:0, tension:.35, fill:true
+    }]
+  }, options:{...CO,
+    scales: makeScales(v => v.toLocaleString('ko-KR'))
+  }});
+  setter(c);
+}
+
+function buildFxCharts(fx){
+  buildSingleFxChart('usdChart','usdChartEmpty', fx.usd, '#4E9BF5', 'USD/KRW', usdChart, c=>{usdChart=c;});
+  buildSingleFxChart('eurChart','eurChartEmpty', fx.eur, '#A78BFA', 'EUR/KRW', eurChart, c=>{eurChart=c;});
+  buildSingleFxChart('cnyChart','cnyChartEmpty', fx.cny, '#22C55E', 'CNY/KRW', cnyChart, c=>{cnyChart=c;});
 }
 
 /* ── 메인 로드 ── */
@@ -390,10 +417,12 @@ async function loadAll(){
     renderCard('usd-val', fx.usd, '원',     2);
     renderCard('cny-val', fx.cny, '원/위안', 2);
     renderCard('eur-val', fx.eur, '원/유로', 2);
-    buildFxChart(fx);
+    buildFxCharts(fx);
   } else {
     ['usd-val','cny-val','eur-val'].forEach(id => setError(id, fxRes.reason.message));
-    document.getElementById('fxChartEmpty').textContent = '로드 실패: ' + fxRes.reason.message;
+    ['usdChartEmpty','eurChartEmpty','cnyChartEmpty'].forEach(id => {
+      document.getElementById(id).textContent = '로드 실패: ' + fxRes.reason.message;
+    });
   }
 
   document.getElementById('ts').textContent = '마지막 업데이트: ' + new Date().toLocaleString('ko-KR');
@@ -427,5 +456,6 @@ loadAll();
 </script>
 </body>
 </html>
+
 
 
