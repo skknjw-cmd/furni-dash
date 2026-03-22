@@ -984,14 +984,15 @@ function setAptMsg(m, c){
   }
 })();
 
+/* ── 키 인코딩 헬퍼: Encoding키(%포함)→그대로, Decoding키→encodeURIComponent ── */
+function encKey(){ return aptApiKey.includes('%') ? aptApiKey : encodeURIComponent(aptApiKey); }
+
 /* ── 국토부 아파트 매매 거래량 ── */
-// ※ serviceKey는 Decoding 키를 그대로 사용 (encodeURIComponent 금지)
 async function fetchAptTradeMonth(ym){
-  // 서울 대표 구 코드 25개 (법정동 앞 5자리)
   const results = await Promise.allSettled(
     SEOUL_GU.map(code => {
-      const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev` +
-        `?serviceKey=${aptApiKey}&LAWD_CD=${code}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1`;
+      const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade` +
+        `?serviceKey=${encKey()}&LAWD_CD=${code}&DEAL_YMD=${ym}&pageNo=1&numOfRows=1`;
       return fetch(url, {signal: AbortSignal.timeout(12000)})
         .then(r => r.text())
         .then(xml => {
@@ -1014,7 +1015,7 @@ async function fetchAptTradeMonth(ym){
 // 서울 기준 아파트 준공 월별 집계
 async function fetchSupplyMonth(ym){
   const url = `https://apis.data.go.kr/1613000/HousesBuildingService/getHousesBuildingResult` +
-    `?serviceKey=${aptApiKey}&pageNo=1&numOfRows=1000&strtYm=${ym}&endYm=${ym}`;
+    `?serviceKey=${encKey()}&pageNo=1&numOfRows=1000&strtYm=${ym}&endYm=${ym}`;
   try{
     const r = await fetch(url, {signal: AbortSignal.timeout(12000)});
     const text = await r.text();
@@ -1131,17 +1132,21 @@ async function diagApt(){
   // 2개월 전 데이터 (처리 지연 감안)
   const d = new Date(now.getFullYear(), now.getMonth()-2, 1);
   const ym = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;
-  const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev` +
-    `?serviceKey=${aptApiKey}&LAWD_CD=11110&DEAL_YMD=${ym}&pageNo=1&numOfRows=3`;
+  const url = `https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade` +
+    `?serviceKey=${encKey()}&LAWD_CD=11110&DEAL_YMD=${ym}&pageNo=1&numOfRows=3`;
   try{
     const r = await fetch(url, {signal: AbortSignal.timeout(10000)});
     const txt = await r.text();
     const resultCode = new DOMParser().parseFromString(txt,'text/xml').querySelector('resultCode')?.textContent;
     const totalCount = new DOMParser().parseFromString(txt,'text/xml').querySelector('totalCount')?.textContent;
-    if(resultCode === '30') alert(`❌ API 키 오류 (resultCode:${resultCode})\n공공데이터포털에서 Decoding 키를 다시 확인하세요.`);
-    else if(resultCode === '03') alert(`❌ API 미신청 (resultCode:${resultCode})\ndata.go.kr에서 "아파트매매 실거래 상세 자료" 활용신청을 확인하세요.`);
-    else if(resultCode === '00') alert(`✅ API 정상 (resultCode:00)\n${ym} 종로구 거래건수: ${totalCount}건\n\n데이터가 0이면 국토부 처리 지연입니다. 2~3개월 전 데이터가 정상 범위입니다.`);
-    else alert(`응답 코드: ${resultCode}\n\n원본 응답(첫 300자):\n${txt.slice(0,300)}`);
+    const rc2 = new DOMParser().parseFromString(txt,'text/xml').querySelector('resultCode')?.textContent;
+    const tc2 = new DOMParser().parseFromString(txt,'text/xml').querySelector('totalCount')?.textContent;
+    if(r.status===403||txt.trim()==='Forbidden'){
+      alert(`❌ Forbidden (HTTP 403)\n\n→ 마이페이지에서 Encoding 키로 교체하세요.\n  (Decoding 키 대신 Encoding 키)\n\n입력된 키 앞 20자: ${aptApiKey.slice(0,20)}`);
+    } else if(rc2==='30') alert(`❌ 인증키 오류(30) — Encoding 키로 교체하세요`);
+    else if(rc2==='03') alert(`❌ 미승인(03) — data.go.kr/data/15126469 활용신청`);
+    else if(rc2==='00') alert(`✅ 정상! ${ym} 종로구: ${tc2}건`);
+    else alert(`코드:${rc2||'없음'} HTTP:${r.status}\n${txt.slice(0,300)}`);
   } catch(e){
     alert(`네트워크 오류: ${e.message}`);
   }
@@ -1227,7 +1232,6 @@ loadAll();
 </script>
 </body>
 </html>
-
 
 
 
