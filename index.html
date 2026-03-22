@@ -1010,6 +1010,8 @@ function saveTrade(){
   setTradeData(data);
   renderTradeSection();
   renderTradeHistory();
+  // 모달 닫기
+  document.getElementById('tradeModal').classList.remove('show');
 }
 
 function clearTrade(){
@@ -1487,10 +1489,11 @@ document.getElementById('chemModal').addEventListener('click',function(e){if(e.t
   renderChemSection();
   renderChemHistory();
 })();
+/* ── 페이지 로드 시 자동 실행 ── */
+loadAll();
 </script>
 </body>
 </html>
-
 
 
 
