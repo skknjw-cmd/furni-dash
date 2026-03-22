@@ -761,11 +761,29 @@ const TOOLTIP={
   padding:10,cornerRadius:6
 };
 
+/* ── 날짜 레이블 공통 포맷 함수 ──────────────────────────────
+   어떤 형식이든 안전하게 처리
+   "2024-03-22" / "20240322" / Date obj / "2024-01" / "202401"
+   → 일별: "03/22"  / 월별: "24.01"
+──────────────────────────────────────────────────────── */
+function fmtDateLabel(val) {
+  // 숫자만 추출
+  const digits = String(val).replace(/[^0-9]/g, '');
+  if (digits.length >= 8) {
+    // YYYYMMDD → MM/DD
+    return digits.slice(4,6) + '/' + digits.slice(6,8);
+  } else if (digits.length >= 6) {
+    // YYYYMM → YY.MM
+    return digits.slice(2,4) + '.' + digits.slice(4,6);
+  }
+  return String(val);
+}
+
 function buildChart(canvasId,emptyId,datasets,yFmt,ref,setter){
   const el=document.getElementById(canvasId),empty=document.getElementById(emptyId);
   empty.style.display='none'; el.style.display='block';
   if(ref) ref.destroy();
-  const labels=datasets[0].rawDates.map(d=>{ const s=String(d); return s.slice(5,7)+'/'+s.slice(8,10); });
+  const labels=datasets[0].rawDates.map(d=>fmtDateLabel(d));
   const c=new Chart(el,{
     type:'line',
     data:{
@@ -958,7 +976,7 @@ function buildFreightChart(canvasId, emptyId, series, ref, setter){
   const c = new Chart(el,{
     type:'line',
     data:{
-      labels: series[0].dates.map(d=>{ const s=String(d); return s.slice(5,7)+'/'+s.slice(8,10); }),
+      labels: series[0].dates.map(d=>fmtDateLabel(d)),
       datasets: series.map(s=>({
         label:s.label, data:s.values,
         borderColor:s.color, backgroundColor:s.fill||'transparent',
@@ -1078,7 +1096,7 @@ function renderTradeSection(){
   tradeChart = new Chart(el,{
     type:'bar',
     data:{
-      labels: data.map(d=>{ const s=String(d.ym); return s.slice(2,4)+'.'+s.slice(4,6); }),
+      labels: data.map(d=>fmtDateLabel(d.ym)),
       datasets:[{
         label:'거래량(건)', data:data.map(d=>d.total),
         backgroundColor:'rgba(56,139,253,0.5)', borderColor:'#388BFD',
@@ -1154,7 +1172,7 @@ function clearSupply(){
 
 function renderSupplySection(){
   const data = getSupplyData();
-  const labels = data.map(d=>{ const s=String(d.ym); return s.slice(2,4)+'.'+s.slice(4,6); });
+  const labels = data.map(d=>fmtDateLabel(d.ym));
   const totals = data.map(d=>d.total);
 
   // KPI 업데이트
@@ -1272,7 +1290,7 @@ function renderNaverSection(){
   if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(naverChart)naverChart.destroy(); naverChart=null; return; }
   empty.style.display='none'; el.style.display='block';
   if(naverChart) naverChart.destroy();
-  const labels=data.map(d=>{ const s=String(d.date); return s.slice(5,7)+'/'+s.slice(8,10); });
+  const labels=data.map(d=>fmtDateLabel(d.date));
   naverChart=new Chart(el,{
     type:'line',
     data:{labels, datasets:[{
@@ -1459,7 +1477,7 @@ function renderChemSection(){
     chemCharts[chem]=new Chart(el,{
       type:'line',
       data:{
-        labels:data.map(d=>{ const s=String(d.ym); return s.slice(2,4)+'.'+s.slice(4,6); }),
+        labels:data.map(d=>fmtDateLabel(d.ym)),
         datasets:[{
           label:`${CHEM_NAMES[chem]} $/kg`, data:data.map(d=>d.val),
           borderColor:color, backgroundColor:rgba,
