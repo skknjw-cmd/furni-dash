@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소파·가구 시장 인텔리전스</title>
-<!-- build: 20260322_115057 -->
+<!-- build: 20260322_122614 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Design tokens (Linear / GitHub Dark) ── */
@@ -1322,7 +1322,7 @@ function renderNaverSection(){
   if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(naverChart)naverChart.destroy(); naverChart=null; return; }
   empty.style.display='none'; el.style.display='block';
   if(naverChart) naverChart.destroy();
-  const labels=data.map(d=>fmtDay(d.date));
+  const labels=data.map(d=>{ const s=String(d.date); const p=s.split('-'); return p[0].slice(2)+'/'+p[1]; });
   naverChart=new Chart(el,{
     type:'line',
     data:{labels, datasets:[{
