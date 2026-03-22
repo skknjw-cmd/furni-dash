@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소파·가구 시장 인텔리전스</title>
-<!-- build: 20260322_113940 -->
+<!-- build: 20260322_114438 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Design tokens (Linear / GitHub Dark) ── */
@@ -766,27 +766,28 @@ const TOOLTIP={
    "2024-03-22" / "20240322" / Date obj / "2024-01" / "202401"
    → 일별: "03/22"  / 월별: "24.01"
 ──────────────────────────────────────────────────────── */
+function fmtYM(val) {
+  // YYYYMM / YYYY-MM / 2024.01 등 → YY.MM
+  const d = String(val).replace(/[^0-9]/g, '');
+  if (d.length < 6) return String(val);
+  return d.slice(2,4) + '.' + d.slice(4,6);
+}
+function fmtDay(val) {
+  // YYYY-MM-DD / YYYYMMDD 등 → MM/DD
+  const d = String(val).replace(/[^0-9]/g, '');
+  if (d.length < 8) return fmtYM(val);
+  return d.slice(4,6) + '/' + d.slice(6,8);
+}
 function fmtDateLabel(val) {
-  if (!val) return '';
-  const s = String(val);
-  // YYYY-MM-DD 또는 YYYY.MM.DD 형식
-  if (s.includes('-') || (s.includes('.') && s.length > 6)) {
-    const parts = s.split(/[-./]/);
-    if (parts.length >= 3) return parts[1] + '/' + parts[2]; // MM/DD
-    if (parts.length === 2) return parts[0].slice(2) + '.' + parts[1]; // YY.MM
-  }
-  // 숫자만 추출 (YYYYMMDD or YYYYMM)
-  const digits = s.replace(/[^0-9]/g, '');
-  if (digits.length >= 8) return digits.slice(4,6) + '/' + digits.slice(6,8);
-  if (digits.length >= 6) return digits.slice(2,4) + '.' + digits.slice(4,6);
-  return s;
+  const d = String(val).replace(/[^0-9]/g, '');
+  return d.length >= 8 ? fmtDay(val) : fmtYM(val);
 }
 
 function buildChart(canvasId,emptyId,datasets,yFmt,ref,setter){
   const el=document.getElementById(canvasId),empty=document.getElementById(emptyId);
   empty.style.display='none'; el.style.display='block';
   if(ref) ref.destroy();
-  const labels=datasets[0].rawDates.map(d=>fmtDateLabel(d));
+  const labels=datasets[0].rawDates.map(d=>fmtDay(d));
   const c=new Chart(el,{
     type:'line',
     data:{
@@ -979,7 +980,7 @@ function buildFreightChart(canvasId, emptyId, series, ref, setter){
   const c = new Chart(el,{
     type:'line',
     data:{
-      labels: series[0].dates.map(d=>fmtDateLabel(d)),
+      labels: series[0].dates.map(d=>fmtDay(d)),
       datasets: series.map(s=>({
         label:s.label, data:s.values,
         borderColor:s.color, backgroundColor:s.fill||'transparent',
@@ -1099,7 +1100,7 @@ function renderTradeSection(){
   tradeChart = new Chart(el,{
     type:'bar',
     data:{
-      labels: data.map(d=>fmtDateLabel(d.ym)),
+      labels: data.map(d=>fmtYM(d.ym)),
       datasets:[{
         label:'거래량(건)', data:data.map(d=>d.total),
         backgroundColor:'rgba(56,139,253,0.5)', borderColor:'#388BFD',
@@ -1175,7 +1176,7 @@ function clearSupply(){
 
 function renderSupplySection(){
   const data = getSupplyData();
-  const labels = data.map(d=>fmtDateLabel(d.ym));
+  const labels = data.map(d=>fmtYM(d.ym));
   const totals = data.map(d=>d.total);
 
   // KPI 업데이트
@@ -1293,7 +1294,7 @@ function renderNaverSection(){
   if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(naverChart)naverChart.destroy(); naverChart=null; return; }
   empty.style.display='none'; el.style.display='block';
   if(naverChart) naverChart.destroy();
-  const labels=data.map(d=>fmtDateLabel(d.date));
+  const labels=data.map(d=>fmtDay(d.date));
   naverChart=new Chart(el,{
     type:'line',
     data:{labels, datasets:[{
@@ -1480,7 +1481,7 @@ function renderChemSection(){
     chemCharts[chem]=new Chart(el,{
       type:'line',
       data:{
-        labels:data.map(d=>fmtDateLabel(d.ym)),
+        labels:data.map(d=>fmtYM(d.ym)),
         datasets:[{
           label:`${CHEM_NAMES[chem]} $/kg`, data:data.map(d=>d.val),
           borderColor:color, backgroundColor:rgba,
