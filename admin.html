@@ -516,7 +516,11 @@ function saveChem(){
     stored[c].sort((a,b)=>a.ym.localeCompare(b.ym));
     if(stored[c].length>24)stored[c].splice(0,stored[c].length-24);
   });
-  ls_set('chem_price_data',stored);refreshAll();flashMsg('ch-msg');
+  ls_set('chem_price_data',stored);
+  // 소 가죽 별도 처리 (국가 선택 없으므로 admin에서는 기본 IT로 저장 또는 스킵)
+  // admin.html에서 hide 입력은 현재 ch-hide 필드만 있고 국가 선택 없음
+  // 추후 국가 선택 추가 예정
+  refreshAll();flashMsg('ch-msg');
 }
 
 function saveWeeklyAll(){
@@ -942,6 +946,14 @@ async function syncToSheets(){
     tasks.push({ sheet:'chem', rows: Object.entries(chemMerged).sort().map(([ym,v])=>[
       `${ym.slice(0,4)}-${ym.slice(4)}`, v.poly||'', v.tdi||'', v.mdi||'', v.note||''
     ])});
+    // 소 가죽 국가별 (독립 키: hide_leather_IT 등)
+    ['IT','CN','US','BR'].forEach(ctr=>{
+      try{
+        const rows=(JSON.parse(localStorage.getItem('hide_leather_'+ctr)||'[]'))
+          .map(d=>[`${d.ym.slice(0,4)}-${d.ym.slice(4)}`, d.val||'', d.note||'']);
+        tasks.push({ sheet:'hide_'+ctr.toLowerCase(), rows });
+      }catch(e){}
+    });
 
     let success = 0;
     for(const t of tasks){
