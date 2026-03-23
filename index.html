@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소파·가구 시장 인텔리전스</title>
-<!-- build: 20260323_004942 -->
+<!-- build: 20260323_005949 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Design tokens (Linear / GitHub Dark) ── */
@@ -229,12 +229,16 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
     <div class="kpi-label">EUR / KRW</div>
     <div id="eur-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
   </div>
+  <div class="kpi" style="--kpi-color:#22D3EE;">
+    <div class="kpi-label">BRL / USD</div>
+    <div id="brl-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
+  </div>
 </div>
 
 <!-- ── CHARTS ── -->
 <div class="sec-hdr">
   <span class="sec-title">추이 차트</span>
-  <span class="sec-src">유가: EIA (GitHub CSV) · 환율: Frankfurter (ECB) · 기간: 3개월</span>
+  <span class="sec-src">유가: EIA (GitHub CSV) · 환율: Frankfurter (ECB) · BRL/USD 포함 · 기간: 3개월</span>
 </div>
 
 <div class="chart-grid">
@@ -280,6 +284,17 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
     <div class="cwrap">
       <div class="cempty" id="cnyChartEmpty"><span class="spin">⟳</span></div>
       <canvas id="cnyChart" style="display:none"></canvas>
+    </div>
+  </div>
+  <div class="ccrd">
+    <div class="ccrd-head">
+      <span class="ccrd-title" style="color:#22D3EE;">BRL / USD</span>
+      <span class="ccrd-range">3개월</span>
+    </div>
+    <div class="ccrd-sub">브라질 레알 · 가죽 원가 선행 지표</div>
+    <div class="cwrap">
+      <div class="cempty" id="brlChartEmpty"><span class="spin">⟳</span></div>
+      <canvas id="brlChart" style="display:none"></canvas>
     </div>
   </div>
 </div>
@@ -518,8 +533,8 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
   </div>
 </div>
 
-<!-- KPI 카드 3개 -->
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:16px;">
+<!-- KPI 카드 4개 (폴리올/TDI/MDI + 가죽) -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:16px;">
   <div class="kpi" style="--kpi-color:#D2A8FF;">
     <div class="kpi-label">폴리올 수입단가 ($/kg)</div>
     <div id="chem-poly-val"><div class="kpi-empty" style="font-size:10px;color:var(--t4);">✎ 수동 입력 버튼으로 추가</div></div>
@@ -535,10 +550,15 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
     <div id="chem-mdi-val"><div class="kpi-empty" style="font-size:10px;color:var(--t4);">✎ 수동 입력 버튼으로 추가</div></div>
     <div id="chem-mdi-chg" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);">—</div>
   </div>
+  <div class="kpi" style="--kpi-color:#C8902A;">
+    <div class="kpi-label">소 가죽 수입단가 ($/kg)</div>
+    <div id="chem-hide-val"><div class="kpi-empty" style="font-size:10px;color:var(--t4);">✎ 수동 입력 버튼으로 추가</div></div>
+    <div id="chem-hide-chg" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);">—</div>
+  </div>
 </div>
 
-<!-- 차트 3개 -->
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:12px;">
+<!-- 차트 4개 -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:12px;">
   <div class="ccrd">
     <div class="ccrd-head"><span class="ccrd-title" style="color:#D2A8FF;">폴리올</span><span class="ccrd-range">HS 3907200000</span></div>
     <div class="ccrd-sub">폴리에테르폴리올 전체 수입 · 단가 CIF 기준</div>
@@ -561,6 +581,14 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
     <div class="cwrap" style="height:160px;">
       <div class="cempty" id="mdiChartEmpty">✎ 수동 입력 버튼으로 추가</div>
       <canvas id="mdiChart" style="display:none"></canvas>
+    </div>
+  </div>
+  <div class="ccrd">
+    <div class="ccrd-head"><span class="ccrd-title" style="color:#C8902A;">소 가죽</span><span class="ccrd-range">HS 4107100000</span></div>
+    <div class="ccrd-sub">소 전면 정제 가죽 수입 · 단가 CIF 기준</div>
+    <div class="cwrap" style="height:160px;">
+      <div class="cempty" id="hideChartEmpty">✎ 수동 입력 버튼으로 추가</div>
+      <canvas id="hideChart" style="display:none"></canvas>
     </div>
   </div>
 </div>
@@ -652,6 +680,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
       <div class="field"><label>폴리올 수입단가 ($/kg)</label><input type="number" id="ch-in-poly" placeholder="예: 1.85" step="0.01"></div>
       <div class="field"><label>TDI 수입단가 ($/kg)</label><input type="number" id="ch-in-tdi" placeholder="예: 2.10" step="0.01"></div>
       <div class="field"><label>MDI 수입단가 ($/kg)</label><input type="number" id="ch-in-mdi" placeholder="예: 1.95" step="0.01"></div>
+      <div class="field"><label>🐄 소 가죽 수입단가 ($/kg) · HS 4107100000</label><input type="number" id="ch-in-hide" placeholder="예: 3.20" step="0.01"></div>
       <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="ch-in-note" placeholder="예: 중국 TDI 증설 영향 하락세"></div>
     </div>
     <div style="display:flex;gap:8px;">
@@ -744,7 +773,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
 Chart.defaults.font.family = "'Inter', sans-serif";
-let oilChart=null, usdChart=null, eurChart=null, cnyChart=null;
+let oilChart=null, usdChart=null, eurChart=null, cnyChart=null, brlChart=null;
 
 /* ── DATA FETCHERS ── */
 async function fetchOilCSV(type){
@@ -764,7 +793,7 @@ async function fetchFX(){
   const end=new Date(), start=new Date(+end-91*864e5);
   const fmt=d=>d.toISOString().split('T')[0];
   // 신규 도메인: api.frankfurter.dev/v1 (기존 api.frankfurter.app 변경됨)
-  const url=`https://api.frankfurter.dev/v1/${fmt(start)}..${fmt(end)}?base=USD&symbols=KRW,CNY,EUR`;
+  const url=`https://api.frankfurter.dev/v1/${fmt(start)}..${fmt(end)}?base=USD&symbols=KRW,CNY,EUR,BRL`;
   const r=await fetch(url,{signal:AbortSignal.timeout(15000)});
   if(!r.ok) throw new Error(`환율 로드 실패 (${r.status})`);
   const j=await r.json();
@@ -774,6 +803,8 @@ async function fetchFX(){
     usd:dates.map(d=>({date:d,value:j.rates[d].KRW})),
     cny:dates.map(d=>({date:d,value:j.rates[d].KRW/j.rates[d].CNY})),
     eur:dates.map(d=>({date:d,value:j.rates[d].KRW/j.rates[d].EUR})),
+    brl:dates.filter(d=>j.rates[d].BRL).map(d=>({date:d,value:+(1/j.rates[d].BRL*j.rates[d].KRW).toFixed(4)||null})),
+    brl_usd:dates.filter(d=>j.rates[d].BRL).map(d=>({date:d,value:+(1/j.rates[d].BRL).toFixed(4)})),
   };
 }
 
@@ -974,7 +1005,7 @@ function printDashboard(){
 async function loadAll(){
   const btn=document.getElementById('btnRefresh');
   btn.disabled=true; btn.textContent='로딩 중...';
-  ['wti-val','brent-val','usd-val','cny-val','eur-val'].forEach(setKpiLoading);
+  ['wti-val','brent-val','usd-val','cny-val','eur-val','brl-val'].forEach(setKpiLoading);
 
   const [oilRes,fxRes]=await Promise.allSettled([
     Promise.all([fetchOilCSV('wti'),fetchOilCSV('brent')]),
@@ -1007,9 +1038,16 @@ async function loadAll(){
     buildChart('usdChart','usdChartEmpty',[{...mkFx(fx.usd),label:'USD/KRW',color:'#388BFD',fill:'rgba(56,139,253,.07)'}],fmtKrw,usdChart,c=>{usdChart=c;});
     buildChart('eurChart','eurChartEmpty',[{...mkFx(fx.eur),label:'EUR/KRW',color:'#D2A8FF',fill:'rgba(210,168,255,.07)'}],fmtKrw,eurChart,c=>{eurChart=c;});
     buildChart('cnyChart','cnyChartEmpty',[{...mkFx(fx.cny),label:'CNY/KRW',color:'#3FB950',fill:'rgba(63,185,80,.07)'}],fmtKrw,cnyChart,c=>{cnyChart=c;});
+    // BRL/USD (레알이 약세일수록 수치 낮음 = 가죽 수입가 하락 선행)
+    if(fx.brl_usd && fx.brl_usd.length){
+      renderKpi('brl-val',fx.brl_usd,'USD/BRL',4);
+      const mkBrl=(arr)=>({rawDates:arr.map(d=>d.date),values:arr.map(d=>d.value.toFixed(4))});
+      const fmtBrl=v=>(+v).toFixed(4);
+      buildChart('brlChart','brlChartEmpty',[{...mkBrl(fx.brl_usd),label:'BRL/USD',color:'#22D3EE',fill:'rgba(34,211,238,.07)'}],fmtBrl,brlChart,c=>{brlChart=c;});
+    } else { setKpiErr('brl-val','로드 실패'); }
   } else {
-    ['usd-val','cny-val','eur-val'].forEach(id=>setKpiErr(id,'로드 실패'));
-    ['usdChartEmpty','eurChartEmpty','cnyChartEmpty'].forEach(id=>{document.getElementById(id).textContent='로드 실패';});
+    ['usd-val','cny-val','eur-val','brl-val'].forEach(id=>setKpiErr(id,'로드 실패'));
+    ['usdChartEmpty','eurChartEmpty','cnyChartEmpty','brlChartEmpty'].forEach(id=>{document.getElementById(id).textContent='로드 실패';});
   }
 
   // Google Sheets 연동된 경우 Sheets에서 로드 (데이터가 있는 항목만 덮어씀)
@@ -1662,11 +1700,11 @@ document.getElementById('naverModal').addEventListener('click',function(e){if(e.
    폴리올 / TDI / MDI — 관세청 API + 수동 fallback
 ═══════════════════════════════════════════ */
 const CHEM_KEY = 'chem_price_data';
-const CHEM_HS  = { poly:'3907200000', tdi:'2929101000', mdi:'2929102000' };
-const CHEM_NAMES = { poly:'폴리올', tdi:'TDI', mdi:'MDI' };
-const CHEM_COLORS = { poly:'#D2A8FF', tdi:'#F0883E', mdi:'#58A6FF' };
+const CHEM_HS  = { poly:'3907200000', tdi:'2929101000', mdi:'2929102000', hide:'4107100000' };
+const CHEM_NAMES = { poly:'폴리올', tdi:'TDI', mdi:'MDI', hide:'소 가죽' };
+const CHEM_COLORS = { poly:'#D2A8FF', tdi:'#F0883E', mdi:'#58A6FF', hide:'#C8902A' };
 let chemApiKey = localStorage.getItem('chem_api_key')||'';
-let chemCharts = { poly:null, tdi:null, mdi:null };
+let chemCharts = { poly:null, tdi:null, mdi:null, hide:null };
 
 function getChemData(){ try{ return JSON.parse(localStorage.getItem(CHEM_KEY)||'{}'); }catch{ return {}; } }
 function setChemData(d){ localStorage.setItem(CHEM_KEY, JSON.stringify(d)); }
@@ -1769,7 +1807,7 @@ function saveChemManual(){
   if(!dateRaw){ alert('연월을 입력하세요'); return; }
   const ym=dateRaw.replace('-','');
   const stored=getChemData();
-  ['poly','tdi','mdi'].forEach(chem=>{
+  ['poly','tdi','mdi','hide'].forEach(chem=>{
     const v = chem==='poly'?poly : chem==='tdi'?tdi : mdi;
     if(!v) return;
     if(!stored[chem]) stored[chem]=[];
@@ -1787,7 +1825,7 @@ function clearChem(){ setChemData({}); renderChemSection(); renderChemHistory();
 
 function renderChemSection(){
   const stored=getChemData();
-  ['poly','tdi','mdi'].forEach(chem=>{
+  ['poly','tdi','mdi','hide'].forEach(chem=>{
     const data=(stored[chem]||[]);
     const last=data[data.length-1], prev=data[data.length-2];
     const valEl=document.getElementById(`chem-${chem}-val`);
@@ -1841,7 +1879,7 @@ function renderChemHistory(){
   const el=document.getElementById('ch-history');
   const stored=getChemData();
   const merged={};
-  ['poly','tdi','mdi'].forEach(chem=>{
+  ['poly','tdi','mdi','hide'].forEach(chem=>{
     (stored[chem]||[]).forEach(e=>{
       if(!merged[e.ym]) merged[e.ym]={};
       merged[e.ym][chem]=e.val;
