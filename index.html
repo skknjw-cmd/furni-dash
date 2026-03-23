@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DAUNING 경제·경영 지표</title>
-<!-- build: 20260323_024429 -->
+<!-- build: 20260323_025650 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════
@@ -201,10 +201,102 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
 .ftr-item{display:flex;align-items:center;gap:5px;}
 .fdot{width:4px;height:4px;border-radius:50%;}
 
-/* ── RESPONSIVE ── */
-@media(max-width:1100px){.chart-grid,.freight-grid{grid-template-columns:1fr;}.kpi-strip{grid-template-columns:repeat(3,1fr);}}
-@media(max-width:700px){.chart-grid,.kpi-strip{grid-template-columns:1fr 1fr;}.main{padding:16px 16px 72px;}.hdr{padding:0 16px;}.hdr-sep,.hdr-sub{display:none;}}
-@media(max-width:460px){.kpi-strip{grid-template-columns:1fr;}}
+/* ═══════════════════════════════════════════
+   RESPONSIVE — 태블릿 / 모바일 완전 대응
+═══════════════════════════════════════════ */
+
+/* ── 태블릿 (1100px 이하) ── */
+@media(max-width:1100px){
+  .chart-grid, .freight-grid { grid-template-columns: 1fr; }
+  .kpi-strip { grid-template-columns: repeat(3, 1fr); }
+  .fcrd-kpis { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── 모바일 중형 (768px 이하) ── */
+@media(max-width:768px){
+  .main { padding: 12px 12px 80px; }
+  .hdr  { padding: 0 14px; height: 50px; }
+  .hdr-sep, .hdr-sub { display: none; }
+  .hdr-title { font-size: 12px; }
+  .hdr-right { gap: 6px; }
+
+  /* KPI 스트립: 2열 */
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
+  .kpi { padding: 12px 14px; }
+  .kpi-num { font-size: 18px; }
+
+  /* 차트·운임 그리드: 1열 */
+  .chart-grid, .freight-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px; }
+
+  /* 섹션 헤더 */
+  .sec-hdr { flex-wrap: wrap; gap: 4px; }
+  .sec-title { font-size: 11px; }
+  .sec-src { font-size: 9px; width: 100%; }
+
+  /* 운임 카드 */
+  .fcrd { padding: 14px 16px; }
+  .fcrd-kpis { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .fkpi { padding: 8px 10px; }
+  .fkpi-val { font-size: 15px; }
+
+  /* SCFI */
+  .scfi-stat-val { font-size: 22px; }
+  .scfi-row { gap: 16px; }
+
+  /* 차트 카드 */
+  .ccrd-head { flex-wrap: wrap; gap: 4px; }
+  .cwrap { height: 140px !important; }
+
+  /* 원자재 4열 → 2열 */
+  [style*="grid-template-columns:repeat(4,1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* 소파트렌드 2열 → 1열 */
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 추가예정 3열 → 1열 */
+  [style*="grid-template-columns:1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 모달 */
+  .modal { padding: 20px 16px; width: 95vw !important; }
+  .modal-grid { grid-template-columns: 1fr !important; }
+
+  /* 푸터 */
+  .ftr { padding: 6px 12px; gap: 10px; flex-wrap: wrap; }
+  .ftr-item { font-size: 9px; }
+}
+
+/* ── 모바일 소형 (480px 이하) ── */
+@media(max-width:480px){
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .kpi-num { font-size: 16px; }
+  .kpi-label { font-size: 9px; }
+
+  /* 운임 KPI 2열 */
+  .fcrd-kpis { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+
+  /* 원자재 4열 → 1열 */
+  [style*="grid-template-columns:repeat(4,1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .scfi-stat-val { font-size: 18px; }
+  .hdr-logo { width: 24px; height: 24px; font-size: 11px; }
+}
+
+/* ── 터치 디바이스: 버튼 최소 크기 보장 ── */
+@media(hover:none) and (pointer:coarse){
+  .btn, .btn-solid { min-height: 40px; padding: 8px 16px; font-size: 13px; }
+  select { min-height: 36px; font-size: 14px; }
+  input[type="number"], input[type="date"], input[type="month"], input[type="text"] {
+    min-height: 40px; font-size: 14px;
+  }
+}
 /* ══ 인쇄 / PDF 전용 스타일 ══════════════════════════════════ */
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -1149,7 +1241,17 @@ async function loadAll(){
   const gasUrl = localStorage.getItem('gas_url');
   if(gasUrl){
     try{
-      const r = await fetch(`${gasUrl}?action=getAll`, {signal: AbortSignal.timeout(8000)});
+      // 모바일 네트워크 대응: 타임아웃 20초, 실패 시 1회 재시도
+      const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+      const timeout = isMobile ? 20000 : 12000;
+      let r;
+      try {
+        r = await fetch(`${gasUrl}?action=getAll`, {signal: AbortSignal.timeout(timeout)});
+      } catch(retryErr) {
+        // 1회 재시도
+        await new Promise(res=>setTimeout(res, 1500));
+        r = await fetch(`${gasUrl}?action=getAll`, {signal: AbortSignal.timeout(timeout)});
+      }
       const json = await r.json();
       if(json.ok && json.data){
         const d = json.data;
@@ -2145,9 +2247,16 @@ document.getElementById('chemModal').addEventListener('click',function(e){if(e.t
 })();
 /* ── 페이지 로드 시 자동 실행 (Chart.js 로드 완료 후) ── */
 window.addEventListener('load', function(){
-  loadAll();
+  // 기본 수동 입력 데이터 먼저 렌더 (Sheets 로드 전에도 보이도록)
+  renderTradeSection();
+  renderSupplySection();
+  renderNaverSection();
   renderNaverMat();
   renderNaverBrand();
+  renderChemSection();
+  ['cn'].forEach(renderFreightSection);
+  // 이후 자동 수집 + Sheets 로드
+  loadAll();
 });
 </script>
 </body>
