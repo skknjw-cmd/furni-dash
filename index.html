@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소파·가구 시장 인텔리전스</title>
-<!-- build: 20260322_122614 -->
+<!-- build: 20260322_235704 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Design tokens (Linear / GitHub Dark) ── */
@@ -386,42 +386,90 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
 
 <!-- ── 네이버 소파 검색 트렌드 ── -->
 <div class="sec-hdr">
-  <span class="sec-title">🔍 네이버 소파 검색 트렌드</span>
-  <span class="sec-src">네이버 데이터랩 · 상대값(0~100) · 주간 수동 입력</span>
+  <span class="sec-title">🔍 네이버 소파 검색 트렌드 분석</span>
+  <span class="sec-src">
+    네이버 데이터랩 · 상대값(0~100) · 주간 수동 입력
+    <button class="btn" onclick="document.getElementById('naverModal').classList.add('show')"
+      style="margin-left:10px;padding:3px 12px;font-size:10px;">✎ 트렌드 입력</button>
+  </span>
 </div>
 
-<div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:12px 18px;margin-bottom:14px;font-size:11px;color:var(--t3);line-height:1.8;">
-  <strong style="color:var(--t2);">📌 입력 방법:</strong>
-  <a href="https://datalab.naver.com/keyword/trendResult.naver?hashKey=N_84c3e00e8cdf9ddf13bb4ae3fee3de35" target="_blank" style="color:#58A6FF;">네이버 데이터랩 바로가기</a> →
-  키워드: <code style="background:var(--s2);padding:1px 5px;border-radius:3px;">소파, 소파추천, 가죽소파, 패브릭소파</code> → 월별 수치 확인 → 아래 입력
-  &nbsp;|&nbsp; 값은 0~100 상대값 (기간 내 최고점=100)
-  <button class="btn" onclick="document.getElementById('naverModal').classList.add('show')"
-    style="margin-left:10px;padding:3px 12px;font-size:10px;">✎ 주간 입력</button>
-</div>
-
-<!-- KPI + 차트 -->
-<div style="display:grid;grid-template-columns:180px 1fr;gap:16px;margin-bottom:28px;">
-  <div style="display:flex;flex-direction:column;gap:8px;">
-    <div class="kpi" style="--kpi-color:#58A6FF;flex:1;">
-      <div class="kpi-label">최근 주간 트렌드 지수</div>
-      <div id="naver-val"><div class="kpi-empty" style="font-size:11px;color:var(--t3);padding-top:4px;">데이터 없음</div></div>
+<!-- 차트 1: 시장 수요 + 거래량 비교 -->
+<div class="ccrd" style="margin-bottom:14px;">
+  <div class="ccrd-head">
+    <div>
+      <span class="ccrd-title" style="color:#58A6FF;">📊 차트 1 · 시장 수요 — 소파 검색 지수 vs 아파트 거래량</span>
+      <div class="ccrd-sub" style="margin-top:2px;">소파+소파추천+소파구매 통합 지수(좌축, 0~100) vs 서울 아파트 거래량(우축, 건)</div>
     </div>
-    <div class="kpi" style="--kpi-color:#3FB950;flex:1;">
-      <div class="kpi-label">전주 대비</div>
-      <div id="naver-chg" style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:500;color:var(--t2);padding-top:4px;">—</div>
+    <div style="display:flex;gap:16px;align-items:center;">
+      <div class="kpi" style="--kpi-color:#58A6FF;padding:8px 12px;min-width:110px;">
+        <div class="kpi-label" style="font-size:9px;">검색 지수</div>
+        <div id="naver-val" style="font-size:13px;"><span style="color:var(--t4);font-size:11px;">없음</span></div>
+      </div>
+      <div id="naver-chg" style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;color:var(--t2);">—</div>
     </div>
   </div>
+  <div class="cwrap" style="height:180px;">
+    <div class="cempty" id="naverChartEmpty">✎ 트렌드 입력 버튼으로 데이터를 추가하세요</div>
+    <canvas id="naverChart" style="display:none"></canvas>
+  </div>
+</div>
+
+<!-- 차트 2 + 차트 3: 나란히 -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px;">
+
+  <!-- 차트 2: 소재 트렌드 -->
   <div class="ccrd">
     <div class="ccrd-head">
-      <span class="ccrd-title" style="color:#58A6FF;">소파 검색 트렌드 (네이버)</span>
-      <span class="ccrd-range">최대 52주</span>
+      <div>
+        <span class="ccrd-title" style="color:#D2A8FF;">🛋 차트 2 · 소재 트렌드 — 가죽 vs 패브릭</span>
+        <div class="ccrd-sub" style="margin-top:2px;">가죽소파 vs 패브릭소파 검색 상대값</div>
+      </div>
     </div>
-    <div class="ccrd-sub">검색어: 소파 / 소파추천 / 가죽소파 / 패브릭소파 통합 상대값</div>
-    <div class="cwrap" style="height:160px;">
-      <div class="cempty" id="naverChartEmpty">✎ 주간 입력 버튼으로 데이터를 추가하세요</div>
-      <canvas id="naverChart" style="display:none"></canvas>
+    <div style="display:flex;gap:10px;margin-bottom:8px;">
+      <div class="kpi" style="--kpi-color:#D2A8FF;padding:6px 10px;flex:1;">
+        <div class="kpi-label" style="font-size:9px;">가죽소파</div>
+        <div id="nv-mat-leather" style="font-size:13px;font-family:'JetBrains Mono',monospace;">—</div>
+      </div>
+      <div class="kpi" style="--kpi-color:#3FB950;padding:6px 10px;flex:1;">
+        <div class="kpi-label" style="font-size:9px;">패브릭소파</div>
+        <div id="nv-mat-fabric" style="font-size:13px;font-family:'JetBrains Mono',monospace;">—</div>
+      </div>
+    </div>
+    <div class="cwrap" style="height:150px;">
+      <div class="cempty" id="naverMatChartEmpty">데이터 없음</div>
+      <canvas id="naverMatChart" style="display:none"></canvas>
     </div>
   </div>
+
+  <!-- 차트 3: 브랜드 점유율 -->
+  <div class="ccrd">
+    <div class="ccrd-head">
+      <div>
+        <span class="ccrd-title" style="color:#F0883E;">🏷 차트 3 · 브랜드 경쟁 — 다우닝 / 자코모 / 에싸</span>
+        <div class="ccrd-sub" style="margin-top:2px;">브랜드별 검색 상대값 점유 추이</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <div class="kpi" style="--kpi-color:#F0883E;padding:6px 10px;flex:1;">
+        <div class="kpi-label" style="font-size:9px;">다우닝</div>
+        <div id="nv-br-downing" style="font-size:13px;font-family:'JetBrains Mono',monospace;">—</div>
+      </div>
+      <div class="kpi" style="--kpi-color:#388BFD;padding:6px 10px;flex:1;">
+        <div class="kpi-label" style="font-size:9px;">자코모</div>
+        <div id="nv-br-jacomo" style="font-size:13px;font-family:'JetBrains Mono',monospace;">—</div>
+      </div>
+      <div class="kpi" style="--kpi-color:#3FB950;padding:6px 10px;flex:1;">
+        <div class="kpi-label" style="font-size:9px;">에싸</div>
+        <div id="nv-br-essa" style="font-size:13px;font-family:'JetBrains Mono',monospace;">—</div>
+      </div>
+    </div>
+    <div class="cwrap" style="height:150px;">
+      <div class="cempty" id="naverBrandChartEmpty">데이터 없음</div>
+      <canvas id="naverBrandChart" style="display:none"></canvas>
+    </div>
+  </div>
+
 </div>
 
 <!-- ── 폴리올 / TDI / MDI ── -->
@@ -516,26 +564,56 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
 
 <!-- 네이버 트렌드 수동 입력 모달 -->
 <div class="modal-bg" id="naverModal">
-  <div class="modal" style="width:480px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+  <div class="modal" style="width:560px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
       <span style="font-size:14px;font-weight:600;">🔍 소파 검색 트렌드 입력</span>
       <button onclick="document.getElementById('naverModal').classList.remove('show')" style="background:none;border:none;color:var(--t2);font-size:18px;cursor:pointer;">✕</button>
     </div>
-    <div style="font-size:11px;color:var(--t3);margin-bottom:14px;padding:10px 14px;background:var(--s2);border-radius:6px;border-left:2px solid #58A6FF;line-height:1.8;">
-      📌 <a href="https://datalab.naver.com/keyword/trendResult.naver?hashKey=N_84c3e00e8cdf9ddf13bb4ae3fee3de35" target="_blank" style="color:#58A6FF;font-weight:600;">네이버 데이터랩 → 검색어 트렌드</a><br>
-      키워드 입력: <code style="background:var(--bg);padding:1px 5px;">소파, 소파추천, 가죽소파, 패브릭소파</code><br>
-      기간: 최근 1년 / 주간 / 전체기기 → 그래프에서 해당 주 수치 확인 후 입력
+    <div style="font-size:11px;color:var(--t3);margin-bottom:14px;padding:10px 14px;background:var(--s2);border-radius:6px;border-left:2px solid #58A6FF;line-height:1.9;">
+      📌 <a href="https://datalab.naver.com/keyword/trendResult.naver" target="_blank" style="color:#58A6FF;font-weight:600;">네이버 데이터랩 → 검색어 트렌드</a>에서 아래 3개 그룹을 각각 조회 후 입력<br>
+      · <strong style="color:#58A6FF;">시장수요:</strong> 소파, 소파추천, 소파구매
+      &nbsp;|&nbsp; <strong style="color:#D2A8FF;">소재:</strong> 가죽소파 / 패브릭소파
+      &nbsp;|&nbsp; <strong style="color:#F0883E;">브랜드:</strong> 다우닝, 자코모, 에싸
     </div>
-    <div class="modal-grid">
-      <div class="field"><label>기준 주 (일요일 기준)</label><input type="date" id="nv-in-date"></div>
-      <div class="field"><label>트렌드 지수 (0~100)</label><input type="number" id="nv-in-val" placeholder="예: 74" min="0" max="100"></div>
-      <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="nv-in-note" placeholder="예: 이사철 시작, 봄 성수기 진입"></div>
+
+    <!-- 기준 날짜 -->
+    <div class="modal-grid" style="margin-bottom:12px;">
+      <div class="field" style="grid-column:1/-1"><label>기준 주 (일요일 기준)</label><input type="date" id="nv-in-date"></div>
     </div>
+
+    <!-- 차트1: 시장 수요 -->
+    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:10px;font-weight:600;color:#58A6FF;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">📊 차트 1 · 시장 수요 (소파+소파추천+소파구매 통합)</div>
+      <div class="modal-grid">
+        <div class="field"><label>시장 수요 지수 (0~100)</label><input type="number" id="nv-in-val" placeholder="예: 74" min="0" max="100"></div>
+        <div class="field"><label>메모</label><input type="text" id="nv-in-note" placeholder="선택"></div>
+      </div>
+    </div>
+
+    <!-- 차트2: 소재 트렌드 -->
+    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:12px;margin-bottom:10px;">
+      <div style="font-size:10px;font-weight:600;color:#D2A8FF;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">🛋 차트 2 · 소재 트렌드 (각각 별도 조회)</div>
+      <div class="modal-grid">
+        <div class="field"><label>가죽소파 지수 (0~100)</label><input type="number" id="nv-in-leather" placeholder="예: 65" min="0" max="100"></div>
+        <div class="field"><label>패브릭소파 지수 (0~100)</label><input type="number" id="nv-in-fabric" placeholder="예: 72" min="0" max="100"></div>
+      </div>
+    </div>
+
+    <!-- 차트3: 브랜드 -->
+    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:12px;margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:600;color:#F0883E;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">🏷 차트 3 · 브랜드 경쟁 (통합 비교 조회)</div>
+      <div class="modal-grid">
+        <div class="field"><label>다우닝 (0~100)</label><input type="number" id="nv-in-downing" placeholder="예: 45" min="0" max="100"></div>
+        <div class="field"><label>자코모 (0~100)</label><input type="number" id="nv-in-jacomo" placeholder="예: 38" min="0" max="100"></div>
+        <div class="field"><label>에싸 (0~100)</label><input type="number" id="nv-in-essa" placeholder="예: 52" min="0" max="100"></div>
+      </div>
+    </div>
+
     <div style="display:flex;gap:8px;">
-      <button class="btn-solid" onclick="saveNaverTrend()" style="flex:1;">저장</button>
-      <button class="btn" onclick="if(confirm('트렌드 전체 데이터를 초기화합니까?'))clearNaverTrend()" style="color:var(--red);border-color:var(--red);">초기화</button>
+      <button class="btn-solid" onclick="saveNaverAll()" style="flex:1;">전체 저장</button>
+      <button class="btn" onclick="if(confirm('트렌드 전체 데이터를 초기화합니까?'))clearNaverAll()" style="color:var(--red);border-color:var(--red);">초기화</button>
     </div>
-    <div id="nv-history" style="margin-top:14px;max-height:180px;overflow-y:auto;"></div>
+    <div id="nv-history" style="margin-top:14px;max-height:160px;overflow-y:auto;"></div>
   </div>
 </div>
 
@@ -903,6 +981,10 @@ async function loadAll(){
           localStorage.setItem('freight_cn', JSON.stringify(d.freight_cn));
         if(Array.isArray(d.naver_sofa_trend) && d.naver_sofa_trend.length > 0)
           localStorage.setItem('naver_sofa_trend', JSON.stringify(d.naver_sofa_trend));
+        if(Array.isArray(d.naver_material) && d.naver_material.length > 0)
+          localStorage.setItem('naver_material', JSON.stringify(d.naver_material));
+        if(Array.isArray(d.naver_brand) && d.naver_brand.length > 0)
+          localStorage.setItem('naver_brand', JSON.stringify(d.naver_brand));
         if(Array.isArray(d.apt_trade_data)   && d.apt_trade_data.length > 0)
           localStorage.setItem('apt_trade_data', JSON.stringify(d.apt_trade_data));
         if(Array.isArray(d.apt_supply_data)  && d.apt_supply_data.length > 0)
@@ -919,7 +1001,7 @@ async function loadAll(){
 
   // 수동 입력 섹션 렌더 (Sheets 또는 로컬 데이터)
   renderTradeSection(); renderSupplySection();
-  renderNaverSection(); renderChemSection();
+  renderNaverSection(); renderNaverMat(); renderNaverBrand(); renderChemSection();
   ['cn'].forEach(renderFreightSection);
 
   document.getElementById('ts').textContent=new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
@@ -1278,93 +1360,250 @@ document.getElementById('supplyModal').addEventListener('click',function(e){if(e
 ['cn'].forEach(renderFreightSection);
 
 /* ══════════════════════════════════════════
-   네이버 소파 검색 트렌드 — localStorage 수동
+   네이버 소파 검색 트렌드 — 3개 그룹
+   naver_sofa_trend  : 시장 수요 (기존 키 유지)
+   naver_material    : 소재 트렌드 (가죽/패브릭)
+   naver_brand       : 브랜드 (다우닝/자코모/에싸)
 ═══════════════════════════════════════════ */
-const NAVER_KEY = 'naver_sofa_trend';
-function getNaverData(){ try{ return JSON.parse(localStorage.getItem(NAVER_KEY)||'[]'); }catch{ return []; } }
-function setNaverData(d){ localStorage.setItem(NAVER_KEY, JSON.stringify(d)); }
+const NAVER_KEY     = 'naver_sofa_trend';
+const NAVER_MAT_KEY = 'naver_material';
+const NAVER_BR_KEY  = 'naver_brand';
+function getNaverData(){   try{ return JSON.parse(localStorage.getItem(NAVER_KEY)||'[]'); }catch{ return []; } }
+function getNaverMat(){    try{ return JSON.parse(localStorage.getItem(NAVER_MAT_KEY)||'[]'); }catch{ return []; } }
+function getNaverBrand(){  try{ return JSON.parse(localStorage.getItem(NAVER_BR_KEY)||'[]'); }catch{ return []; } }
+function setNaverData(d){  localStorage.setItem(NAVER_KEY, JSON.stringify(d)); }
+function setNaverMat(d){   localStorage.setItem(NAVER_MAT_KEY, JSON.stringify(d)); }
+function setNaverBrand(d){ localStorage.setItem(NAVER_BR_KEY, JSON.stringify(d)); }
 
-function saveNaverTrend(){
-  const dateRaw = document.getElementById('nv-in-date').value;
-  const val     = document.getElementById('nv-in-val').value;
-  const note    = document.getElementById('nv-in-note').value.trim();
-  if(!dateRaw||!val){ alert('날짜와 트렌드 지수를 입력하세요.'); return; }
-  const data = getNaverData();
-  const idx  = data.findIndex(d=>d.date===dateRaw);
-  const entry = {date:dateRaw, val:+val, note};
-  if(idx>=0) data[idx]=entry; else data.push(entry);
-  data.sort((a,b)=>a.date.localeCompare(b.date));
-  if(data.length>52) data.splice(0,data.length-52);
-  setNaverData(data);
-  renderNaverSection();
-  renderNaverHistory();
+/* ── 저장 ── */
+function saveNaverAll(){
+  const date = document.getElementById('nv-in-date').value;
+  if(!date){ alert('날짜를 입력하세요'); return; }
+  let saved = 0;
+
+  // 차트1: 시장 수요
+  const val = document.getElementById('nv-in-val').value;
+  if(val){
+    const data = getNaverData();
+    const entry = {date, val:+val, note:document.getElementById('nv-in-note').value.trim()};
+    const idx = data.findIndex(d=>d.date===date);
+    if(idx>=0) data[idx]=entry; else data.push(entry);
+    data.sort((a,b)=>a.date.localeCompare(b.date));
+    if(data.length>52) data.splice(0,data.length-52);
+    setNaverData(data); saved++;
+  }
+
+  // 차트2: 소재
+  const leather = document.getElementById('nv-in-leather').value;
+  const fabric  = document.getElementById('nv-in-fabric').value;
+  if(leather || fabric){
+    const data = getNaverMat();
+    const entry = {date, leather:leather?+leather:null, fabric:fabric?+fabric:null};
+    const idx = data.findIndex(d=>d.date===date);
+    if(idx>=0) data[idx]=entry; else data.push(entry);
+    data.sort((a,b)=>a.date.localeCompare(b.date));
+    if(data.length>52) data.splice(0,data.length-52);
+    setNaverMat(data); saved++;
+  }
+
+  // 차트3: 브랜드
+  const downing = document.getElementById('nv-in-downing').value;
+  const jacomo  = document.getElementById('nv-in-jacomo').value;
+  const essa    = document.getElementById('nv-in-essa').value;
+  if(downing || jacomo || essa){
+    const data = getNaverBrand();
+    const entry = {date, downing:downing?+downing:null, jacomo:jacomo?+jacomo:null, essa:essa?+essa:null};
+    const idx = data.findIndex(d=>d.date===date);
+    if(idx>=0) data[idx]=entry; else data.push(entry);
+    data.sort((a,b)=>a.date.localeCompare(b.date));
+    if(data.length>52) data.splice(0,data.length-52);
+    setNaverBrand(data); saved++;
+  }
+
+  if(!saved){ alert('입력된 값이 없습니다'); return; }
+  renderNaverSection(); renderNaverMat(); renderNaverBrand(); renderNaverHistory();
+  document.getElementById('naverModal').classList.remove('show');
 }
-function clearNaverTrend(){ setNaverData([]); renderNaverSection(); renderNaverHistory(); }
 
+function saveNaverTrend(){ saveNaverAll(); } // 하위호환
+
+function clearNaverAll(){
+  setNaverData([]); setNaverMat([]); setNaverBrand([]);
+  renderNaverSection(); renderNaverMat(); renderNaverBrand(); renderNaverHistory();
+}
+function clearNaverTrend(){ clearNaverAll(); }
+
+/* ── 차트 1: 시장 수요 + 거래량 듀얼 축 ── */
 let naverChart=null;
 function renderNaverSection(){
   const data = getNaverData();
-  // KPI
   const last=data[data.length-1], prev=data[data.length-2];
   const valEl=document.getElementById('naver-val'), chgEl=document.getElementById('naver-chg');
   if(!last){
-    valEl.innerHTML='<div class="kpi-empty" style="font-size:11px;color:var(--t3);padding-top:4px;">데이터 없음</div>';
-    chgEl.innerHTML='—';
+    valEl.innerHTML='<span style="color:var(--t4);font-size:11px;">없음</span>';
+    chgEl.textContent='—';
   } else {
-    valEl.innerHTML=`<div><span class="kpi-num">${last.val}</span><span class="kpi-unit">/ 100</span></div>`;
+    valEl.innerHTML=`<span style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--t1);">${last.val}</span><span style="font-size:11px;color:var(--t3);"> / 100</span>`;
     if(prev){
       const chg=last.val-prev.val, dir=chg>=0?'up':'dn', arr=chg>=0?'▲':'▼';
-      chgEl.innerHTML=`<div class="kpi-chg ${dir}" style="font-size:16px;">${arr} ${Math.abs(chg).toFixed(0)}</div>`;
+      chgEl.innerHTML=`<span class="${dir}">${arr} ${Math.abs(chg).toFixed(0)}</span>`;
     }
   }
-  // 차트
+  // 차트: 검색 지수 + 거래량 듀얼 Y축
   const el=document.getElementById('naverChart'), empty=document.getElementById('naverChartEmpty');
+  const tradeData = JSON.parse(localStorage.getItem('apt_trade_data')||'[]');
+
   if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(naverChart)naverChart.destroy(); naverChart=null; return; }
   empty.style.display='none'; el.style.display='block';
   if(naverChart) naverChart.destroy();
-  const labels=data.map(d=>{ const s=String(d.date); const p=s.split('-'); return p[0].slice(2)+'/'+p[1]; });
-  naverChart=new Chart(el,{
+
+  const labels = data.map(d=>{ const s=String(d.date); const p=s.split('-'); return p[0].slice(2)+'/'+p[1]; });
+
+  // 거래량 데이터를 네이버 날짜 기준으로 매핑
+  const tradeMap = {};
+  tradeData.forEach(t=>{ tradeMap[t.ym]=t.total; });
+  // 네이버 날짜(YYYY-MM-DD)에서 연월(YYYYMM) 추출
+  const tradeAligned = data.map(d=>{
+    const ym = d.date.slice(0,7).replace('-','');
+    return tradeMap[ym]||null;
+  });
+  const hasTradeData = tradeAligned.some(v=>v!==null);
+
+  naverChart = new Chart(el,{
     type:'line',
-    data:{labels, datasets:[{
-      label:'소파 검색 트렌드', data:data.map(d=>d.val),
-      borderColor:'#58A6FF', backgroundColor:'rgba(56,139,253,0.08)',
-      fill:true, tension:0.3, pointRadius:3, pointHoverRadius:5, borderWidth:2
-    }]},
+    data:{
+      labels,
+      datasets:[
+        {
+          label:'소파 검색 지수', data:data.map(d=>d.val),
+          borderColor:'#58A6FF', backgroundColor:'rgba(56,139,253,0.07)',
+          fill:true, tension:0.3, pointRadius:2, borderWidth:2, yAxisID:'y'
+        },
+        ...(hasTradeData ? [{
+          label:'서울 거래량', data:tradeAligned,
+          borderColor:'#3FB950', backgroundColor:'transparent',
+          tension:0.3, pointRadius:2, borderWidth:1.5,
+          borderDash:[4,3], yAxisID:'y2', spanGaps:true
+        }] : [])
+      ]
+    },
     options:{
       responsive:true, maintainAspectRatio:false, animation:{duration:400},
-      layout:{padding:{top:16,bottom:2,left:2,right:2}},
+      interaction:{mode:'index',intersect:false},
+      layout:{padding:{top:20,bottom:2,left:2,right:2}},
       plugins:{
-        legend:{display:false},
+        legend:{display:true, labels:{color:'#8B949E',boxWidth:10,boxHeight:2,font:{size:10}}},
         tooltip:{backgroundColor:'#1C2128',borderColor:'#30363D',borderWidth:1,
-          titleColor:'#8B949E',bodyColor:'#E6EDF3',padding:10,cornerRadius:6,
-          callbacks:{label:ctx=>`트렌드: ${ctx.parsed.y}`}}
+          titleColor:'#8B949E',bodyColor:'#E6EDF3',padding:10,cornerRadius:6}
       },
       scales:{
         x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
-        y:{min:0,max:100,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:10}}}
+        y:{min:0,max:100,position:'left',grid:{color:'rgba(48,54,61,.3)'},ticks:{color:'#58A6FF',font:{size:9}}},
+        ...(hasTradeData ? {y2:{position:'right',grid:{display:false},ticks:{color:'#3FB950',font:{size:9},callback:v=>v!=null?v.toLocaleString('ko-KR'):''}} } : {})
       }
     }
   });
 }
 
+/* ── 차트 2: 소재 트렌드 ── */
+let naverMatChart=null;
+function renderNaverMat(){
+  const data = getNaverMat();
+  const last = data[data.length-1];
+  document.getElementById('nv-mat-leather').textContent = last?.leather!=null ? last.leather+'/100' : '—';
+  document.getElementById('nv-mat-fabric').textContent  = last?.fabric!=null  ? last.fabric+'/100'  : '—';
+
+  const el=document.getElementById('naverMatChart'), empty=document.getElementById('naverMatChartEmpty');
+  if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(naverMatChart)naverMatChart.destroy(); naverMatChart=null; return; }
+  empty.style.display='none'; el.style.display='block';
+  if(naverMatChart) naverMatChart.destroy();
+  const labels = data.map(d=>{ const s=String(d.date); const p=s.split('-'); return p[0].slice(2)+'/'+p[1]; });
+  naverMatChart = new Chart(el,{
+    type:'line',
+    data:{labels, datasets:[
+      {label:'가죽소파', data:data.map(d=>d.leather), borderColor:'#D2A8FF', backgroundColor:'rgba(210,168,255,0.07)',
+       fill:true, tension:0.3, pointRadius:2, borderWidth:2, spanGaps:true},
+      {label:'패브릭소파', data:data.map(d=>d.fabric), borderColor:'#3FB950', backgroundColor:'rgba(63,185,80,0.07)',
+       fill:false, tension:0.3, pointRadius:2, borderWidth:2, spanGaps:true},
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:{duration:400},
+      interaction:{mode:'index',intersect:false},
+      layout:{padding:{top:16,bottom:2,left:2,right:2}},
+      plugins:{
+        legend:{display:true, labels:{color:'#8B949E',boxWidth:10,boxHeight:2,font:{size:10}}},
+        tooltip:{backgroundColor:'#1C2128',borderColor:'#30363D',borderWidth:1,
+          titleColor:'#8B949E',bodyColor:'#E6EDF3',padding:8,cornerRadius:6}
+      },
+      scales:{
+        x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
+        y:{min:0,max:100,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}}
+      }
+    }
+  });
+}
+
+/* ── 차트 3: 브랜드 경쟁 ── */
+let naverBrandChart=null;
+function renderNaverBrand(){
+  const data = getNaverBrand();
+  const last = data[data.length-1];
+  document.getElementById('nv-br-downing').textContent = last?.downing!=null ? last.downing+'/100' : '—';
+  document.getElementById('nv-br-jacomo').textContent  = last?.jacomo!=null  ? last.jacomo+'/100'  : '—';
+  document.getElementById('nv-br-essa').textContent    = last?.essa!=null    ? last.essa+'/100'    : '—';
+
+  const el=document.getElementById('naverBrandChart'), empty=document.getElementById('naverBrandChartEmpty');
+  if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(naverBrandChart)naverBrandChart.destroy(); naverBrandChart=null; return; }
+  empty.style.display='none'; el.style.display='block';
+  if(naverBrandChart) naverBrandChart.destroy();
+  const labels = data.map(d=>{ const s=String(d.date); const p=s.split('-'); return p[0].slice(2)+'/'+p[1]; });
+  naverBrandChart = new Chart(el,{
+    type:'line',
+    data:{labels, datasets:[
+      {label:'다우닝', data:data.map(d=>d.downing), borderColor:'#F0883E', backgroundColor:'rgba(240,136,62,0.07)',
+       fill:false, tension:0.3, pointRadius:2, borderWidth:2, spanGaps:true},
+      {label:'자코모', data:data.map(d=>d.jacomo), borderColor:'#388BFD', backgroundColor:'transparent',
+       fill:false, tension:0.3, pointRadius:2, borderWidth:2, spanGaps:true},
+      {label:'에싸', data:data.map(d=>d.essa), borderColor:'#3FB950', backgroundColor:'transparent',
+       fill:false, tension:0.3, pointRadius:2, borderWidth:2, spanGaps:true},
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:{duration:400},
+      interaction:{mode:'index',intersect:false},
+      layout:{padding:{top:16,bottom:2,left:2,right:2}},
+      plugins:{
+        legend:{display:true, labels:{color:'#8B949E',boxWidth:10,boxHeight:2,font:{size:10}}},
+        tooltip:{backgroundColor:'#1C2128',borderColor:'#30363D',borderWidth:1,
+          titleColor:'#8B949E',bodyColor:'#E6EDF3',padding:8,cornerRadius:6}
+      },
+      scales:{
+        x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
+        y:{min:0,max:100,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}}
+      }
+    }
+  });
+}
+
+/* ── 히스토리 ── */
 function renderNaverHistory(){
   const el=document.getElementById('nv-history');
-  const data=getNaverData().slice().reverse().slice(0,10);
-  if(!data.length){ el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:8px 0;">저장된 데이터 없음</div>'; return; }
-  el.innerHTML=`<div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:6px;">최근 입력</div>`+
-    data.map(d=>`<div style="display:flex;gap:10px;align-items:center;padding:4px 8px;background:var(--s2);border-radius:4px;margin-bottom:3px;font-size:11px;">
-      <span style="font-family:'JetBrains Mono',monospace;color:var(--t3);flex-shrink:0;">${d.date}</span>
-      <span style="color:var(--t2);flex:1;">지수: <strong>${d.val}</strong></span>
-      ${d.note?`<span style="color:var(--t3);font-size:10px;">${d.note}</span>`:''}
-    </div>`).join('');
+  const d1=getNaverData(), d2=getNaverMat(), d3=getNaverBrand();
+  const all=[...d1.map(d=>({date:d.date,type:'수요',val:`${d.val}/100`})),
+             ...d2.map(d=>({date:d.date,type:'소재',val:`가죽${d.leather??'—'}/패브릭${d.fabric??'—'}`})),
+             ...d3.map(d=>({date:d.date,type:'브랜드',val:`다${d.downing??'—'}/자${d.jacomo??'—'}/에${d.essa??'—'}`}))
+  ].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,15);
+  if(!all.length){ el.innerHTML='<div style="font-size:11px;color:var(--t3);padding:8px 0;">저장된 데이터 없음</div>'; return; }
+  el.innerHTML=all.map(d=>`<div style="display:flex;gap:8px;align-items:center;padding:4px 8px;background:var(--s2);border-radius:4px;margin-bottom:3px;font-size:11px;">
+    <span style="font-family:'JetBrains Mono',monospace;color:var(--t3);flex-shrink:0;font-size:10px;">${d.date}</span>
+    <span style="color:var(--t4);font-size:10px;flex-shrink:0;">[${d.type}]</span>
+    <span style="color:var(--t2);">${d.val}</span>
+  </div>`).join('');
 }
 
 document.getElementById('naverModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
 (function(){
-  const d=new Date(); const diff=d.getDay();
-  d.setDate(d.getDate()-diff); // 가장 최근 일요일
+  const d=new Date(); d.setDate(d.getDate()-d.getDay());
   document.getElementById('nv-in-date').value=d.toISOString().slice(0,10);
-  renderNaverSection(); renderNaverHistory();
 })();
 
 /* ══════════════════════════════════════════
@@ -1573,7 +1812,9 @@ document.getElementById('chemModal').addEventListener('click',function(e){if(e.t
 })();
 /* ── 페이지 로드 시 자동 실행 (Chart.js 로드 완료 후) ── */
 window.addEventListener('load', function(){
-  loadAll(); // loadAll 내부에서 render + Sheets 로드 모두 처리
+  loadAll();
+  renderNaverMat();
+  renderNaverBrand();
 });
 </script>
 </body>
