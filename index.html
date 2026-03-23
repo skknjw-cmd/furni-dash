@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DAUNING 경제·경영 지표</title>
-<!-- build: 20260323_043103 -->
+<!-- build: 20260323_043658 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════
@@ -1263,18 +1263,31 @@ async function loadAll(){
   btn.disabled=true; btn.textContent='로딩 중...';
   ['wti-val','brent-val','usd-val','cny-val','eur-val','brl-val'].forEach(setKpiLoading);
 
-  const [oilRes,fxRes]=await Promise.allSettled([
-    Promise.all([fetchOilCSV('wti'),fetchOilCSV('brent')]),
+  /* ══ 수동 입력 데이터: 즉시 렌더 (네트워크 기다리지 않음) ══ */
+  renderTradeSection(); renderSupplySection();
+  renderNaverSection(); renderNaverMat(); renderNaverBrand(); renderChemSection();
+  ['cn'].forEach(renderFreightSection);
+
+  /* ══ GAS URL 설정 ══ */
+  const GAS_DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwuArne85f66B8lW2crdhTBQK2Eu6z0bsrMDXie_dW7uFIT9fuQKkbzMD1PrWUdTu9qeA/exec';
+  const gasUrl = localStorage.getItem('gas_url') || GAS_DEFAULT_URL;
+
+  /* ══ 유가·환율·Sheets 모두 병렬 fetch ══ */
+  const sheetsPromise = gasUrl ? fetchSheets(gasUrl) : Promise.resolve(null);
+
+  const [oilRes, fxRes] = await Promise.allSettled([
+    Promise.all([fetchOilCSV('wti'), fetchOilCSV('brent')]),
     fetchFX()
   ]);
 
+  /* ── 유가 렌더 ── */
   if(oilRes.status==='fulfilled'){
     const [wti,brent]=oilRes.value;
     renderKpi('wti-val',wti,'USD/bbl',2);
     renderKpi('brent-val',brent,'USD/bbl',2);
     const n=Math.min(wti.length,brent.length,65);
     buildChart('oilChart','oilChartEmpty',[
-      {label:'WTI', rawDates:wti.slice(-n).map(d=>d.date), values:wti.slice(-n).map(d=>d.value.toFixed(2)),  color:'#F0883E', fill:'rgba(224,123,0,.07)'},
+      {label:'WTI', rawDates:wti.slice(-n).map(d=>d.date), values:wti.slice(-n).map(d=>d.value.toFixed(2)), color:'#F0883E', fill:'rgba(224,123,0,.07)'},
       {label:'Brent',rawDates:brent.slice(-n).map(d=>d.date),values:brent.slice(-n).map(d=>d.value.toFixed(2)),color:'#F85149'}
     ],v=>parseFloat(v).toFixed(0),oilChart,c=>{oilChart=c;});
   } else {
@@ -1282,93 +1295,66 @@ async function loadAll(){
     document.getElementById('oilChartEmpty').textContent='로드 실패';
   }
 
+  /* ── 환율 렌더 ── */
   if(fxRes.status==='fulfilled'){
     const fx=fxRes.value;
     renderKpi('usd-val',fx.usd,'원',2);
     renderKpi('cny-val',fx.cny,'원/위안',2);
     renderKpi('eur-val',fx.eur,'원/유로',2);
-
     const mkFx=(arr)=>({rawDates:arr.map(d=>d.date),values:arr.map(d=>Math.round(d.value))});
     const fmtKrw=v=>parseInt(v).toLocaleString('ko-KR');
-
     buildChart('usdChart','usdChartEmpty',[{...mkFx(fx.usd),label:'USD/KRW',color:'#1565C0',fill:'rgba(21,101,192,.07)'}],fmtKrw,usdChart,c=>{usdChart=c;});
     buildChart('eurChart','eurChartEmpty',[{...mkFx(fx.eur),label:'EUR/KRW',color:'#6A1B9A',fill:'rgba(106,27,154,.07)'}],fmtKrw,eurChart,c=>{eurChart=c;});
     buildChart('cnyChart','cnyChartEmpty',[{...mkFx(fx.cny),label:'CNY/KRW',color:'#00796B',fill:'rgba(0,121,107,.07)'}],fmtKrw,cnyChart,c=>{cnyChart=c;});
-    // BRL/USD (레알이 약세일수록 수치 낮음 = 가죽 수입가 하락 선행)
     if(fx.brl_usd && fx.brl_usd.length){
       renderKpi('brl-val',fx.brl_usd,'USD/BRL',4);
       const mkBrl=(arr)=>({rawDates:arr.map(d=>d.date),values:arr.map(d=>d.value.toFixed(4))});
-      const fmtBrl=v=>(+v).toFixed(4);
-      buildChart('brlChart','brlChartEmpty',[{...mkBrl(fx.brl_usd),label:'BRL/USD',color:'#00838F',fill:'rgba(0,131,143,.07)'}],fmtBrl,brlChart,c=>{brlChart=c;});
+      buildChart('brlChart','brlChartEmpty',[{...mkBrl(fx.brl_usd),label:'BRL/USD',color:'#00838F',fill:'rgba(0,131,143,.07)'}],v=>(+v).toFixed(4),brlChart,c=>{brlChart=c;});
     } else { setKpiErr('brl-val','로드 실패'); }
   } else {
     ['usd-val','cny-val','eur-val','brl-val'].forEach(id=>setKpiErr(id,'로드 실패'));
     ['usdChartEmpty','eurChartEmpty','cnyChartEmpty','brlChartEmpty'].forEach(id=>{document.getElementById(id).textContent='로드 실패';});
   }
 
-  // Google Sheets 연동된 경우 Sheets에서 로드 (데이터가 있는 항목만 덮어씀)
-  // GAS URL: localStorage 우선, 없으면 기본값 사용 (모든 기기 자동 연결)
-  const GAS_DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwuArne85f66B8lW2crdhTBQK2Eu6z0bsrMDXie_dW7uFIT9fuQKkbzMD1PrWUdTu9qeA/exec';
-  const gasUrl = localStorage.getItem('gas_url') || GAS_DEFAULT_URL;
-  if(gasUrl){
-    try{
-      // 모바일 네트워크 대응: 타임아웃 20초, 실패 시 1회 재시도
-      const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-      const timeout = isMobile ? 20000 : 12000;
-      let r;
-      try {
-        r = await fetch(`${gasUrl}?action=getAll`, {signal: AbortSignal.timeout(timeout)});
-      } catch(retryErr) {
-        // 1회 재시도
-        await new Promise(res=>setTimeout(res, 1500));
-        r = await fetch(`${gasUrl}?action=getAll`, {signal: AbortSignal.timeout(timeout)});
-      }
-      const json = await r.json();
-      if(json.ok && json.data){
-        const d = json.data;
-        // Sheets에 실제 데이터가 있을 때만 로컬 덮어씀 (빈 배열로 덮어쓰기 방지)
-        if(Array.isArray(d.freight_cn)       && d.freight_cn.length > 0)
-          localStorage.setItem('freight_cn', JSON.stringify(d.freight_cn));
-        if(Array.isArray(d.naver_sofa_trend) && d.naver_sofa_trend.length > 0)
-          localStorage.setItem('naver_sofa_trend', JSON.stringify(d.naver_sofa_trend));
-        if(Array.isArray(d.naver_material) && d.naver_material.length > 0)
-          localStorage.setItem('naver_material', JSON.stringify(d.naver_material));
-        if(Array.isArray(d.naver_brand) && d.naver_brand.length > 0)
-          localStorage.setItem('naver_brand', JSON.stringify(d.naver_brand));
-        if(Array.isArray(d.apt_trade_data)   && d.apt_trade_data.length > 0)
-          localStorage.setItem('apt_trade_data', JSON.stringify(d.apt_trade_data));
-        if(Array.isArray(d.apt_supply_data)  && d.apt_supply_data.length > 0)
-          localStorage.setItem('apt_supply_data', JSON.stringify(d.apt_supply_data));
-        // chem: 폴리올/TDI/MDI
-        if(d.chem_price_data){
-          const prev = JSON.parse(localStorage.getItem('chem_price_data')||'{}');
-          let updated = false;
-          ['poly','tdi','mdi'].forEach(k=>{
-            if(d.chem_price_data[k]?.length > 0){ prev[k]=d.chem_price_data[k]; updated=true; }
-          });
-          if(updated) localStorage.setItem('chem_price_data', JSON.stringify(prev));
-        }
-        // 소가죽: 국가별 완전 독립 키로 저장 (hide_leather_IT 등)
-        ['IT','CN','US','BR'].forEach(ctr=>{
-          const sheetKey = 'hide_' + ctr;   // Sheets에서 오는 키
-          const lsKey = 'hide_leather_' + ctr; // localStorage 독립 키
-          if(Array.isArray(d[sheetKey]) && d[sheetKey].length > 0){
-            localStorage.setItem(lsKey, JSON.stringify(d[sheetKey]));
-            console.log('소가죽 로드:', ctr, d[sheetKey].length+'건');
-          }
-        });
-        console.log('Sheets 로드 완료:', new Date().toLocaleTimeString());
-      }
-    } catch(e){ console.warn('Sheets 로드 실패 (로컬 데이터 유지):', e.message); }
-  }
-
-  // 수동 입력 섹션 렌더 (Sheets 또는 로컬 데이터)
-  renderTradeSection(); renderSupplySection();
-  renderNaverSection(); renderNaverMat(); renderNaverBrand(); renderChemSection();
-  ['cn'].forEach(renderFreightSection);
-
+  /* ── 버튼 즉시 활성화 (Sheets 기다리지 않음) ── */
   document.getElementById('ts').textContent=new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
   btn.disabled=false; btn.textContent='↻ 새로고침';
+
+  /* ── Sheets: 백그라운드에서 완료 후 자동 업데이트 ── */
+  sheetsPromise.then(()=>{
+    renderTradeSection(); renderSupplySection();
+    renderNaverSection(); renderNaverMat(); renderNaverBrand(); renderChemSection();
+    ['cn'].forEach(renderFreightSection);
+    document.getElementById('ts').textContent=new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    console.log('Sheets 업데이트 완료');
+  }).catch(()=>{});
+}
+
+/* ── Sheets 데이터 fetch → localStorage 저장 (분리된 함수) ── */
+async function fetchSheets(gasUrl){
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  const timeout = isMobile ? 25000 : 15000;
+  const r = await fetch(`${gasUrl}?action=getAll`, {signal: AbortSignal.timeout(timeout)});
+  const json = await r.json();
+  if(!json.ok || !json.data) return;
+  const d = json.data;
+  if(Array.isArray(d.freight_cn)       && d.freight_cn.length > 0) localStorage.setItem('freight_cn', JSON.stringify(d.freight_cn));
+  if(Array.isArray(d.naver_sofa_trend) && d.naver_sofa_trend.length > 0) localStorage.setItem('naver_sofa_trend', JSON.stringify(d.naver_sofa_trend));
+  if(Array.isArray(d.naver_material)   && d.naver_material.length > 0) localStorage.setItem('naver_material', JSON.stringify(d.naver_material));
+  if(Array.isArray(d.naver_brand)      && d.naver_brand.length > 0) localStorage.setItem('naver_brand', JSON.stringify(d.naver_brand));
+  if(Array.isArray(d.apt_trade_data)   && d.apt_trade_data.length > 0) localStorage.setItem('apt_trade_data', JSON.stringify(d.apt_trade_data));
+  if(Array.isArray(d.apt_supply_data)  && d.apt_supply_data.length > 0) localStorage.setItem('apt_supply_data', JSON.stringify(d.apt_supply_data));
+  if(d.chem_price_data){
+    const prev = JSON.parse(localStorage.getItem('chem_price_data')||'{}');
+    let updated = false;
+    ['poly','tdi','mdi'].forEach(k=>{ if(d.chem_price_data[k]?.length > 0){ prev[k]=d.chem_price_data[k]; updated=true; } });
+    if(updated) localStorage.setItem('chem_price_data', JSON.stringify(prev));
+  }
+  ['IT','CN','US','BR'].forEach(ctr=>{
+    const key = 'hide_' + ctr;
+    if(Array.isArray(d[key]) && d[key].length > 0) localStorage.setItem('hide_leather_'+ctr, JSON.stringify(d[key]));
+  });
+  console.log('Sheets 로드 완료:', new Date().toLocaleTimeString());
 }
 
 /* ══════════════════════════════════
