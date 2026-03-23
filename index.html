@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>다우닝 경제·경영 지표</title>
-<!-- build: 20260323_013025 -->
+<!-- build: 20260323_022217 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════
@@ -2002,33 +2002,90 @@ function renderChemSection(){
       }
     });
   });
+
+  // ── 소 가죽 정제 단가 렌더링 ──
+  const hValEl=document.getElementById('chem-hide-val');
+  const hChgEl=document.getElementById('chem-hide-chg');
+  const hideData=getHideData(hideFilter);
+  const hLast=hideData[hideData.length-1], hPrev=hideData[hideData.length-2];
+  if(!hLast){
+    hValEl.innerHTML='<div class="kpi-empty" style="font-size:10px;color:var(--t3);">데이터 없음</div>';
+    hChgEl.innerHTML='—';
+  } else {
+    const cName={IT:'🇮🇹 이태리',CN:'🇨🇳 중국',US:'🇺🇸 미국',BR:'🇧🇷 브라질',all:'전체 평균'};
+    hValEl.innerHTML=`<div><span class="kpi-num">${hLast.val.toFixed(2)}</span><span class="kpi-unit">$/kg</span></div><div style="font-size:9px;color:var(--t4);margin-top:2px;">${cName[hideFilter]||'전체'}</div>`;
+    if(hPrev){
+      const chg=hLast.val-hPrev.val,pct=chg/hPrev.val*100;
+      const dir=chg>=0?'up':'dn',arr=chg>=0?'▲':'▼';
+      hChgEl.innerHTML=`<div class="kpi-chg ${dir}" style="font-size:13px;">${arr} ${Math.abs(chg).toFixed(2)} (${Math.abs(pct).toFixed(1)}%)</div>`;
+    }
+  }
+  // 소 가죽 차트
+  const hEl=document.getElementById('hideChart'), hEmpty=document.getElementById('hideChartEmpty');
+  if(chemCharts['hide']){ chemCharts['hide'].destroy(); chemCharts['hide']=null; }
+  if(!hideData.length){
+    hEmpty.style.display='flex'; hEl.style.display='none';
+  } else {
+    hEmpty.style.display='none'; hEl.style.display='block';
+    const chartFilter=(document.getElementById('hide-chart-filter')||{}).value||'all';
+    const cColors={IT:'#009246',CN:'#DE2910',US:'#3C3B6E',BR:'#009C3B',all:'#C8902A'};
+    const cLabel={IT:'🇮🇹 이태리',CN:'🇨🇳 중국',US:'🇺🇸 미국',BR:'🇧🇷 브라질',all:'전체 평균'};
+    let datasets=[], labels=[];
+    if(chartFilter==='all'){
+      // 각 국가 별도 라인
+      hideCountries.forEach(ctr=>{
+        const d=(stored['hide_'+ctr]||[]);
+        if(!d.length) return;
+        datasets.push({label:cLabel[ctr],data:d.map(e=>e.val),borderColor:cColors[ctr],
+          backgroundColor:'transparent',tension:0.3,pointRadius:2,borderWidth:2,spanGaps:true});
+      });
+      const allYMs=[...new Set(hideCountries.flatMap(ctr=>(stored['hide_'+ctr]||[]).map(e=>e.ym)))].sort();
+      labels=allYMs.map(ym=>fmtYM(ym));
+      // 각 dataset 데이터를 allYMs 기준으로 맞춤
+      hideCountries.forEach((ctr,i)=>{
+        if(!datasets[i]) return;
+        const d=(stored['hide_'+ctr]||[]);
+        datasets[i].data=allYMs.map(ym=>{const e=d.find(x=>x.ym===ym); return e?e.val:null;});
+      });
+    } else {
+      const d=(stored['hide_'+chartFilter]||[]);
+      labels=d.map(e=>fmtYM(e.ym));
+      datasets=[{label:cLabel[chartFilter],data:d.map(e=>e.val),borderColor:cColors[chartFilter],
+        backgroundColor:cColors[chartFilter]+'18',fill:true,tension:0.3,pointRadius:2,borderWidth:2}];
+    }
+    const allVals=datasets.flatMap(ds=>ds.data.filter(v=>v!=null));
+    const r=allVals.length?calcYRange(allVals):{min:0,max:10};
+    chemCharts['hide']=new Chart(hEl,{type:'line',data:{labels,datasets},options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:400},
+      interaction:{mode:'index',intersect:false},layout:{padding:{top:16,bottom:2,left:2,right:2}},
+      plugins:{
+        legend:{display:datasets.length>1,labels:{color:'#334155',boxWidth:10,boxHeight:2,font:{size:10}}},
+        tooltip:{backgroundColor:'#FFFFFF',borderColor:'rgba(176,196,222,.6)',borderWidth:1,
+          titleColor:'#64748B',bodyColor:'#0F172A',padding:10,cornerRadius:6,
+          callbacks:{label:ctx=>ctx.parsed.y!=null?`${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} $/kg`:''}}
+      },
+      scales:{
+        x:{type:'category',grid:{color:'rgba(176,196,222,.5)'},ticks:{color:'#64748B',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
+        y:{min:r.min,max:r.max,grid:{color:'rgba(176,196,222,.5)'},ticks:{color:'#475569',font:{size:9},callback:v=>v.toFixed(2)}}
+      }
+    }});
+  }
+}
+
+function onHideFilterChange(){
+  const cf=(document.getElementById('hide-chart-filter')||{}).value||'all';
+  const kf=document.getElementById('hide-country-filter');
+  if(kf) kf.value=cf;
+  const lbl=document.getElementById('hide-chart-country-label');
+  const names={IT:'🇮🇹 이태리',CN:'🇨🇳 중국',US:'🇺🇸 미국',BR:'🇧🇷 브라질',all:'전체 평균'};
+  if(lbl) lbl.textContent=names[cf]||'전체';
+  renderChemSection();
 }
 
 function renderChemHistory(){
   const el=document.getElementById('ch-history');
   const stored=getChemData();
   const merged={};
-  // 소가죽 국가 필터
-  const hideFilter = (document.getElementById('hide-country-filter')||{}).value || 'all';
-  const hideCountries = ['IT','CN','US','BR'];
-  const countryNames = {IT:'이태리',CN:'중국',US:'미국',BR:'브라질',all:'전체'};
-  // hide 데이터: 필터에 따라 병합 또는 단일 국가
-  function getHideData(filter){
-    if(filter==='all'){
-      // 전체 평균 (같은 ym에 여러 국가 있으면 평균)
-      const merged={};
-      hideCountries.forEach(c=>{
-        (stored['hide_'+c]||[]).forEach(e=>{
-          if(!merged[e.ym]) merged[e.ym]={ym:e.ym,vals:[],countries:[]};
-          merged[e.ym].vals.push(e.val);
-          merged[e.ym].countries.push(c);
-        });
-      });
-      return Object.values(merged).sort((a,b)=>a.ym.localeCompare(b.ym))
-        .map(m=>({ym:m.ym, val:m.vals.reduce((a,b)=>a+b)/m.vals.length, note:m.countries.join('+')}));
-    }
-    return (stored['hide_'+filter]||[]);
-  }
   ['poly','tdi','mdi'].forEach(chem=>{
     (stored[chem]||[]).forEach(e=>{
       if(!merged[e.ym]) merged[e.ym]={};
