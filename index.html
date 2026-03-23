@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DAUNING 경제·경영 지표</title>
-<!-- build: 20260323_042514 -->
+<!-- build: 20260323_043103 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════
@@ -1307,7 +1307,9 @@ async function loadAll(){
   }
 
   // Google Sheets 연동된 경우 Sheets에서 로드 (데이터가 있는 항목만 덮어씀)
-  const gasUrl = localStorage.getItem('gas_url');
+  // GAS URL: localStorage 우선, 없으면 기본값 사용 (모든 기기 자동 연결)
+  const GAS_DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwuArne85f66B8lW2crdhTBQK2Eu6z0bsrMDXie_dW7uFIT9fuQKkbzMD1PrWUdTu9qeA/exec';
+  const gasUrl = localStorage.getItem('gas_url') || GAS_DEFAULT_URL;
   if(gasUrl){
     try{
       // 모바일 네트워크 대응: 타임아웃 20초, 실패 시 1회 재시도
@@ -2327,17 +2329,11 @@ window.addEventListener('load', function(){
 
   // 2. GAS URL 상태 버튼 업데이트
   const savedGasUrl = localStorage.getItem('gas_url');
-  updateGasStatusBtn(savedGasUrl);
+  updateGasStatusBtn(savedGasUrl || GAS_DEFAULT_URL);
 
-  // 3. GAS URL 없으면 설정 모달 표시 (1.5초 후, 페이지 로딩 완료 후)
-  if(!savedGasUrl){
-    setTimeout(()=>{
-      document.getElementById('setupModal').classList.add('show');
-    }, 1500);
-  } else {
-    // URL 있으면 input에 미리 채워두기
-    document.getElementById('setup-gas-url').value = savedGasUrl;
-  }
+  // 3. URL 입력창에 현재 URL 미리 채우기 (기본값 포함)
+  const activeGasUrl = localStorage.getItem('gas_url') || GAS_DEFAULT_URL;
+  document.getElementById('setup-gas-url').value = activeGasUrl;
 
   // 4. 자동 수집 + Sheets 로드
   loadAll();
