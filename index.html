@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>다우닝 경제·경영 지표</title>
-<!-- build: 20260323_022647 -->
+<!-- build: 20260323_023223 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════
@@ -1166,27 +1166,24 @@ async function loadAll(){
           localStorage.setItem('apt_trade_data', JSON.stringify(d.apt_trade_data));
         if(Array.isArray(d.apt_supply_data)  && d.apt_supply_data.length > 0)
           localStorage.setItem('apt_supply_data', JSON.stringify(d.apt_supply_data));
-        // chem: 폴리올/TDI/MDI + 소가죽 국가별 통합 저장
-        const chemStored = JSON.parse(localStorage.getItem('chem_price_data')||'{}');
-        let chemUpdated = false;
+        // chem: 폴리올/TDI/MDI
         if(d.chem_price_data){
-          const hasChem = (d.chem_price_data.poly?.length > 0 || d.chem_price_data.tdi?.length > 0 || d.chem_price_data.mdi?.length > 0);
-          if(hasChem){
-            if(d.chem_price_data.poly?.length > 0) chemStored.poly = d.chem_price_data.poly;
-            if(d.chem_price_data.tdi?.length  > 0) chemStored.tdi  = d.chem_price_data.tdi;
-            if(d.chem_price_data.mdi?.length  > 0) chemStored.mdi  = d.chem_price_data.mdi;
-            chemUpdated = true;
-          }
+          const prev = JSON.parse(localStorage.getItem('chem_price_data')||'{}');
+          let updated = false;
+          ['poly','tdi','mdi'].forEach(k=>{
+            if(d.chem_price_data[k]?.length > 0){ prev[k]=d.chem_price_data[k]; updated=true; }
+          });
+          if(updated) localStorage.setItem('chem_price_data', JSON.stringify(prev));
         }
-        // 소 가죽 국가별 데이터 (Sheets: d.hide_IT, d.hide_CN, d.hide_US, d.hide_BR)
+        // 소가죽: 국가별 완전 독립 키로 저장 (hide_leather_IT 등)
         ['IT','CN','US','BR'].forEach(ctr=>{
-          const key = 'hide_' + ctr;
-          if(Array.isArray(d[key]) && d[key].length > 0){
-            chemStored[key] = d[key];
-            chemUpdated = true;
+          const sheetKey = 'hide_' + ctr;   // Sheets에서 오는 키
+          const lsKey = 'hide_leather_' + ctr; // localStorage 독립 키
+          if(Array.isArray(d[sheetKey]) && d[sheetKey].length > 0){
+            localStorage.setItem(lsKey, JSON.stringify(d[sheetKey]));
+            console.log('소가죽 로드:', ctr, d[sheetKey].length+'건');
           }
         });
-        if(chemUpdated) localStorage.setItem('chem_price_data', JSON.stringify(chemStored));
         console.log('Sheets 로드 완료:', new Date().toLocaleTimeString());
       }
     } catch(e){ console.warn('Sheets 로드 실패 (로컬 데이터 유지):', e.message); }
@@ -1931,21 +1928,26 @@ function saveChemManual(){
     stored[chem].sort((a,b)=>a.ym.localeCompare(b.ym));
     if(stored[chem].length>24) stored[chem].splice(0,stored[chem].length-24);
   });
-  // 소 가죽: 국가별로 저장 (hide_IT, hide_CN, hide_US, hide_BR)
+  // 소 가죽: 별도 독립 localStorage 키로 저장
   if(hide){
-    const key='hide_'+hideCountry;
-    if(!stored[key]) stored[key]=[];
-    const idx=stored[key].findIndex(e=>e.ym===ym);
-    const entry={ym,val:+hide,country:hideCountry,note};
-    if(idx>=0) stored[key][idx]=entry; else stored[key].push(entry);
-    stored[key].sort((a,b)=>a.ym.localeCompare(b.ym));
-    if(stored[key].length>24) stored[key].splice(0,stored[key].length-24);
+    const lsKey = 'hide_leather_' + hideCountry;
+    const hideArr = JSON.parse(localStorage.getItem(lsKey)||'[]');
+    const idx = hideArr.findIndex(e=>e.ym===ym);
+    const entry = {ym, val:+hide, note};
+    if(idx>=0) hideArr[idx]=entry; else hideArr.push(entry);
+    hideArr.sort((a,b)=>a.ym.localeCompare(b.ym));
+    if(hideArr.length>24) hideArr.splice(0,hideArr.length-24);
+    localStorage.setItem(lsKey, JSON.stringify(hideArr));
   }
   setChemData(stored);
   renderChemSection();
   renderChemHistory();
 }
-function clearChem(){ setChemData({}); renderChemSection(); renderChemHistory(); }
+function clearChem(){
+  setChemData({});
+  ['IT','CN','US','BR'].forEach(ctr=>localStorage.removeItem('hide_leather_'+ctr));
+  renderChemSection(); renderChemHistory();
+}
 
 function renderChemSection(){
   const stored=getChemData();
@@ -1954,21 +1956,25 @@ function renderChemSection(){
   const hideCountries = ['IT','CN','US','BR'];
   const countryNames = {IT:'이태리',CN:'중국',US:'미국',BR:'브라질',all:'전체'};
   // hide 데이터: 필터에 따라 병합 또는 단일 국가
+  // 소가죽: 독립 키에서 직접 읽기
+  function getHideRaw(ctr){
+    try{ return JSON.parse(localStorage.getItem('hide_leather_'+ctr)||'[]'); }
+    catch{ return []; }
+  }
   function getHideData(filter){
     if(filter==='all'){
-      // 전체 평균 (같은 ym에 여러 국가 있으면 평균)
       const merged={};
-      hideCountries.forEach(c=>{
-        (stored['hide_'+c]||[]).forEach(e=>{
+      hideCountries.forEach(ctr=>{
+        getHideRaw(ctr).forEach(e=>{
           if(!merged[e.ym]) merged[e.ym]={ym:e.ym,vals:[],countries:[]};
           merged[e.ym].vals.push(e.val);
-          merged[e.ym].countries.push(c);
+          merged[e.ym].countries.push(ctr);
         });
       });
       return Object.values(merged).sort((a,b)=>a.ym.localeCompare(b.ym))
         .map(m=>({ym:m.ym, val:m.vals.reduce((a,b)=>a+b)/m.vals.length, note:m.countries.join('+')}));
     }
-    return (stored['hide_'+filter]||[]);
+    return getHideRaw(filter);
   }
   ['poly','tdi','mdi'].forEach(chem=>{
     const data=(stored[chem]||[]);
@@ -2050,7 +2056,7 @@ function renderChemSection(){
     if(chartFilter==='all'){
       // 각 국가 별도 라인
       hideCountries.forEach(ctr=>{
-        const d=(stored['hide_'+ctr]||[]);
+        const d=getHideRaw(ctr);
         if(!d.length) return;
         datasets.push({label:cLabel[ctr],data:d.map(e=>e.val),borderColor:cColors[ctr],
           backgroundColor:'transparent',tension:0.3,pointRadius:2,borderWidth:2,spanGaps:true});
@@ -2060,11 +2066,11 @@ function renderChemSection(){
       // 각 dataset 데이터를 allYMs 기준으로 맞춤
       hideCountries.forEach((ctr,i)=>{
         if(!datasets[i]) return;
-        const d=(stored['hide_'+ctr]||[]);
+        const d=getHideRaw(ctr);
         datasets[i].data=allYMs.map(ym=>{const e=d.find(x=>x.ym===ym); return e?e.val:null;});
       });
     } else {
-      const d=(stored['hide_'+chartFilter]||[]);
+      const d=getHideRaw(chartFilter);
       labels=d.map(e=>fmtYM(e.ym));
       datasets=[{label:cLabel[chartFilter],data:d.map(e=>e.val),borderColor:cColors[chartFilter],
         backgroundColor:cColors[chartFilter]+'18',fill:true,tension:0.3,pointRadius:2,borderWidth:2}];
