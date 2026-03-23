@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DAUNING 경제·경영 지표</title>
-<!-- build: 20260323_025650 -->
+<!-- build: 20260323_042514 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════
@@ -326,6 +326,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
     </div>
     <span class="ts-txt" id="ts">—</span>
     <button class="btn" id="btnRefresh" onclick="loadAll()">↻ 새로고침</button>
+    <button class="btn" id="btnGasStatus" onclick="document.getElementById('setupModal').classList.add('show')" title="Google Sheets 연동 설정" style="font-size:11px;">☁ 연동설정</button>
     <button class="btn" onclick="printDashboard()" style="color:var(--t2);border-color:var(--b2);" title="PDF로 저장">⬇ PDF</button>
   </div>
 </header>
@@ -784,6 +785,42 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
 
 </main>
 
+<!-- ── 최초 방문 / GAS URL 설정 모달 ── -->
+<div class="modal-bg" id="setupModal" style="z-index:500;">
+  <div class="modal" style="width:520px;border-top:4px solid var(--navy);">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--navy),var(--blue2));display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin-bottom:12px;">D</div>
+      <div style="font-size:16px;font-weight:700;color:var(--t1);">DAUNING 경제·경영 지표</div>
+      <div style="font-size:12px;color:var(--t3);margin-top:4px;">Google Sheets 연동 URL을 입력하면 데이터가 표시됩니다</div>
+    </div>
+
+    <div style="background:var(--blue3);border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:11px;color:var(--t2);line-height:1.8;">
+      📌 <strong>URL 확인 방법:</strong> PC에서 <code>admin.html</code> 접속 →
+      홈 화면 상단 <em>☁ Google Sheets 연동</em> 패널에서 복사
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="display:block;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Apps Script 배포 URL</label>
+      <input type="url" id="setup-gas-url"
+        placeholder="https://script.google.com/macros/s/.../exec"
+        style="width:100%;padding:10px 12px;border:1px solid var(--b1);border-radius:6px;font-size:12px;color:var(--t1);background:var(--s2);outline:none;font-family:'JetBrains Mono',monospace;"
+        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--b1)'">
+    </div>
+
+    <div style="display:flex;gap:10px;">
+      <button onclick="saveSetupUrl()" style="flex:1;padding:12px;background:var(--navy);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">
+        ✓ 저장 후 데이터 불러오기
+      </button>
+      <button onclick="document.getElementById('setupModal').classList.remove('show')"
+        style="padding:12px 16px;background:transparent;border:1px solid var(--b1);border-radius:6px;font-size:12px;color:var(--t3);cursor:pointer;">
+        나중에
+      </button>
+    </div>
+
+    <div id="setup-msg" style="text-align:center;font-size:11px;color:var(--t3);margin-top:12px;"></div>
+  </div>
+</div>
+
 <!-- 네이버 트렌드 수동 입력 모달 -->
 <div class="modal-bg" id="naverModal">
   <div class="modal" style="width:560px;">
@@ -1178,6 +1215,38 @@ function calcYRange(vals, padding=8, step=5) {
   const hi = Math.min(100, Math.ceil((Math.max(...v.filter(x=>x <= q3+1.5*iqr)) + padding) / step) * step);
   // 범위가 너무 좁으면 최소 20 확보
   return { min: lo, max: Math.max(hi, lo + 20) };
+}
+
+/* ── GAS URL 설정 (모바일 최초 접속 포함) ── */
+function saveSetupUrl(){
+  const url = document.getElementById('setup-gas-url').value.trim();
+  if(!url || !url.startsWith('https://script.google.com')){
+    document.getElementById('setup-msg').textContent = '올바른 Apps Script URL을 입력해주세요';
+    document.getElementById('setup-msg').style.color = 'var(--red)';
+    return;
+  }
+  localStorage.setItem('gas_url', url);
+  document.getElementById('setup-msg').textContent = '✓ 저장됨. 데이터를 불러오는 중...';
+  document.getElementById('setup-msg').style.color = 'var(--green)';
+  setTimeout(()=>{
+    document.getElementById('setupModal').classList.remove('show');
+    updateGasStatusBtn(url);
+    loadAll();
+  }, 800);
+}
+
+function updateGasStatusBtn(gasUrl){
+  const btn = document.getElementById('btnGasStatus');
+  if(!btn) return;
+  if(gasUrl){
+    btn.textContent = '☁ 연결됨';
+    btn.style.color = 'rgba(255,255,255,.9)';
+    btn.style.borderColor = 'rgba(105,240,174,.5)';
+  } else {
+    btn.textContent = '☁ 연동설정';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+  }
 }
 
 function printDashboard(){
@@ -2247,7 +2316,7 @@ document.getElementById('chemModal').addEventListener('click',function(e){if(e.t
 })();
 /* ── 페이지 로드 시 자동 실행 (Chart.js 로드 완료 후) ── */
 window.addEventListener('load', function(){
-  // 기본 수동 입력 데이터 먼저 렌더 (Sheets 로드 전에도 보이도록)
+  // 1. 로컬 데이터 먼저 렌더 (즉시 표시)
   renderTradeSection();
   renderSupplySection();
   renderNaverSection();
@@ -2255,7 +2324,22 @@ window.addEventListener('load', function(){
   renderNaverBrand();
   renderChemSection();
   ['cn'].forEach(renderFreightSection);
-  // 이후 자동 수집 + Sheets 로드
+
+  // 2. GAS URL 상태 버튼 업데이트
+  const savedGasUrl = localStorage.getItem('gas_url');
+  updateGasStatusBtn(savedGasUrl);
+
+  // 3. GAS URL 없으면 설정 모달 표시 (1.5초 후, 페이지 로딩 완료 후)
+  if(!savedGasUrl){
+    setTimeout(()=>{
+      document.getElementById('setupModal').classList.add('show');
+    }, 1500);
+  } else {
+    // URL 있으면 input에 미리 채워두기
+    document.getElementById('setup-gas-url').value = savedGasUrl;
+  }
+
+  // 4. 자동 수집 + Sheets 로드
   loadAll();
 });
 </script>
