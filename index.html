@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DAUNING 경제·경영 지표</title>
-<!-- build: 20260323_043658 -->
+<!-- build: 20260323_044602 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════
@@ -337,27 +337,27 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
 <div class="kpi-strip" style="margin-bottom:28px;">
   <div class="kpi" style="--kpi-color:var(--amber)">
     <div class="kpi-label" title="EIA 주간 데이터 · 매주 월요일 전주 데이터 업데이트">WTI 원유</div>
-    <div id="wti-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
+    <div id="wti-val"></div>
   </div>
   <div class="kpi" style="--kpi-color:#FB923C">
     <div class="kpi-label" title="EIA 주간 데이터 · 매주 월요일 전주 데이터 업데이트">Brent 원유</div>
-    <div id="brent-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
+    <div id="brent-val"></div>
   </div>
   <div class="kpi" style="--kpi-color:var(--blue)">
     <div class="kpi-label" title="ECB 기준 · 평일 매일 오후 4시(CET) 업데이트 · 주말 데이터 없음">USD / KRW</div>
-    <div id="usd-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
+    <div id="usd-val"></div>
   </div>
   <div class="kpi" style="--kpi-color:var(--green)">
     <div class="kpi-label" title="ECB 기준 · 평일 매일 오후 4시(CET) 업데이트 · 주말 데이터 없음">CNY / KRW</div>
-    <div id="cny-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
+    <div id="cny-val"></div>
   </div>
   <div class="kpi" style="--kpi-color:var(--purple)">
     <div class="kpi-label" title="ECB 기준 · 평일 매일 오후 4시(CET) 업데이트 · 주말 데이터 없음">EUR / KRW</div>
-    <div id="eur-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
+    <div id="eur-val"></div>
   </div>
   <div class="kpi" style="--kpi-color:#22D3EE;">
     <div class="kpi-label" title="ECB 기준 · 평일 매일 오후 4시(CET) 업데이트 · 주말 데이터 없음">BRL / USD</div>
-    <div id="brl-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
+    <div id="brl-val"></div>
   </div>
 </div>
 
@@ -996,13 +996,24 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
+/* ── 전역 설정 ── */
+const GAS_DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwuArne85f66B8lW2crdhTBQK2Eu6z0bsrMDXie_dW7uFIT9fuQKkbzMD1PrWUdTu9qeA/exec';
+
+/* ── AbortSignal.timeout 폴리필 (구형 모바일 대응) ── */
+function fetchWithTimeout(url, ms, opts={}) {
+  const controller = new AbortController();
+  const tid = setTimeout(()=>controller.abort(), ms);
+  return fetch(url, { ...opts, signal: controller.signal })
+    .finally(()=>clearTimeout(tid));
+}
+
 Chart.defaults.font.family = "'Inter', sans-serif";
 let oilChart=null, usdChart=null, eurChart=null, cnyChart=null, brlChart=null;
 
 /* ── DATA FETCHERS ── */
 async function fetchOilCSV(type){
   const url=`https://raw.githubusercontent.com/datasets/oil-prices/main/data/${type}-daily.csv`;
-  const r=await fetch(url,{signal:AbortSignal.timeout(15000)});
+  const r=await fetchWithTimeout(url, 15000, {mode:'cors'});
   if(!r.ok) throw new Error(`유가 로드 실패 (${r.status})`);
   const text=await r.text();
   return text.trim().split('\n').slice(1).map(line=>{
@@ -1018,7 +1029,7 @@ async function fetchFX(){
   const fmt=d=>d.toISOString().split('T')[0];
   // 신규 도메인: api.frankfurter.dev/v1 (기존 api.frankfurter.app 변경됨)
   const url=`https://api.frankfurter.dev/v1/${fmt(start)}..${fmt(end)}?base=USD&symbols=KRW,CNY,EUR,BRL`;
-  const r=await fetch(url,{signal:AbortSignal.timeout(15000)});
+  const r=await fetchWithTimeout(url, 15000, {mode:'cors'});
   if(!r.ok) throw new Error(`환율 로드 실패 (${r.status})`);
   const j=await r.json();
   if(!j.rates) throw new Error('환율 데이터 없음');
@@ -1268,9 +1279,9 @@ async function loadAll(){
   renderNaverSection(); renderNaverMat(); renderNaverBrand(); renderChemSection();
   ['cn'].forEach(renderFreightSection);
 
-  /* ══ GAS URL 설정 ══ */
-  const GAS_DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwuArne85f66B8lW2crdhTBQK2Eu6z0bsrMDXie_dW7uFIT9fuQKkbzMD1PrWUdTu9qeA/exec';
   const gasUrl = localStorage.getItem('gas_url') || GAS_DEFAULT_URL;
+  const statusBtn = document.getElementById('btnGasStatus');
+  if(statusBtn){ statusBtn.textContent='☁ 동기화 중...'; }
 
   /* ══ 유가·환율·Sheets 모두 병렬 fetch ══ */
   const sheetsPromise = gasUrl ? fetchSheets(gasUrl) : Promise.resolve(null);
@@ -1292,7 +1303,8 @@ async function loadAll(){
     ],v=>parseFloat(v).toFixed(0),oilChart,c=>{oilChart=c;});
   } else {
     setKpiErr('wti-val','로드 실패'); setKpiErr('brent-val','로드 실패');
-    document.getElementById('oilChartEmpty').textContent='로드 실패';
+    const oilEmptyEl = document.getElementById('oilChartEmpty');
+    if(oilEmptyEl) oilEmptyEl.textContent='로드 실패';
   }
 
   /* ── 환율 렌더 ── */
@@ -1317,25 +1329,39 @@ async function loadAll(){
   }
 
   /* ── 버튼 즉시 활성화 (Sheets 기다리지 않음) ── */
-  document.getElementById('ts').textContent=new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  try {
+    document.getElementById('ts').textContent=new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  } catch(e){}
   btn.disabled=false; btn.textContent='↻ 새로고침';
 
   /* ── Sheets: 백그라운드에서 완료 후 자동 업데이트 ── */
   sheetsPromise.then(()=>{
+    if(statusBtn){ statusBtn.textContent='☁ 연결됨'; statusBtn.style.borderColor='rgba(105,240,174,.5)'; }
     renderTradeSection(); renderSupplySection();
     renderNaverSection(); renderNaverMat(); renderNaverBrand(); renderChemSection();
     ['cn'].forEach(renderFreightSection);
     document.getElementById('ts').textContent=new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
     console.log('Sheets 업데이트 완료');
-  }).catch(()=>{});
+  }).catch(e=>{
+    console.warn('Sheets 실패:', e.message);
+    if(statusBtn){ statusBtn.textContent='☁ 연결오류'; statusBtn.style.borderColor='rgba(248,81,73,.5)'; statusBtn.style.color='rgba(255,150,150,.9)'; }
+  });
 }
 
 /* ── Sheets 데이터 fetch → localStorage 저장 (분리된 함수) ── */
 async function fetchSheets(gasUrl){
   const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-  const timeout = isMobile ? 25000 : 15000;
-  const r = await fetch(`${gasUrl}?action=getAll`, {signal: AbortSignal.timeout(timeout)});
+  const timeout = isMobile ? 30000 : 18000;
+  console.log('Sheets fetch 시작, 타임아웃:', timeout/1000+'초');
+  // GAS는 리다이렉트 발생 → redirect:'follow' + mode:'cors' 명시
+  const r = await fetchWithTimeout(`${gasUrl}?action=getAll`, timeout, {
+    method: 'GET',
+    redirect: 'follow',
+    cache: 'no-cache'
+  });
+  if(!r.ok) throw new Error('HTTP ' + r.status);
   const json = await r.json();
+  console.log('Sheets 응답:', json.ok ? '성공' : '실패', json.error||'');
   if(!json.ok || !json.data) return;
   const d = json.data;
   if(Array.isArray(d.freight_cn)       && d.freight_cn.length > 0) localStorage.setItem('freight_cn', JSON.stringify(d.freight_cn));
@@ -2002,7 +2028,7 @@ async function fetchCustomsTrade(hsCd, ym){
   const key = chemApiKey.includes('%') ? chemApiKey : encodeURIComponent(chemApiKey);
   const url = `https://apis.data.go.kr/1220000/nitemtrade/getNitemtradeList` +
     `?serviceKey=${key}&strtYymm=${ym}&endYymm=${ym}&hsCd=${hsCd}&ctrCd=&type=json`;
-  const r = await fetch(url, {signal:AbortSignal.timeout(10000)});
+  const r = await fetchWithTimeout(url, 10000);
   const json = await r.json();
   // 응답에서 수입금액, 수입중량 추출
   const items = json?.response?.body?.items?.item || json?.items?.item || [];
