@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>소파·가구 시장 인텔리전스</title>
-<!-- build: 20260323_011822 -->
+<title>다우닝 경제·경영 지표</title>
+<!-- build: 20260323_013025 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════
@@ -222,10 +222,10 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
 <!-- ── HEADER ── -->
 <header class="hdr">
   <div class="hdr-left">
-    <div class="hdr-logo">F</div>
-    <span class="hdr-title">Furniture Market Intelligence</span>
+    <div class="hdr-logo">D</div>
+    <span class="hdr-title">다우닝 경제·경영 지표</span>
     <div class="hdr-sep"></div>
-    <span class="hdr-sub">소파·가구 시장 지표</span>
+    <span class="hdr-sub">Downing Market Intelligence Dashboard</span>
   </div>
   <div class="hdr-right">
     <div class="live-pill">
@@ -584,7 +584,17 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
     <div id="chem-mdi-chg" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);">—</div>
   </div>
   <div class="kpi" style="--kpi-color:#C8902A;">
-    <div class="kpi-label">소 가죽 수입단가 ($/kg)</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="kpi-label" style="margin-bottom:0;">소 가죽 정제 단가 ($/kg)</div>
+      <select id="hide-country-filter" onchange="renderChemSection()"
+        style="font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;border:1px solid var(--b1);background:var(--s2);color:var(--t2);cursor:pointer;outline:none;">
+        <option value="all">전체</option>
+        <option value="IT">🇮🇹 이태리</option>
+        <option value="CN">🇨🇳 중국</option>
+        <option value="US">🇺🇸 미국</option>
+        <option value="BR">🇧🇷 브라질</option>
+      </select>
+    </div>
     <div id="chem-hide-val"><div class="kpi-empty" style="font-size:10px;color:var(--t4);">✎ 수동 입력 버튼으로 추가</div></div>
     <div id="chem-hide-chg" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);">—</div>
   </div>
@@ -617,8 +627,24 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
     </div>
   </div>
   <div class="ccrd">
-    <div class="ccrd-head"><span class="ccrd-title" style="color:#C8902A;">소 가죽</span><span class="ccrd-range">HS 4107100000</span></div>
-    <div class="ccrd-sub">소 전면 정제 가죽 수입 · 단가 CIF 기준</div>
+    <div class="ccrd-head">
+      <span class="ccrd-title" style="color:#C8902A;">🐄 소 가죽 정제 단가</span>
+      <span class="ccrd-range">수작업 입력</span>
+    </div>
+    <div class="ccrd-sub">
+      국가별 수입단가 · $/kg &nbsp;|&nbsp;
+      <span id="hide-chart-country-label" style="font-weight:600;color:#C8902A;">전체</span>
+      <span style="margin-left:6px;">
+        <select id="hide-chart-filter" onchange="onHideFilterChange()"
+          style="font-size:9px;padding:1px 5px;border-radius:3px;border:1px solid var(--b1);background:var(--s2);color:var(--t2);cursor:pointer;outline:none;">
+          <option value="all">전체 평균</option>
+          <option value="IT">🇮🇹 이태리</option>
+          <option value="CN">🇨🇳 중국</option>
+          <option value="US">🇺🇸 미국</option>
+          <option value="BR">🇧🇷 브라질</option>
+        </select>
+      </span>
+    </div>
     <div class="cwrap" style="height:160px;">
       <div class="cempty" id="hideChartEmpty">✎ 수동 입력 버튼으로 추가</div>
       <canvas id="hideChart" style="display:none"></canvas>
@@ -630,12 +656,37 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
   실제 구매 계약단가와 차이 있을 수 있음 (관세청 통관 기준).
 </div>
 
-<!-- Phase 3 나머지 -->
+<!-- 추가 예정 -->
 <div class="p2">
-  <div class="p2-title">Phase 4 — 추가 예정</div>
-  <div class="p2-grid">
-    <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">가죽 원자재 (IMF PHIDEUSDM)</span><span class="p2-tag">FRED API</span></div>
-    <div class="p2-item"><div class="p2-dot"></div><span class="p2-txt">가구 소매판매지수</span><span class="p2-tag">통계청 KOSIS</span></div>
+  <div class="p2-title">📋 추가 예정 지표</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+    <!-- 그룹 1 -->
+    <div>
+      <div style="font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--navy);">💰 손익 지표</div>
+      <div class="p2-grid" style="grid-template-columns:1fr;">
+        <div class="p2-item"><div class="p2-dot" style="background:var(--navy);"></div><span class="p2-txt">목표 매출</span><span class="p2-tag">월간</span></div>
+        <div class="p2-item"><div class="p2-dot" style="background:var(--navy);"></div><span class="p2-txt">실적 매출</span><span class="p2-tag">월간</span></div>
+        <div class="p2-item"><div class="p2-dot" style="background:var(--navy);"></div><span class="p2-txt">영업이익</span><span class="p2-tag">월간</span></div>
+      </div>
+    </div>
+    <!-- 그룹 2 -->
+    <div>
+      <div style="font-size:10px;font-weight:700;color:#1565C0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #1565C0;">📊 채널별 성과</div>
+      <div class="p2-grid" style="grid-template-columns:1fr;">
+        <div class="p2-item"><div class="p2-dot" style="background:#1565C0;"></div><span class="p2-txt">채널별 매출</span><span class="p2-tag">월간</span></div>
+        <div class="p2-item"><div class="p2-dot" style="background:#1565C0;"></div><span class="p2-txt">채널별 영업이익</span><span class="p2-tag">월간</span></div>
+      </div>
+    </div>
+    <!-- 그룹 3 -->
+    <div>
+      <div style="font-size:10px;font-weight:700;color:#00796B;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #00796B;">📦 재고·원가</div>
+      <div class="p2-grid" style="grid-template-columns:1fr;">
+        <div class="p2-item"><div class="p2-dot" style="background:#00796B;"></div><span class="p2-txt">출고금액</span><span class="p2-tag">월간</span></div>
+        <div class="p2-item"><div class="p2-dot" style="background:#00796B;"></div><span class="p2-txt">제품원가</span><span class="p2-tag">월간</span></div>
+        <div class="p2-item"><div class="p2-dot" style="background:#00796B;"></div><span class="p2-txt">재고금액</span><span class="p2-tag">월간</span></div>
+        <div class="p2-item"><div class="p2-dot" style="background:#E07B00;"></div><span class="p2-txt">과잉재고</span><span class="p2-tag">월간</span></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -713,7 +764,18 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
       <div class="field"><label>폴리올 수입단가 ($/kg)</label><input type="number" id="ch-in-poly" placeholder="예: 1.85" step="0.01"></div>
       <div class="field"><label>TDI 수입단가 ($/kg)</label><input type="number" id="ch-in-tdi" placeholder="예: 2.10" step="0.01"></div>
       <div class="field"><label>MDI 수입단가 ($/kg)</label><input type="number" id="ch-in-mdi" placeholder="예: 1.95" step="0.01"></div>
-      <div class="field"><label>🐄 소 가죽 수입단가 ($/kg) · HS 4107100000</label><input type="number" id="ch-in-hide" placeholder="예: 3.20" step="0.01"></div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>🐄 소 가죽 정제 단가 ($/kg)</label>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+          <select id="ch-in-hide-country" style="padding:8px 10px;border:1px solid var(--b1);border-radius:6px;background:var(--s2);color:var(--t1);font-size:12px;font-weight:600;outline:none;cursor:pointer;flex-shrink:0;">
+            <option value="IT">🇮🇹 이태리</option>
+            <option value="CN">🇨🇳 중국</option>
+            <option value="US">🇺🇸 미국</option>
+            <option value="BR">🇧🇷 브라질</option>
+          </select>
+          <input type="number" id="ch-in-hide" placeholder="$/kg 예: 3.20" step="0.01" style="flex:1;">
+        </div>
+      </div>
       <div class="field" style="grid-column:1/-1"><label>메모 (선택)</label><input type="text" id="ch-in-note" placeholder="예: 중국 TDI 증설 영향 하락세"></div>
     </div>
     <div style="display:flex;gap:8px;">
@@ -1836,11 +1898,14 @@ function saveChemManual(){
   const poly=document.getElementById('ch-in-poly').value;
   const tdi=document.getElementById('ch-in-tdi').value;
   const mdi=document.getElementById('ch-in-mdi').value;
+  const hide=document.getElementById('ch-in-hide').value;
+  const hideCountry=document.getElementById('ch-in-hide-country').value;
   const note=document.getElementById('ch-in-note').value.trim();
   if(!dateRaw){ alert('연월을 입력하세요'); return; }
   const ym=dateRaw.replace('-','');
   const stored=getChemData();
-  ['poly','tdi','mdi','hide'].forEach(chem=>{
+  // 폴리올/TDI/MDI
+  ['poly','tdi','mdi'].forEach(chem=>{
     const v = chem==='poly'?poly : chem==='tdi'?tdi : mdi;
     if(!v) return;
     if(!stored[chem]) stored[chem]=[];
@@ -1850,6 +1915,16 @@ function saveChemManual(){
     stored[chem].sort((a,b)=>a.ym.localeCompare(b.ym));
     if(stored[chem].length>24) stored[chem].splice(0,stored[chem].length-24);
   });
+  // 소 가죽: 국가별로 저장 (hide_IT, hide_CN, hide_US, hide_BR)
+  if(hide){
+    const key='hide_'+hideCountry;
+    if(!stored[key]) stored[key]=[];
+    const idx=stored[key].findIndex(e=>e.ym===ym);
+    const entry={ym,val:+hide,country:hideCountry,note};
+    if(idx>=0) stored[key][idx]=entry; else stored[key].push(entry);
+    stored[key].sort((a,b)=>a.ym.localeCompare(b.ym));
+    if(stored[key].length>24) stored[key].splice(0,stored[key].length-24);
+  }
   setChemData(stored);
   renderChemSection();
   renderChemHistory();
@@ -1858,7 +1933,28 @@ function clearChem(){ setChemData({}); renderChemSection(); renderChemHistory();
 
 function renderChemSection(){
   const stored=getChemData();
-  ['poly','tdi','mdi','hide'].forEach(chem=>{
+  // 소가죽 국가 필터
+  const hideFilter = (document.getElementById('hide-country-filter')||{}).value || 'all';
+  const hideCountries = ['IT','CN','US','BR'];
+  const countryNames = {IT:'이태리',CN:'중국',US:'미국',BR:'브라질',all:'전체'};
+  // hide 데이터: 필터에 따라 병합 또는 단일 국가
+  function getHideData(filter){
+    if(filter==='all'){
+      // 전체 평균 (같은 ym에 여러 국가 있으면 평균)
+      const merged={};
+      hideCountries.forEach(c=>{
+        (stored['hide_'+c]||[]).forEach(e=>{
+          if(!merged[e.ym]) merged[e.ym]={ym:e.ym,vals:[],countries:[]};
+          merged[e.ym].vals.push(e.val);
+          merged[e.ym].countries.push(c);
+        });
+      });
+      return Object.values(merged).sort((a,b)=>a.ym.localeCompare(b.ym))
+        .map(m=>({ym:m.ym, val:m.vals.reduce((a,b)=>a+b)/m.vals.length, note:m.countries.join('+')}));
+    }
+    return (stored['hide_'+filter]||[]);
+  }
+  ['poly','tdi','mdi'].forEach(chem=>{
     const data=(stored[chem]||[]);
     const last=data[data.length-1], prev=data[data.length-2];
     const valEl=document.getElementById(`chem-${chem}-val`);
@@ -1912,7 +2008,28 @@ function renderChemHistory(){
   const el=document.getElementById('ch-history');
   const stored=getChemData();
   const merged={};
-  ['poly','tdi','mdi','hide'].forEach(chem=>{
+  // 소가죽 국가 필터
+  const hideFilter = (document.getElementById('hide-country-filter')||{}).value || 'all';
+  const hideCountries = ['IT','CN','US','BR'];
+  const countryNames = {IT:'이태리',CN:'중국',US:'미국',BR:'브라질',all:'전체'};
+  // hide 데이터: 필터에 따라 병합 또는 단일 국가
+  function getHideData(filter){
+    if(filter==='all'){
+      // 전체 평균 (같은 ym에 여러 국가 있으면 평균)
+      const merged={};
+      hideCountries.forEach(c=>{
+        (stored['hide_'+c]||[]).forEach(e=>{
+          if(!merged[e.ym]) merged[e.ym]={ym:e.ym,vals:[],countries:[]};
+          merged[e.ym].vals.push(e.val);
+          merged[e.ym].countries.push(c);
+        });
+      });
+      return Object.values(merged).sort((a,b)=>a.ym.localeCompare(b.ym))
+        .map(m=>({ym:m.ym, val:m.vals.reduce((a,b)=>a+b)/m.vals.length, note:m.countries.join('+')}));
+    }
+    return (stored['hide_'+filter]||[]);
+  }
+  ['poly','tdi','mdi'].forEach(chem=>{
     (stored[chem]||[]).forEach(e=>{
       if(!merged[e.ym]) merged[e.ym]={};
       merged[e.ym][chem]=e.val;
