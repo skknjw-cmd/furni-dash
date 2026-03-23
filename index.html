@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소파·가구 시장 인텔리전스</title>
-<!-- build: 20260323_004242 -->
+<!-- build: 20260323_004942 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Design tokens (Linear / GitHub Dark) ── */
@@ -945,6 +945,23 @@ function buildChart(canvasId,emptyId,datasets,yFmt,ref,setter){
 }
 
 /* ── MAIN LOAD ── */
+/* ── IQR 기반 y축 범위: 이상점 영향 제거 ─────────────────────
+   Q1-1.5*IQR ~ Q3+1.5*IQR 범위 내 데이터로 축 범위 계산
+   → 이상점이 있어도 대부분 데이터가 잘 보임
+──────────────────────────────────────────────────────── */
+function calcYRange(vals, padding=8, step=5) {
+  const v = vals.filter(x => x != null && !isNaN(x)).sort((a,b)=>a-b);
+  if (!v.length) return { min: 0, max: 100 };
+  const q1 = v[Math.floor(v.length * 0.25)];
+  const q3 = v[Math.floor(v.length * 0.75)];
+  const iqr = q3 - q1;
+  // IQR 방식으로 이상점 경계
+  const lo = Math.max(0,  Math.floor((Math.min(...v.filter(x=>x >= q1-1.5*iqr)) - padding) / step) * step);
+  const hi = Math.min(100, Math.ceil((Math.max(...v.filter(x=>x <= q3+1.5*iqr)) + padding) / step) * step);
+  // 범위가 너무 좁으면 최소 20 확보
+  return { min: lo, max: Math.max(hi, lo + 20) };
+}
+
 function printDashboard(){
   // 모달 모두 닫기
   document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('show'));
@@ -1537,8 +1554,8 @@ let naverMatChart=null;
 function renderNaverMat(){
   const data = getNaverMat();
   const last = data[data.length-1];
-  document.getElementById('nv-mat-leather').textContent = last?.leather!=null ? last.leather+'/100' : '—';
-  document.getElementById('nv-mat-fabric').textContent  = last?.fabric!=null  ? last.fabric+'/100'  : '—';
+  document.getElementById('nv-mat-leather').textContent = last?.leather!=null ? last.leather.toFixed(1)+'/100' : '—';
+  document.getElementById('nv-mat-fabric').textContent  = last?.fabric!=null  ? last.fabric.toFixed(1)+'/100'  : '—';
 
   const el=document.getElementById('naverMatChart'), empty=document.getElementById('naverMatChartEmpty');
   if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(naverMatChart)naverMatChart.destroy(); naverMatChart=null; return; }
@@ -1549,7 +1566,7 @@ function renderNaverMat(){
     type:'line',
     data:{labels, datasets:[
       {label:'가죽소파', data:data.map(d=>d.leather), borderColor:'#D2A8FF', backgroundColor:'rgba(210,168,255,0.07)',
-       fill:true, tension:0.3, pointRadius:2, borderWidth:2, spanGaps:true},
+       fill:true, tension:0.3, pointRadius:2, borderWidth:2, spanGaps:true, clip:false},
       {label:'패브릭소파', data:data.map(d=>d.fabric), borderColor:'#3FB950', backgroundColor:'rgba(63,185,80,0.07)',
        fill:false, tension:0.3, pointRadius:2, borderWidth:2, spanGaps:true},
     ]},
@@ -1566,10 +1583,8 @@ function renderNaverMat(){
         x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
         y:(()=>{
           const vals=[...data.map(d=>d.leather),...data.map(d=>d.fabric)].filter(v=>v!=null);
-          if(!vals.length) return {grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}};
-          const lo=Math.max(0,Math.floor((Math.min(...vals)-10)/5)*5);
-          const hi=Math.min(100,Math.ceil((Math.max(...vals)+10)/5)*5);
-          return {min:lo,max:hi,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}};
+          const r=calcYRange(vals);
+          return {min:r.min,max:r.max,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}};
         })()
       }
     }
@@ -1581,9 +1596,9 @@ let naverBrandChart=null;
 function renderNaverBrand(){
   const data = getNaverBrand();
   const last = data[data.length-1];
-  document.getElementById('nv-br-downing').textContent = last?.downing!=null ? last.downing+'/100' : '—';
-  document.getElementById('nv-br-jacomo').textContent  = last?.jacomo!=null  ? last.jacomo+'/100'  : '—';
-  document.getElementById('nv-br-essa').textContent    = last?.essa!=null    ? last.essa+'/100'    : '—';
+  document.getElementById('nv-br-downing').textContent = last?.downing!=null ? last.downing.toFixed(1)+'/100' : '—';
+  document.getElementById('nv-br-jacomo').textContent  = last?.jacomo!=null  ? last.jacomo.toFixed(1)+'/100'  : '—';
+  document.getElementById('nv-br-essa').textContent    = last?.essa!=null    ? last.essa.toFixed(1)+'/100'    : '—';
 
   const el=document.getElementById('naverBrandChart'), empty=document.getElementById('naverBrandChartEmpty');
   if(!data.length){ empty.style.display='flex'; el.style.display='none'; if(naverBrandChart)naverBrandChart.destroy(); naverBrandChart=null; return; }
@@ -1613,10 +1628,8 @@ function renderNaverBrand(){
         x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
         y:(()=>{
           const vals=[...data.map(d=>d.downing),...data.map(d=>d.jacomo),...data.map(d=>d.essa)].filter(v=>v!=null);
-          if(!vals.length) return {grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}};
-          const lo=Math.max(0,Math.floor((Math.min(...vals)-10)/5)*5);
-          const hi=Math.min(100,Math.ceil((Math.max(...vals)+10)/5)*5);
-          return {min:lo,max:hi,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}};
+          const r=calcYRange(vals);
+          return {min:r.min,max:r.max,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}};
         })()
       }
     }
@@ -1627,7 +1640,7 @@ function renderNaverBrand(){
 function renderNaverHistory(){
   const el=document.getElementById('nv-history');
   const d1=getNaverData(), d2=getNaverMat(), d3=getNaverBrand();
-  const all=[...d1.map(d=>({date:d.date,type:'수요',val:`${d.val}/100`})),
+  const all=[...d1.map(d=>({date:d.date,type:'수요',val:`${(+d.val).toFixed(1)}/100`})),
              ...d2.map(d=>({date:d.date,type:'소재',val:`가죽${d.leather??'—'}/패브릭${d.fabric??'—'}`})),
              ...d3.map(d=>({date:d.date,type:'브랜드',val:`다${d.downing??'—'}/자${d.jacomo??'—'}/에${d.essa??'—'}`}))
   ].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,15);
