@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>다우닝 경제·경영 지표</title>
-<!-- build: 20260323_022217 -->
+<!-- build: 20260323_022647 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════
@@ -1166,11 +1166,27 @@ async function loadAll(){
           localStorage.setItem('apt_trade_data', JSON.stringify(d.apt_trade_data));
         if(Array.isArray(d.apt_supply_data)  && d.apt_supply_data.length > 0)
           localStorage.setItem('apt_supply_data', JSON.stringify(d.apt_supply_data));
-        // chem은 배열이 아닌 객체 구조
+        // chem: 폴리올/TDI/MDI + 소가죽 국가별 통합 저장
+        const chemStored = JSON.parse(localStorage.getItem('chem_price_data')||'{}');
+        let chemUpdated = false;
         if(d.chem_price_data){
           const hasChem = (d.chem_price_data.poly?.length > 0 || d.chem_price_data.tdi?.length > 0 || d.chem_price_data.mdi?.length > 0);
-          if(hasChem) localStorage.setItem('chem_price_data', JSON.stringify(d.chem_price_data));
+          if(hasChem){
+            if(d.chem_price_data.poly?.length > 0) chemStored.poly = d.chem_price_data.poly;
+            if(d.chem_price_data.tdi?.length  > 0) chemStored.tdi  = d.chem_price_data.tdi;
+            if(d.chem_price_data.mdi?.length  > 0) chemStored.mdi  = d.chem_price_data.mdi;
+            chemUpdated = true;
+          }
         }
+        // 소 가죽 국가별 데이터 (Sheets: d.hide_IT, d.hide_CN, d.hide_US, d.hide_BR)
+        ['IT','CN','US','BR'].forEach(ctr=>{
+          const key = 'hide_' + ctr;
+          if(Array.isArray(d[key]) && d[key].length > 0){
+            chemStored[key] = d[key];
+            chemUpdated = true;
+          }
+        });
+        if(chemUpdated) localStorage.setItem('chem_price_data', JSON.stringify(chemStored));
         console.log('Sheets 로드 완료:', new Date().toLocaleTimeString());
       }
     } catch(e){ console.warn('Sheets 로드 실패 (로컬 데이터 유지):', e.message); }
