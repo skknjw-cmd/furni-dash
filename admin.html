@@ -955,7 +955,7 @@ async function syncToSheets(){
     }
 
     setGasStatus('연결됨', 'var(--green)');
-    setGasMsg(`✅ 동기화 완료 (${success}/7 시트)`, 'var(--green)');
+    setGasMsg(`✅ 동기화 완료 (${success}시트)`, 'var(--green)');
   } catch(err){
     setGasMsg('❌ 동기화 실패: ' + err.message, 'var(--red)');
   } finally {
