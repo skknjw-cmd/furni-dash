@@ -406,6 +406,7 @@ td.del-col{width:36px;text-align:center;}
       <div class="field"><label>폴리올 ($/kg)</label><input type="number" id="ch-poly" placeholder="예: 1.85" step="0.001"></div>
       <div class="field"><label>TDI ($/kg)</label><input type="number" id="ch-tdi" placeholder="예: 2.10" step="0.001"></div>
       <div class="field"><label>MDI ($/kg)</label><input type="number" id="ch-mdi" placeholder="예: 1.95" step="0.001"></div>
+      <div class="field"><label>🐄 소 가죽 ($/kg) · HS 4107100000</label><input type="number" id="ch-hide" placeholder="예: 3.20" step="0.001"></div>
       <div class="field wide"><label>메모</label><input type="text" id="ch-note" placeholder="예: 중국 증설 영향 하락"></div>
     </div>
     <div class="form-actions">
@@ -416,7 +417,7 @@ td.del-col{width:36px;text-align:center;}
   </div>
   <div class="table-wrap">
     <div class="table-head"><span class="table-title">전체 데이터</span><span class="table-count" id="ch-cnt">0건</span></div>
-    <table><thead><tr><th>연월</th><th>폴리올 ($/kg)</th><th>TDI ($/kg)</th><th>MDI ($/kg)</th><th>메모</th><th></th></tr></thead>
+    <table><thead><tr><th>연월</th><th>폴리올 ($/kg)</th><th>TDI ($/kg)</th><th>MDI ($/kg)</th><th>소가죽 ($/kg)</th><th>메모</th><th></th></tr></thead>
     <tbody id="ch-tbody"></tbody></table>
   </div>
 </div>
@@ -505,7 +506,7 @@ function saveChem(){
   if(!ym){alert('연월을 입력하세요');return;}
   const note=document.getElementById('ch-note').value;
   const stored=ls_get('chem_price_data',{});
-  ['poly','tdi','mdi'].forEach(c=>{
+  ['poly','tdi','mdi','hide'].forEach(c=>{
     const v=document.getElementById('ch-'+c).value;
     if(!v)return;
     if(!stored[c])stored[c]=[];
@@ -573,7 +574,7 @@ function delFreight(route,idx){const d=freight_get(route);d.splice(idx,1);freigh
 function delLs(key,idx,renderFn){const d=ls_get(key,[]);d.splice(idx,1);ls_set(key,d);renderFn();refreshAll();}
 function delChemRow(ym){
   const s=ls_get('chem_price_data',{});
-  ['poly','tdi','mdi'].forEach(c=>{if(s[c]){const i=s[c].findIndex(e=>e.ym===ym);if(i>=0)s[c].splice(i,1);}});
+  ['poly','tdi','mdi','hide'].forEach(c=>{if(s[c]){const i=s[c].findIndex(e=>e.ym===ym);if(i>=0)s[c].splice(i,1);}});
   ls_set('chem_price_data',s);renderChem();refreshAll();
 }
 
@@ -634,7 +635,7 @@ function renderSupply(){
 function renderChem(){
   const s=ls_get('chem_price_data',{});
   const merged={};
-  ['poly','tdi','mdi'].forEach(c=>{(s[c]||[]).forEach(e=>{if(!merged[e.ym])merged[e.ym]={note:e.note};merged[e.ym][c]=e.val;});});
+  ['poly','tdi','mdi','hide'].forEach(c=>{(s[c]||[]).forEach(e=>{if(!merged[e.ym])merged[e.ym]={note:e.note};merged[e.ym][c]=e.val;});});
   const rows=Object.entries(merged).sort((a,b)=>b[0].localeCompare(a[0]));
   const cnt=Math.max(...['poly','tdi','mdi'].map(c=>(s[c]||[]).length),0);
   document.getElementById('ch-cnt').textContent=(isFinite(cnt)?cnt:0)+'건';
@@ -645,6 +646,7 @@ function renderChem(){
     <td class="val-col">${v.poly!=null?v.poly.toFixed(2)+'$/kg':'—'}</td>
     <td class="val-col">${v.tdi!=null?v.tdi.toFixed(2)+'$/kg':'—'}</td>
     <td class="val-col">${v.mdi!=null?v.mdi.toFixed(2)+'$/kg':'—'}</td>
+    <td class="val-col">${v.hide!=null?v.hide.toFixed(2)+'$/kg':'—'}</td>
     <td class="note-col">${v.note||''}</td>
     <td class="del-col"><button class="del-btn" onclick="delChemRow('${ym}')">✕</button></td>
   </tr>`).join('');
@@ -753,7 +755,7 @@ function exportExcel(){
   // ── 시트 5: 원자재 (폴리올/TDI/MDI) ──
   const chemS = ls_get('chem_price_data',{});
   const merged={};
-  ['poly','tdi','mdi'].forEach(c=>{
+  ['poly','tdi','mdi','hide'].forEach(c=>{
     (chemS[c]||[]).forEach(e=>{
       if(!merged[e.ym]) merged[e.ym]={note:e.note||''};
       merged[e.ym][c]=e.val;
@@ -974,5 +976,3 @@ refreshAll();
 </script>
 </body>
 </html>
-
-
