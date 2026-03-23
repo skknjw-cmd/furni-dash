@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>소파·가구 시장 인텔리전스</title>
-<!-- build: 20260322_235704 -->
+<!-- build: 20260323_004242 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── Design tokens (Linear / GitHub Dark) ── */
@@ -171,6 +171,17 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
 @media(max-width:1100px){.chart-grid,.freight-grid{grid-template-columns:1fr;}.kpi-strip{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:700px){.chart-grid,.kpi-strip{grid-template-columns:1fr 1fr;}.main{padding:16px 16px 72px;}.hdr{padding:0 16px;}.hdr-sep,.hdr-sub{display:none;}}
 @media(max-width:460px){.kpi-strip{grid-template-columns:1fr;}}
+/* ══ 인쇄 / PDF 전용 스타일 ══════════════════════════════════ */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { background: #fff !important; color: #111 !important; }
+  .hdr-right, #btnRefresh, .modal-bg, .btn, .btn-solid, .p2, .cempty { display: none !important; }
+  :root { --bg:#fff;--s1:#f8f9fa;--s2:#f1f3f5;--s3:#e9ecef;--b1:#dee2e6;--b2:#ced4da;--t1:#212529;--t2:#343a40;--t3:#6c757d;--t4:#adb5bd; }
+  .ccrd { break-inside:avoid; border:1px solid #ccc !important; background:#f8f9fa !important; }
+  .cwrap { height:160px !important; }
+  .kpi { background:#f8f9fa !important; border:1px solid #dee2e6 !important; }
+  @page { size: A4 landscape; margin: 10mm 8mm; }
+}
 </style>
 </head>
 <body>
@@ -190,6 +201,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
     </div>
     <span class="ts-txt" id="ts">—</span>
     <button class="btn" id="btnRefresh" onclick="loadAll()">↻ 새로고침</button>
+    <button class="btn" onclick="printDashboard()" style="color:var(--t2);border-color:var(--b2);" title="PDF로 저장">⬇ PDF</button>
   </div>
 </header>
 
@@ -478,43 +490,49 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
   <span class="sec-src">관세청 수출입 무역통계 API · HS코드 기반 수입단가 자동 계산 (CIF 기준)</span>
 </div>
 
-<!-- API 키 패널 -->
-<div id="chemApiPanel" style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-    <div>
-      <div style="font-size:12px;font-weight:600;color:var(--t2);">관세청 무역통계 API 키 (아파트 키와 동일 · 또는 별도 신청)</div>
-      <div style="font-size:10px;color:var(--t3);margin-top:2px;">
-        <a href="https://www.data.go.kr/data/15100475/openapi.do" target="_blank">품목별 국가별 수출입실적 (data.go.kr/data/15100475)</a> 활용신청 (자동승인, 무료)
-        &nbsp;|&nbsp; HS: 폴리올 <code>3907200000</code> · TDI <code>2929101000</code> · MDI <code>2929102000</code>
-      </div>
+<!-- API 키 패널 (토글) -->
+<div id="chemApiPanel" style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;">
+  <!-- 항상 보이는 헤더 행 -->
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="chemApiStatus" style="font-size:10px;font-family:'JetBrains Mono',monospace;padding:2px 8px;border-radius:10px;background:var(--s3);color:var(--t4);">API 미설정</span>
+    <button class="btn" onclick="document.getElementById('chemModal').classList.add('show')"
+      style="height:28px;padding:0 12px;font-size:11px;white-space:nowrap;">✎ 수동 입력</button>
+    <button class="btn" id="chemApiToggleBtn" onclick="toggleChemApiPanel()"
+      style="height:28px;padding:0 12px;font-size:11px;white-space:nowrap;margin-left:auto;color:var(--t4);">
+      ⚙ API 키 설정
+    </button>
+  </div>
+  <!-- 접히는 API 키 입력 영역 -->
+  <div id="chemApiInputArea" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--b1);">
+    <div style="font-size:10px;color:var(--t3);margin-bottom:8px;">
+      <a href="https://www.data.go.kr/data/15100475/openapi.do" target="_blank" style="color:var(--blue);">공공데이터포털 신청 →</a>
+      &nbsp;|&nbsp; HS: 폴리올 <code>3907200000</code> · TDI <code>2929101000</code> · MDI <code>2929102000</code>
     </div>
-    <span id="chemApiStatus" style="font-size:10px;color:var(--t3);">미설정</span>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="password" id="chemApiKey" placeholder="공공데이터포털 Encoding 키"
+        style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--b1);border-radius:6px;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;"
+        onfocus="this.style.borderColor='var(--amber)'" onblur="this.style.borderColor='var(--b1)'">
+      <button class="btn-solid" onclick="saveChemKey()" style="height:34px;padding:0 16px;font-size:12px;white-space:nowrap;background:var(--amber);border-color:var(--amber);color:#000;">저장 후 수집</button>
+    </div>
+    <div id="chemApiMsg" style="font-size:11px;margin-top:8px;"></div>
   </div>
-  <div style="display:flex;gap:8px;align-items:flex-end;">
-    <input type="password" id="chemApiKey" placeholder="공공데이터포털 Encoding 키 (아파트 API와 동일 키 사용 가능)"
-      style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--b1);border-radius:6px;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:11px;"
-      onfocus="this.style.borderColor='var(--amber)'" onblur="this.style.borderColor='var(--b1)'">
-    <button class="btn-solid" onclick="saveChemKey()" style="height:34px;padding:0 16px;font-size:12px;white-space:nowrap;">저장 후 수집</button>
-    <button class="btn" onclick="document.getElementById('chemModal').classList.add('show')" style="height:34px;padding:0 12px;font-size:11px;white-space:nowrap;">✎ 수동 입력</button>
-  </div>
-  <div id="chemApiMsg" style="font-size:11px;margin-top:8px;"></div>
 </div>
 
 <!-- KPI 카드 3개 -->
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:16px;">
   <div class="kpi" style="--kpi-color:#D2A8FF;">
     <div class="kpi-label">폴리올 수입단가 ($/kg)</div>
-    <div id="chem-poly-val"><div class="kpi-loading" style="font-size:10px;">API 키 입력 후 자동 수집</div></div>
+    <div id="chem-poly-val"><div class="kpi-empty" style="font-size:10px;color:var(--t4);">✎ 수동 입력 버튼으로 추가</div></div>
     <div id="chem-poly-chg" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);">—</div>
   </div>
   <div class="kpi" style="--kpi-color:#F0883E;">
     <div class="kpi-label">TDI 수입단가 ($/kg)</div>
-    <div id="chem-tdi-val"><div class="kpi-loading" style="font-size:10px;">API 키 입력 후 자동 수집</div></div>
+    <div id="chem-tdi-val"><div class="kpi-empty" style="font-size:10px;color:var(--t4);">✎ 수동 입력 버튼으로 추가</div></div>
     <div id="chem-tdi-chg" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);">—</div>
   </div>
   <div class="kpi" style="--kpi-color:#58A6FF;">
     <div class="kpi-label">MDI 수입단가 ($/kg)</div>
-    <div id="chem-mdi-val"><div class="kpi-loading" style="font-size:10px;">API 키 입력 후 자동 수집</div></div>
+    <div id="chem-mdi-val"><div class="kpi-empty" style="font-size:10px;color:var(--t4);">✎ 수동 입력 버튼으로 추가</div></div>
     <div id="chem-mdi-chg" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--t2);">—</div>
   </div>
 </div>
@@ -525,7 +543,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
     <div class="ccrd-head"><span class="ccrd-title" style="color:#D2A8FF;">폴리올</span><span class="ccrd-range">HS 3907200000</span></div>
     <div class="ccrd-sub">폴리에테르폴리올 전체 수입 · 단가 CIF 기준</div>
     <div class="cwrap" style="height:160px;">
-      <div class="cempty" id="polyChartEmpty">API 키 설정 후 자동 수집</div>
+      <div class="cempty" id="polyChartEmpty">✎ 수동 입력 버튼으로 추가</div>
       <canvas id="polyChart" style="display:none"></canvas>
     </div>
   </div>
@@ -533,7 +551,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
     <div class="ccrd-head"><span class="ccrd-title" style="color:#F0883E;">TDI</span><span class="ccrd-range">HS 2929101000</span></div>
     <div class="ccrd-sub">톨루엔디이소시아네이트 수입 · 단가 CIF 기준</div>
     <div class="cwrap" style="height:160px;">
-      <div class="cempty" id="tdiChartEmpty">API 키 설정 후 자동 수집</div>
+      <div class="cempty" id="tdiChartEmpty">✎ 수동 입력 버튼으로 추가</div>
       <canvas id="tdiChart" style="display:none"></canvas>
     </div>
   </div>
@@ -541,7 +559,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;}
     <div class="ccrd-head"><span class="ccrd-title" style="color:#58A6FF;">MDI</span><span class="ccrd-range">HS 2929102000</span></div>
     <div class="ccrd-sub">메틸렌디페닐디이소시아네이트 수입 · 단가 CIF 기준</div>
     <div class="cwrap" style="height:160px;">
-      <div class="cempty" id="mdiChartEmpty">API 키 설정 후 자동 수집</div>
+      <div class="cempty" id="mdiChartEmpty">✎ 수동 입력 버튼으로 추가</div>
       <canvas id="mdiChart" style="display:none"></canvas>
     </div>
   </div>
@@ -927,6 +945,15 @@ function buildChart(canvasId,emptyId,datasets,yFmt,ref,setter){
 }
 
 /* ── MAIN LOAD ── */
+function printDashboard(){
+  // 모달 모두 닫기
+  document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('show'));
+  // 잠깐 기다린 후 인쇄 (차트 렌더 완료 보장)
+  setTimeout(()=>{
+    window.print();
+  }, 300);
+}
+
 async function loadAll(){
   const btn=document.getElementById('btnRefresh');
   btn.disabled=true; btn.textContent='로딩 중...';
@@ -1537,7 +1564,13 @@ function renderNaverMat(){
       },
       scales:{
         x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
-        y:{min:0,max:100,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}}
+        y:(()=>{
+          const vals=[...data.map(d=>d.leather),...data.map(d=>d.fabric)].filter(v=>v!=null);
+          if(!vals.length) return {grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}};
+          const lo=Math.max(0,Math.floor((Math.min(...vals)-10)/5)*5);
+          const hi=Math.min(100,Math.ceil((Math.max(...vals)+10)/5)*5);
+          return {min:lo,max:hi,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}};
+        })()
       }
     }
   });
@@ -1578,7 +1611,13 @@ function renderNaverBrand(){
       },
       scales:{
         x:{type:'category',grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#484F58',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:5}},
-        y:{min:0,max:100,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}}
+        y:(()=>{
+          const vals=[...data.map(d=>d.downing),...data.map(d=>d.jacomo),...data.map(d=>d.essa)].filter(v=>v!=null);
+          if(!vals.length) return {grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}};
+          const lo=Math.max(0,Math.floor((Math.min(...vals)-10)/5)*5);
+          const hi=Math.min(100,Math.ceil((Math.max(...vals)+10)/5)*5);
+          return {min:lo,max:hi,grid:{color:'rgba(48,54,61,.4)'},ticks:{color:'#8B949E',font:{size:9}}};
+        })()
       }
     }
   });
@@ -1619,11 +1658,23 @@ let chemCharts = { poly:null, tdi:null, mdi:null };
 function getChemData(){ try{ return JSON.parse(localStorage.getItem(CHEM_KEY)||'{}'); }catch{ return {}; } }
 function setChemData(d){ localStorage.setItem(CHEM_KEY, JSON.stringify(d)); }
 
+function toggleChemApiPanel(){
+  const area = document.getElementById('chemApiInputArea');
+  const btn  = document.getElementById('chemApiToggleBtn');
+  const open = area.style.display === 'none';
+  area.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '✕ 닫기' : '⚙ API 키 설정';
+}
+
 function saveChemKey(){
   const v=document.getElementById('chemApiKey').value.trim();
   if(!v){ alert('키를 입력하세요'); return; }
   chemApiKey=v; localStorage.setItem('chem_api_key',v);
-  document.getElementById('chemApiStatus').textContent='저장됨';
+  const st=document.getElementById('chemApiStatus');
+  st.textContent='API 연결됨'; st.style.background='rgba(63,185,80,.15)'; st.style.color='var(--green)';
+  // 입력 영역 닫기
+  document.getElementById('chemApiInputArea').style.display='none';
+  document.getElementById('chemApiToggleBtn').textContent='⚙ API 키 설정';
   loadChemData();
 }
 
@@ -1804,7 +1855,9 @@ document.getElementById('chemModal').addEventListener('click',function(e){if(e.t
   const d=new Date(); d.setMonth(d.getMonth()-1);
   document.getElementById('ch-in-date').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
   if(chemApiKey){
-    document.getElementById('chemApiStatus').textContent='저장됨';
+    const st=document.getElementById('chemApiStatus');
+    st.textContent='API 연결됨'; st.style.background='rgba(63,185,80,.15)'; st.style.color='var(--green)';
+    document.getElementById('chemApiKey').value=chemApiKey;
     loadChemData();
   }
   renderChemSection();
