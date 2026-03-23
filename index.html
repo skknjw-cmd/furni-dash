@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DAUNING 경제·경영 지표</title>
-<!-- build: 20260323_023831 -->
+<!-- build: 20260323_024429 -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════
@@ -243,27 +243,27 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
 <!-- ── KPI STRIP ── -->
 <div class="kpi-strip" style="margin-bottom:28px;">
   <div class="kpi" style="--kpi-color:var(--amber)">
-    <div class="kpi-label">WTI 원유</div>
+    <div class="kpi-label" title="EIA 주간 데이터 · 매주 월요일 전주 데이터 업데이트">WTI 원유</div>
     <div id="wti-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
   </div>
   <div class="kpi" style="--kpi-color:#FB923C">
-    <div class="kpi-label">Brent 원유</div>
+    <div class="kpi-label" title="EIA 주간 데이터 · 매주 월요일 전주 데이터 업데이트">Brent 원유</div>
     <div id="brent-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
   </div>
   <div class="kpi" style="--kpi-color:var(--blue)">
-    <div class="kpi-label">USD / KRW</div>
+    <div class="kpi-label" title="ECB 기준 · 평일 매일 오후 4시(CET) 업데이트 · 주말 데이터 없음">USD / KRW</div>
     <div id="usd-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
   </div>
   <div class="kpi" style="--kpi-color:var(--green)">
-    <div class="kpi-label">CNY / KRW</div>
+    <div class="kpi-label" title="ECB 기준 · 평일 매일 오후 4시(CET) 업데이트 · 주말 데이터 없음">CNY / KRW</div>
     <div id="cny-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
   </div>
   <div class="kpi" style="--kpi-color:var(--purple)">
-    <div class="kpi-label">EUR / KRW</div>
+    <div class="kpi-label" title="ECB 기준 · 평일 매일 오후 4시(CET) 업데이트 · 주말 데이터 없음">EUR / KRW</div>
     <div id="eur-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
   </div>
   <div class="kpi" style="--kpi-color:#22D3EE;">
-    <div class="kpi-label">BRL / USD</div>
+    <div class="kpi-label" title="ECB 기준 · 평일 매일 오후 4시(CET) 업데이트 · 주말 데이터 없음">BRL / USD</div>
     <div id="brl-val"><div class="kpi-loading"><span class="spin">⟳</span>로딩...</div></div>
   </div>
 </div>
@@ -271,7 +271,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
 <!-- ── CHARTS ── -->
 <div class="sec-hdr">
   <span class="sec-title">추이 차트</span>
-  <span class="sec-src">유가: EIA (GitHub CSV) · 환율: Frankfurter (ECB) · BRL/USD 포함 · 기간: 3개월</span>
+  <span class="sec-src">유가: EIA · 주 1회(월) 업데이트 &nbsp;|&nbsp; 환율: ECB · 평일 매일 업데이트 &nbsp;|&nbsp; 기간: 3개월</span>
 </div>
 
 <div class="chart-grid">
@@ -280,7 +280,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
       <span class="ccrd-title">유가 ($/bbl)</span>
       <span class="ccrd-range">3개월</span>
     </div>
-    <div class="ccrd-sub">WTI · Brent</div>
+    <div class="ccrd-sub">WTI · Brent &nbsp;·&nbsp; <span style="color:var(--amber);font-weight:600;">주 1회</span> 업데이트 (매주 월요일)</div>
     <div class="cwrap">
       <div class="cempty" id="oilChartEmpty"><span class="spin">⟳</span></div>
       <canvas id="oilChart" style="display:none"></canvas>
@@ -291,7 +291,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
       <span class="ccrd-title" style="color:#388BFD;">USD / KRW</span>
       <span class="ccrd-range">3개월</span>
     </div>
-    <div class="ccrd-sub">달러 원화 환율 (ECB)</div>
+    <div class="ccrd-sub">달러 원화 환율 (ECB) &nbsp;·&nbsp; <span style="color:var(--blue);font-weight:600;">평일 매일</span> 업데이트</div>
     <div class="cwrap">
       <div class="cempty" id="usdChartEmpty"><span class="spin">⟳</span></div>
       <canvas id="usdChart" style="display:none"></canvas>
@@ -302,7 +302,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
       <span class="ccrd-title" style="color:#D2A8FF;">EUR / KRW</span>
       <span class="ccrd-range">3개월</span>
     </div>
-    <div class="ccrd-sub">유로 원화 환율 (ECB)</div>
+    <div class="ccrd-sub">유로 원화 환율 (ECB) &nbsp;·&nbsp; <span style="color:var(--blue);font-weight:600;">평일 매일</span> 업데이트</div>
     <div class="cwrap">
       <div class="cempty" id="eurChartEmpty"><span class="spin">⟳</span></div>
       <canvas id="eurChart" style="display:none"></canvas>
@@ -313,7 +313,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
       <span class="ccrd-title" style="color:#3FB950;">CNY / KRW</span>
       <span class="ccrd-range">3개월</span>
     </div>
-    <div class="ccrd-sub">위안 원화 환율 (ECB)</div>
+    <div class="ccrd-sub">위안 원화 환율 (ECB) &nbsp;·&nbsp; <span style="color:var(--blue);font-weight:600;">평일 매일</span> 업데이트</div>
     <div class="cwrap">
       <div class="cempty" id="cnyChartEmpty"><span class="spin">⟳</span></div>
       <canvas id="cnyChart" style="display:none"></canvas>
@@ -324,7 +324,7 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
       <span class="ccrd-title" style="color:#22D3EE;">BRL / USD</span>
       <span class="ccrd-range">3개월</span>
     </div>
-    <div class="ccrd-sub">브라질 레알 · 가죽 원가 선행 지표</div>
+    <div class="ccrd-sub">브라질 레알 · 가죽 원가 선행 지표 &nbsp;·&nbsp; <span style="color:var(--blue);font-weight:600;">평일 매일</span> 업데이트</div>
     <div class="cwrap">
       <div class="cempty" id="brlChartEmpty"><span class="spin">⟳</span></div>
       <canvas id="brlChart" style="display:none"></canvas>
@@ -858,8 +858,8 @@ code,kbd{font-family:'JetBrains Mono',monospace;background:var(--s2);padding:1px
 
 
 <footer class="ftr">
-  <div class="ftr-item"><div class="fdot" style="background:var(--amber)"></div>유가: EIA (GitHub CSV)</div>
-  <div class="ftr-item"><div class="fdot" style="background:var(--blue)"></div>환율: Frankfurter (ECB)</div>
+  <div class="ftr-item"><div class="fdot" style="background:var(--amber)"></div>유가: EIA · 주 1회(월)</div>
+  <div class="ftr-item"><div class="fdot" style="background:var(--blue)"></div>환율: ECB · 평일 매일</div>
   <div class="ftr-item"><div class="fdot" style="background:#58A6FF"></div>아파트: 국토부 실거래가 시스템 (rt.molit.go.kr) 월 1회 수동 입력</div>
   <div class="ftr-item"><div class="fdot" style="background:#484F58"></div>운임: 수동 입력 · localStorage</div>
 </footer>
